@@ -1,0 +1,112 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  width: 100%;
+}
+
+.dnaLoader {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.strand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: transparent;
+  transform-style: preserve-3d;
+  animation: rotate 3s linear infinite;
+}
+
+.strand::before,
+.strand::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  top: 40%;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.strand::before {
+  background: #3B82F6;
+  left: -2px;
+  box-shadow: 0 0 8px #3B82F6;
+}
+
+.strand::after {
+  background: #10B981;
+  right: -2px;
+  box-shadow: 0 0 8px #10B981;
+  animation-delay: 0.2s;
+}
+
+.ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  animation: ringPulse 2s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateY(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+}
+
+@keyframes ringPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.2;
+  }
+}
+
+/* Create multiple strands with different rotations */
+.strand:nth-child(1) { transform: translate(-50%, -50%) rotateY(0deg); }
+.strand:nth-child(2) { transform: translate(-50%, -50%) rotateY(30deg); }
+.strand:nth-child(3) { transform: translate(-50%, -50%) rotateY(60deg); }
+.strand:nth-child(4) { transform: translate(-50%, -50%) rotateY(90deg); }
+.strand:nth-child(5) { transform: translate(-50%, -50%) rotateY(120deg); }
+.strand:nth-child(6) { transform: translate(-50%, -50%) rotateY(150deg); }
+.strand:nth-child(7) { transform: translate(-50%, -50%) rotateY(180deg); }
+.strand:nth-child(8) { transform: translate(-50%, -50%) rotateY(210deg); }
+.strand:nth-child(9) { transform: translate(-50%, -50%) rotateY(240deg); }
+.strand:nth-child(10) { transform: translate(-50%, -50%) rotateY(270deg); }
+.strand:nth-child(11) { transform: translate(-50%, -50%) rotateY(300deg); }
+.strand:nth-child(12) { transform: translate(-50%, -50%) rotateY(330deg); }
+

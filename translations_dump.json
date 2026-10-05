@@ -1,0 +1,907 @@
+[
+  {
+    "key": "just_now",
+    "ar": "الآن",
+    "en": "Just now"
+  },
+  {
+    "key": "mins_m_ago",
+    "ar": "منذ ${mins} دقيقة",
+    "en": "${mins}m ago"
+  },
+  {
+    "key": "hours_h_ago",
+    "ar": "منذ ${hours} ساعة",
+    "en": "${hours}h ago"
+  },
+  {
+    "key": "days_d_ago",
+    "ar": "منذ ${days} أيام",
+    "en": "${days}d ago"
+  },
+  {
+    "key": "en_us",
+    "ar": "ar-EG",
+    "en": "en-US"
+  },
+  {
+    "key": "dashboard_refreshed_successful",
+    "ar": "تم تحديث البيانات بنجاح",
+    "en": "Dashboard refreshed successfully"
+  },
+  {
+    "key": "good_morning",
+    "ar": "صباح الخير والنشاط",
+    "en": "Good Morning"
+  },
+  {
+    "key": "good_afternoon",
+    "ar": "طاب يومك",
+    "en": "Good Afternoon"
+  },
+  {
+    "key": "good_evening",
+    "ar": "مساء الخير والتميّز",
+    "en": "Good Evening"
+  },
+  {
+    "key": "resume",
+    "ar": "استئناف آخر دورة:",
+    "en": "Resume:"
+  },
+  {
+    "key": "all_time",
+    "ar": "كل الأوقات",
+    "en": "All Time"
+  },
+  {
+    "key": "refresh_dashboard",
+    "ar": "تحديث البيانات",
+    "en": "Refresh Dashboard"
+  },
+  {
+    "key": "totalinprogress_in_study",
+    "ar": "${totalInProgress} قيد الدراسة",
+    "en": "${totalInProgress} in study"
+  },
+  {
+    "key": "learning_hours",
+    "ar": "ساعات التعلّم",
+    "en": "Learning Hours"
+  },
+  {
+    "key": "total_watch_time",
+    "ar": "إجمالي وقت المشاهدة",
+    "en": "Total watch time"
+  },
+  {
+    "key": "overallrate_completion_rate",
+    "ar": "${overallRate}% معدل الإنجاز",
+    "en": "${overallRate}% completion rate"
+  },
+  {
+    "key": "certificates_earned",
+    "ar": "الشهادات المعتمدة",
+    "en": "Certificates Earned"
+  },
+  {
+    "key": "totalquizzes_quizzes_completed",
+    "ar": "${totalQuizzes} اختبار منجز",
+    "en": "${totalQuizzes} quizzes completed"
+  },
+  {
+    "key": "resume_where_you_left_off",
+    "ar": "استكمل مساراتك التدريبية واقترب من التخرج",
+    "en": "Resume where you left off"
+  },
+  {
+    "key": "all",
+    "ar": "الكل",
+    "en": "All"
+  },
+  {
+    "key": "in_progress",
+    "ar": "قيد التعلّم",
+    "en": "In Progress"
+  },
+  {
+    "key": "completed",
+    "ar": "المكتملة",
+    "en": "Completed"
+  },
+  {
+    "key": "done",
+    "ar": "مكتمل",
+    "en": "Done"
+  },
+  {
+    "key": "live",
+    "ar": "بث مباشر",
+    "en": "Live"
+  },
+  {
+    "key": "onsite",
+    "ar": "حضوري",
+    "en": "Onsite"
+  },
+  {
+    "key": "recorded",
+    "ar": "مسجّل",
+    "en": "Recorded"
+  },
+  {
+    "key": "review",
+    "ar": "مراجعة المادة",
+    "en": "Review"
+  },
+  {
+    "key": "upcoming_classes_sessions",
+    "ar": "الجلسات والمحاضرات القادمة",
+    "en": "Upcoming Classes & Sessions"
+  },
+  {
+    "key": "schedule_for_your_live_and_ons",
+    "ar": "مواعيد المحاضرات المباشرة والحضورية لمساراتك",
+    "en": "Schedule for your live and onsite programs"
+  },
+  {
+    "key": "live_online",
+    "ar": "أونلاين مباشر",
+    "en": "Live Online"
+  },
+  {
+    "key": "join_session",
+    "ar": "انضم إلى البث",
+    "en": "Join Session"
+  },
+  {
+    "key": "session_details",
+    "ar": "تفاصيل الحضور",
+    "en": "Session Details"
+  },
+  {
+    "key": "academic_performance",
+    "ar": "الأداء الأكاديمي والتقييمات",
+    "en": "Academic Performance"
+  },
+  {
+    "key": "breakdown_of_your_real_test_sc",
+    "ar": "توزيع نتائجك في التقييمات والاختبارات الأكاديمية",
+    "en": "Breakdown of your real test scores"
+  },
+  {
+    "key": "quizzes",
+    "ar": "اختبار منجز",
+    "en": "Quizzes"
+  },
+  {
+    "key": "excellent",
+    "ar": "ممتاز (90%+)",
+    "en": "Excellent"
+  },
+  {
+    "key": "very_good",
+    "ar": "جيد جداً (80%+)",
+    "en": "Very Good"
+  },
+  {
+    "key": "average",
+    "ar": "متوسط (70%+)",
+    "en": "Average"
+  },
+  {
+    "key": "needs_review",
+    "ar": "يحتاج تحسين",
+    "en": "Needs Review"
+  },
+  {
+    "key": "goal_achieved",
+    "ar": "🎉 مبروك! حققت هدفك الأسبوعي",
+    "en": "🎉 Goal Achieved!"
+  },
+  {
+    "key": "keep_up_the_momentum",
+    "ar": "حافظ على حماسك ونشاطك!",
+    "en": "Keep Up The Momentum!"
+  },
+  {
+    "key": "you_have_completed_activedayst",
+    "ar": "أكملت ${activeDaysThisWeek} من أصل ${weeklyGoalTarget} أيام نشاط تعليمي هذا الأسبوع.",
+    "en": "You have completed ${activeDaysThisWeek} of ${weeklyGoalTarget} active study days this week."
+  },
+  {
+    "key": "start_learning_your_first_less",
+    "ar": "ابدأ دراسة أول درس لك اليوم لتسجيل نشاطك وتحقيق تقدم في مسارك.",
+    "en": "Start learning your first lesson today to record your study momentum."
+  },
+  {
+    "key": "weekly_goal",
+    "ar": "الهدف الأسبوعي",
+    "en": "Weekly Goal"
+  },
+  {
+    "key": "active_days",
+    "ar": "أيام نشطة",
+    "en": "Active Days"
+  },
+  {
+    "key": "courses",
+    "ar": "دورة",
+    "en": "courses"
+  },
+  {
+    "key": "assignments_tasks",
+    "ar": "المهام والواجبات",
+    "en": "Assignments & Tasks"
+  },
+  {
+    "key": "view_your_pending_assignments",
+    "ar": "متابعة تكليفاتك الأكاديمية",
+    "en": "View your pending assignments"
+  },
+  {
+    "key": "events",
+    "ar": "نشاط",
+    "en": "events"
+  },
+  {
+    "key": "no_recent_activities_yet",
+    "ar": "لا توجد أنشطة مسجلة بعد",
+    "en": "No recent activities yet"
+  },
+  {
+    "key": "completed_quizzes_certificates",
+    "ar": "ستظهر هنا تفاصيل اختباراتك، شاراتك، والإشعارات فور إتمامها.",
+    "en": "Completed quizzes, certificates, and alerts will appear here."
+  },
+  {
+    "key": "study_pro_tip",
+    "ar": "نصيحة للتفوق:",
+    "en": "Study Pro Tip:"
+  },
+  {
+    "key": "take_concise_notes_while_watch",
+    "ar": "استخدم ميزة كتابة الملاحظات أثناء مشاهدة الدروس لتسهيل المراجعة السريعة قبل الاختبارات.",
+    "en": "Take concise notes while watching lessons to make review much faster before quizzes."
+  },
+  {
+    "key": "founded_established",
+    "ar": "عام التأسيس والريادة",
+    "en": "Founded & Established"
+  },
+  {
+    "key": "enrolled_students",
+    "ar": "طالب ومتدرب مستفيد",
+    "en": "Enrolled Students"
+  },
+  {
+    "key": "accredited_programs",
+    "ar": "دورة وبرنامج تدريبي",
+    "en": "Accredited Programs"
+  },
+  {
+    "key": "gcc_arab_countries",
+    "ar": "دول خليجية وعربية",
+    "en": "GCC & Arab Countries"
+  },
+  {
+    "key": "our_story_purpose",
+    "ar": "قصتنا ورسالتنا",
+    "en": "Our Story & Purpose"
+  },
+  {
+    "key": "solutions_for_individuals_ente",
+    "ar": "حلول للأفراد والشركات",
+    "en": "Solutions for Individuals & Enterprises"
+  },
+  {
+    "key": "accredited_certifications",
+    "ar": "شهادات مهنية معتمدة",
+    "en": "Accredited Certifications"
+  },
+  {
+    "key": "strategic_pillars",
+    "ar": "الركائز الاستراتيجية",
+    "en": "Strategic Pillars"
+  },
+  {
+    "key": "vision_mission_core_values",
+    "ar": "الرؤية والرسالة والقيم الجوهرية",
+    "en": "Vision, Mission & Core Values"
+  },
+  {
+    "key": "anchored_by_proven_educational",
+    "ar": "نرتكز على مبادئ تعليمية راسخة تقودنا نحو إحداث فارق حقيقي في مسارات الطلاب ورواد الأعمال.",
+    "en": "Anchored by proven educational principles to transform careers and unlock leadership potential."
+  },
+  {
+    "key": "our_vision",
+    "ar": "رؤيتنا",
+    "en": "Our Vision"
+  },
+  {
+    "key": "to_be_the_leading_arab_educati",
+    "ar": "أن نكون المنصة التعليمية والتدريبية العربية الرائدة والأكثر موثوقية في بناء المهارات التخصصية وتمكين الكوادر ورواد الأعمال للمنافسة عالمياً.",
+    "en": "To be the leading Arab educational and training academy empowering individuals and entrepreneurs to excel globally."
+  },
+  {
+    "key": "our_mission",
+    "ar": "رسالتنا",
+    "en": "Our Mission"
+  },
+  {
+    "key": "delivering_comprehensive_educa",
+    "ar": "تقديم تجارب تعليمية ومهنية متقدمة وشاملة تلبي الاحتياجات الفعلية لسوق العمل، وتساعد أصحاب المشاريع والطلاب على تجاوز التحديات وصنع النجاح المستدام.",
+    "en": "Delivering comprehensive educational and vocational programs that bridge skills gaps and drive sustainable career success."
+  },
+  {
+    "key": "our_core_values",
+    "ar": "قيمنا الجوهرية",
+    "en": "Our Core Values"
+  },
+  {
+    "key": "academic_excellence_integrity_",
+    "ar": "التميز الأكاديمي، النزاهة والموثوقية، الابتكار في أساليب التدريب، والالتزام الكامل بدعم كل متعلم كشريك حقيقي في رحلة التطور والنمو.",
+    "en": "Academic excellence, integrity, innovation in methodology, and unwavering commitment to learner success."
+  },
+  {
+    "key": "left_0",
+    "ar": "right-0",
+    "en": "left-0"
+  },
+  {
+    "key": "r",
+    "ar": "l",
+    "en": "r"
+  },
+  {
+    "key": "translate_x_full_lg_translate_",
+    "ar": "translate-x-full lg:translate-x-0",
+    "en": "-translate-x-full lg:translate-x-0"
+  },
+  {
+    "key": "translatex_24px",
+    "ar": "translateX(-22px)",
+    "en": "translateX(24px)"
+  },
+  {
+    "key": "translatex_2px",
+    "ar": "translateX(-2px)",
+    "en": "translateX(2px)"
+  },
+  {
+    "key": "text_p8k38",
+    "ar": "rotate-180",
+    "en": ""
+  },
+  {
+    "key": "ltr",
+    "ar": "rtl",
+    "en": "ltr"
+  },
+  {
+    "key": "ml_2",
+    "ar": "mr-2",
+    "en": "ml-2"
+  },
+  {
+    "key": "text_pgi14",
+    "ar": "rotate-180",
+    "en": ""
+  },
+  {
+    "key": "sar",
+    "ar": "ر.س",
+    "en": "SAR"
+  },
+  {
+    "key": "text_left",
+    "ar": "text-right",
+    "en": "text-left"
+  },
+  {
+    "key": "left_3_5",
+    "ar": "right-3.5",
+    "en": "left-3.5"
+  },
+  {
+    "key": "pl_10_pr_4",
+    "ar": "pr-10 pl-4",
+    "en": "pl-10 pr-4"
+  },
+  {
+    "key": "left_0_pl_4",
+    "ar": "right-0 pr-4",
+    "en": "left-0 pl-4"
+  },
+  {
+    "key": "pl_11_pr_10",
+    "ar": "pr-11 pl-10",
+    "en": "pl-11 pr-10"
+  },
+  {
+    "key": "right_0_pr_3_5",
+    "ar": "left-0 pl-3.5",
+    "en": "right-0 pr-3.5"
+  },
+  {
+    "key": "left_3",
+    "ar": "right-3",
+    "en": "left-3"
+  },
+  {
+    "key": "group_hover_translate_x_1_5",
+    "ar": "group-hover:-translate-x-1.5",
+    "en": "group-hover:translate-x-1.5"
+  },
+  {
+    "key": "hello_aec_academy_i_would_like",
+    "ar": "مرحباً أكاديمية AEC، أود الاستفسار والحصول على استشارة بخصوص مسارات: ${catName}",
+    "en": "Hello AEC Academy, I would like to inquire about training tracks in: ${catName}"
+  },
+  {
+    "key": "bg_gradient_to_r_from_06102b_9",
+    "ar": "bg-gradient-to-l from-[#06102b]/95 via-[#071942]/80 to-[#071942]/45",
+    "en": "bg-gradient-to-r from-[#06102b]/95 via-[#071942]/80 to-[#071942]/45"
+  },
+  {
+    "key": "course_link_copied_to_clipboar",
+    "ar": "تم نسخ رابط الدورة بنجاح!",
+    "en": "Course link copied to clipboard!"
+  },
+  {
+    "key": "2_hours",
+    "ar": "ساعتان",
+    "en": "2 hours"
+  },
+  {
+    "key": "hours_h_mins_m",
+    "ar": "${hours} س و ${mins} د",
+    "en": "${hours}h ${mins}m"
+  },
+  {
+    "key": "hours_hours",
+    "ar": "${hours} ساعة",
+    "en": "${hours} hours"
+  },
+  {
+    "key": "mins_mins",
+    "ar": "${mins} دقيقة",
+    "en": "${mins} mins"
+  },
+  {
+    "key": "unable_to_find_this_course",
+    "ar": "لم نتمكن من العثور على بيانات هذه الدورة",
+    "en": "Unable to find this course"
+  },
+  {
+    "key": "aec_academy",
+    "ar": "أكاديمية AEC",
+    "en": "AEC Academy"
+  },
+  {
+    "key": "comprehensive_overview_of_the_",
+    "ar": "نظرة شاملة ومفصلة حول أهداف المساق",
+    "en": "Comprehensive overview of the course"
+  },
+  {
+    "key": "key_skills_and_knowledge_gaine",
+    "ar": "المهارات والخبرات العملية التي ستكتسبها",
+    "en": "Key skills and knowledge gained"
+  },
+  {
+    "key": "key_topics_covered_in_this_cou",
+    "ar": "المجالات والمحاور الرئيسية المغطاة في المساق",
+    "en": "Key topics covered in this course"
+  },
+  {
+    "key": "location_schedule_and_attendan",
+    "ar": "المواعيد والمكان والتعليمات الهامة",
+    "en": "Location, schedule, and attendance details"
+  },
+  {
+    "key": "instructor_credentials_and_exp",
+    "ar": "الخبرات والمؤهلات الأكاديمية للمدرب",
+    "en": "Instructor credentials and experience"
+  },
+  {
+    "key": "verified_instructor",
+    "ar": "محاضر معتمد",
+    "en": "Verified Instructor"
+  },
+  {
+    "key": "these_reviews_are_gathered_fro",
+    "ar": "تم جمع هذه التقييمات من الطلاب الفعليين المسجلين في هذا المساق لضمان أعلى معايير الجودة والشفافية.",
+    "en": "These reviews are gathered from verified enrolled students to ensure maximum quality and transparency."
+  },
+  {
+    "key": "off",
+    "ar": "خصم",
+    "en": "OFF"
+  },
+  {
+    "key": "quality_guarantee_instant_life",
+    "ar": "ضمان جودة المحتوى • وصول فوري بعد الاشتراك",
+    "en": "Quality guarantee • Instant lifetime access"
+  },
+  {
+    "key": "access_on_mobile_and_desktop",
+    "ar": "إمكانية المتابعة عبر الهاتف والحاسوب",
+    "en": "Access on mobile and desktop"
+  },
+  {
+    "key": "recommended",
+    "ar": "اقتراحات إضافية",
+    "en": "Recommended"
+  },
+  {
+    "key": "view_all_courses",
+    "ar": "عرض جميع الدورات",
+    "en": "View all courses"
+  },
+  {
+    "key": "your_browser_does_not_support_",
+    "ar": "متصفحك لا يدعم تشغيل هذا الفيديو.",
+    "en": "Your browser does not support the video tag."
+  },
+  {
+    "key": "secure_account_recovery",
+    "ar": "استعادة الحساب الآمنة",
+    "en": "Secure Account Recovery"
+  },
+  {
+    "key": "your_security_is_our_priority",
+    "ar": "حماية بياناتك أولويتنا",
+    "en": "Your Security is Our Priority"
+  },
+  {
+    "key": "regain_access_to_your_account",
+    "ar": "استعادة الوصول إلى حسابك",
+    "en": "Regain Access to Your Account"
+  },
+  {
+    "key": "in_simple_fully_secure_steps",
+    "ar": "بخطوات بسيطة وآمنة تماماً",
+    "en": "In simple, fully secure steps"
+  },
+  {
+    "key": "we_help_you_reset_your_credent",
+    "ar": "نساعدك على استرجاع كلمة المرور الخاصة بك والعودة إلى مساراتك التعليمية بكل سهولة وموثوقية.",
+    "en": "We help you reset your credentials and resume your educational tracks smoothly and reliably."
+  },
+  {
+    "key": "one_time_secure_verification_c",
+    "ar": "رمز تحقق مؤقت وسري يُرسل مباشرة لبريدك",
+    "en": "One-time secure verification code sent to email"
+  },
+  {
+    "key": "end_to_end_credential_encrypti",
+    "ar": "تشفير كامل لكلمة المرور وحماية الحساب",
+    "en": "End-to-end credential encryption and safety"
+  },
+  {
+    "key": "instant_return_to_your_courses",
+    "ar": "عودة فورية لمتابعة دوراتك وشهاداتك",
+    "en": "Instant return to your courses and certificates"
+  },
+  {
+    "key": "need_help",
+    "ar": "تحتاج إلى مساعدة؟",
+    "en": "Need help?"
+  },
+  {
+    "key": "email",
+    "ar": "البريد",
+    "en": "Email"
+  },
+  {
+    "key": "code",
+    "ar": "الرمز",
+    "en": "Code"
+  },
+  {
+    "key": "password",
+    "ar": "كلمة المرور",
+    "en": "Password"
+  },
+  {
+    "key": "forgot_password",
+    "ar": "نسيت كلمة المرور؟",
+    "en": "Forgot Password?"
+  },
+  {
+    "key": "enter_verification_code",
+    "ar": "أدخل رمز التحقق",
+    "en": "Enter Verification Code"
+  },
+  {
+    "key": "change",
+    "ar": "(تعديل)",
+    "en": "(Change)"
+  },
+  {
+    "key": "set_new_password",
+    "ar": "تعيين كلمة المرور الجديدة",
+    "en": "Set New Password"
+  },
+  {
+    "key": "passwords_match",
+    "ar": "كلمتا المرور متطابقتان",
+    "en": "Passwords match"
+  },
+  {
+    "key": "passwords_do_not_match",
+    "ar": "كلمتا المرور غير متطابقتين",
+    "en": "Passwords do not match"
+  },
+  {
+    "key": "approved",
+    "ar": "معتمدة ومنشورة",
+    "en": "Approved"
+  },
+  {
+    "key": "pending_review",
+    "ar": "قيد المراجعة",
+    "en": "Pending Review"
+  },
+  {
+    "key": "rejected",
+    "ar": "مرفوضة",
+    "en": "Rejected"
+  },
+  {
+    "key": "draft",
+    "ar": "مسودة",
+    "en": "Draft"
+  },
+  {
+    "key": "course_management_studio",
+    "ar": "استوديو إدارة الدورات",
+    "en": "Course Management Studio"
+  },
+  {
+    "key": "manage_your_courses_edit_lectu",
+    "ar": "إدارة محتوى البرامج، التعديل على الدروس، ومتابعة تسجيلات الطلاب",
+    "en": "Manage your courses, edit lectures, and monitor student enrollments"
+  },
+  {
+    "key": "refresh",
+    "ar": "تحديث",
+    "en": "Refresh"
+  },
+  {
+    "key": "total_courses",
+    "ar": "إجمالي الدورات",
+    "en": "Total Courses"
+  },
+  {
+    "key": "approved_live",
+    "ar": "معتمدة ومنشورة",
+    "en": "Approved / Live"
+  },
+  {
+    "key": "under_review",
+    "ar": "قيد المراجعة",
+    "en": "Under Review"
+  },
+  {
+    "key": "search_by_course_title",
+    "ar": "بحث باسم الدورة أو القسم...",
+    "en": "Search by course title..."
+  },
+  {
+    "key": "courses_found",
+    "ar": "دورة مطابقة",
+    "en": "courses found"
+  },
+  {
+    "key": "loading_courses",
+    "ar": "جاري تحميل الدورات...",
+    "en": "Loading courses..."
+  },
+  {
+    "key": "welcome_to_instructor_studio",
+    "ar": "مرحباً بك في استوديو المحاضر",
+    "en": "Welcome to Instructor Studio"
+  },
+  {
+    "key": "instructor",
+    "ar": "يا دكتور",
+    "en": "Instructor"
+  },
+  {
+    "key": "track_course_performance_monit",
+    "ar": "تابع أداء دوراتك التدريبية، وتفاعل مع طلابك، واطلع على العوائد والإحصائيات اللحظية من مكان واحد.",
+    "en": "Track course performance, monitor student enrollments, and manage your teaching revenue in real time."
+  },
+  {
+    "key": "create_course",
+    "ar": "إنشاء دورة جديدة",
+    "en": "Create Course"
+  },
+  {
+    "key": "my_courses",
+    "ar": "إدارة دوراتي",
+    "en": "My Courses"
+  },
+  {
+    "key": "enrolled_learners",
+    "ar": "متعلم نشط",
+    "en": "enrolled learners"
+  },
+  {
+    "key": "verified_sales",
+    "ar": "مبيعات معتمدة",
+    "en": "verified sales"
+  },
+  {
+    "key": "student_rating",
+    "ar": "تقييم الطلاب",
+    "en": "student rating"
+  },
+  {
+    "key": "graduates",
+    "ar": "متخرج",
+    "en": "graduates"
+  },
+  {
+    "key": "this_week_s_activity",
+    "ar": "نشاط الأسبوع الحالي",
+    "en": "This Week\\'s Activity"
+  },
+  {
+    "key": "past_7_days",
+    "ar": "آخر 7 أيام",
+    "en": "Past 7 days"
+  },
+  {
+    "key": "new_enrollments",
+    "ar": "تسجيلات جديدة",
+    "en": "New Enrollments"
+  },
+  {
+    "key": "weekly_earnings",
+    "ar": "عوائد هذا الأسبوع",
+    "en": "Weekly Earnings"
+  },
+  {
+    "key": "completed_certifications",
+    "ar": "شهادات مصدرة",
+    "en": "Completed Certifications"
+  },
+  {
+    "key": "launch_new_course_workshop",
+    "ar": "إطلاق برنامج أو ورشة عمل جديدة",
+    "en": "Launch New Course / Workshop"
+  },
+  {
+    "key": "course_performance_overview",
+    "ar": "أداء الدورات التدريبية",
+    "en": "Course Performance Overview"
+  },
+  {
+    "key": "students_and_revenue_breakdown",
+    "ar": "إحصائيات الطلاب والمبيعات لكل برنامج",
+    "en": "Students and revenue breakdown by course"
+  },
+  {
+    "key": "view_all",
+    "ar": "عرض الكل",
+    "en": "View All"
+  },
+  {
+    "key": "no_courses_created_yet",
+    "ar": "لم تقم بإنشاء أي دورات بعد",
+    "en": "No courses created yet"
+  },
+  {
+    "key": "start_by_creating_your_first_c",
+    "ar": "ابدأ الآن بمشاركة خبراتك وأنشئ دورتك الأولى لجذب آلاف الطلاب في الأكاديمية.",
+    "en": "Start by creating your first course and reach thousands of learners."
+  },
+  {
+    "key": "create_first_course",
+    "ar": "إنشاء دورتي الأولى",
+    "en": "Create First Course"
+  },
+  {
+    "key": "teaching_courses",
+    "ar": "إدارة الدورات والتعليم",
+    "en": "Teaching & Courses"
+  },
+  {
+    "key": "account_settings",
+    "ar": "الحساب والإعدادات",
+    "en": "Account & Settings"
+  },
+  {
+    "key": "instructor_portal",
+    "ar": "بوابة المحاضر",
+    "en": "Instructor Portal"
+  },
+  {
+    "key": "explore_platform",
+    "ar": "المنصة العامة",
+    "en": "Explore Platform"
+  },
+  {
+    "key": "new_course",
+    "ar": "دورة جديدة",
+    "en": "New Course"
+  },
+  {
+    "key": "continuous_learning",
+    "ar": "التعلم المستمر",
+    "en": "Continuous Learning"
+  },
+  {
+    "key": "courses_and_workshops_you_are_",
+    "ar": "الدورات التدريبية وورش العمل التي قمت بالاشتراك بها لمتابعة تعلمك",
+    "en": "Courses and workshops you are currently enrolled in as a learner"
+  },
+  {
+    "key": "explore_courses",
+    "ar": "استكشاف دورات جديدة",
+    "en": "Explore Courses"
+  },
+  {
+    "key": "explore_the_academy_catalog_to",
+    "ar": "يمكنك استكشاف مكتبة الأكاديمية والاشتراك في أي دورة أو ورشة عمل.",
+    "en": "Explore the academy catalog to enroll in exciting new programs."
+  },
+  {
+    "key": "text_plqwa",
+    "ar": "rotate-180",
+    "en": ""
+  },
+  {
+    "key": "resume_your_learning_journeys_",
+    "ar": "استكمل مساراتك التعليمية، وتابع تقدمك في المحاضرات، واستعرض تذاكر الحضور ورموز QR.",
+    "en": "Resume your learning journeys, track your lecture progress, and access attendance tickets & QR codes."
+  },
+  {
+    "key": "search_courses_or_instructor",
+    "ar": "ابحث في دوراتك أو اسم المدرب...",
+    "en": "Search courses or instructor..."
+  },
+  {
+    "key": "all_status",
+    "ar": "كل الحالات",
+    "en": "All Status"
+  },
+  {
+    "key": "no_courses_match_your_filter",
+    "ar": "لا توجد نتائج تطابق بحثك",
+    "en": "No courses match your filter"
+  },
+  {
+    "key": "explore_our_course_catalog_and",
+    "ar": "استكشف كتالوج الدورات التعليمية وابدأ باكتساب مهارات احترافية جديدة اليوم.",
+    "en": "Explore our course catalog and start acquiring new professional skills today."
+  },
+  {
+    "key": "try_adjusting_your_search_term",
+    "ar": "جرّب تغيير كلمات البحث أو تبديل خيارات الفلتر للعثور على ما تبحث عنه.",
+    "en": "Try adjusting your search terms or filters to find what you are looking for."
+  },
+  {
+    "key": "course_completed",
+    "ar": "تم إكمال الدورة",
+    "en": "Course Completed"
+  },
+  {
+    "key": "onsite_venue",
+    "ar": "المقر الحضوري",
+    "en": "Onsite Venue"
+  },
+  {
+    "key": "serial",
+    "ar": "الرقم التسلسلي:",
+    "en": "Serial:"
+  },
+  {
+    "key": "review_course_content",
+    "ar": "مراجعة المادة التدريبية",
+    "en": "Review Course Content"
+  }
+]

@@ -1,0 +1,243 @@
+.file-upload-container {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.file-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-upload-area:hover {
+  border-color: #9ca3af;
+}
+
+.file-upload-area.dragging {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.file-upload-area.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.file-upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.file-upload-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.file-upload-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .file-upload-text {
+    flex-direction: row;
+  }
+}
+
+.file-upload-label {
+  font-weight: 500;
+  color: #3b82f6;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.file-upload-label:hover {
+  color: #2563eb;
+}
+
+.file-upload-label.disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.file-upload-drag-text {
+  margin-left: 0;
+  margin-top: 0.25rem;
+  color: #6b7280;
+}
+
+@media (min-width: 640px) {
+  .file-upload-drag-text {
+    margin-left: 0.25rem;
+    margin-top: 0;
+  }
+}
+
+.file-upload-helper-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Progress bar styles */
+.upload-progress-container {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.upload-progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.upload-progress-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  transition: width 0.3s ease-out;
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 1rem 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+.upload-progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  padding: 0 0.25rem;
+}
+
+.upload-percentage {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.upload-chunks-info {
+  font-size: 0.7rem;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+}
+
+/* File previews */
+.file-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.file-preview-item {
+  width: 100px;
+  height: 100px;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+.file-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-preview-document {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  padding: 0.5rem;
+}
+
+.file-preview-document span {
+  font-size: 0.625rem;
+  color: #4b5563;
+  text-align: center;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Selected files list */
+.selected-files {
+  margin-top: 1rem;
+}
+
+.selected-files-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.selected-files-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.selected-file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+  margin-bottom: 0.25rem;
+}
+
+.selected-file-name {
+  font-size: 0.875rem;
+  color: #4b5563;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+
+.selected-file-size {
+  font-size: 0.75rem;
+  color: #6b7280;
+}

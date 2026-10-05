@@ -1,0 +1,505 @@
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import {
+    Sparkles,
+    Megaphone,
+    X,
+    Maximize2,
+    ChevronDown,
+    ChevronUp,
+    MessageCircle,
+    ArrowLeft,
+    ArrowRight
+} from 'lucide-react';
+import { advertisementService } from '../../services/new-api';
+
+const AdvertisementSection = () => {
+    const { t, i18n } = useTranslation();
+    const [advertisement, setAdvertisement] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isDismissed, setIsDismissed] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    const currentLanguage = i18n.language || 'ar';
+    const isRtl = currentLanguage === 'ar';
+
+    useEffect(() => {
+        fetchActiveAdvertisement();
+    }, []);
+
+    const fetchActiveAdvertisement = async () => {
+        try {
+            setLoading(true);
+            const data = await advertisementService.getActiveAdvertisements();
+            if (data?.success && data?.data) {
+                // Support both single object or array returned from API
+                const ad = Array.isArray(data.data) ? data.data[0] : data.data;
+                if (!ad) {
+                    setAdvertisement(null);
+                    return;
+                }
+
+                // Check session dismissal
+                let dismissedInSession = false;
+                try {
+                    dismissedInSession = sessionStorage.getItem(`dismissed_ad_${ad._id}`) === 'true';
+                } catch (e) {
+                    // Safe handling for storage restrictions
+                }
+
+                if (dismissedInSession) {
+                    setIsDismissed(true);
+                } else {
+                    setAdvertisement(ad);
+                    setIsDismissed(false);
+                }
+            } else {
+                setAdvertisement(null);
+            }
+        } catch (error) {
+            console.error('Error fetching advertisement:', error);
+            setAdvertisement(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDismiss = () => {
+        if (advertisement?._id) {
+            try {
+                sessionStorage.setItem(`dismissed_ad_${advertisement._id}`, 'true');
+            } catch (e) {
+                // Ignore storage errors in private mode
+            }
+        }
+        setIsDismissed(true);
+    };
+
+    // Close lightbox on Escape key
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Escape') {
+            setIsLightboxOpen(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isLightboxOpen) {
+            document.body.style.overflow = 'hidden';
+            window.addEventListener('keydown', handleKeyDown);
+        } else {
+            document.body.style.overflow = '';
+            window.removeEventListener('keydown', handleKeyDown);
+        }
+        return () => {
+            document.body.style.overflow = '';
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isLightboxOpen, handleKeyDown]);
+
+    const getLocalizedContent = useCallback((content) => {
+        if (!content) return '';
+        if (typeof content === 'string') return content;
+        return content[currentLanguage] || content.ar || content.en || '';
+    }, [currentLanguage]);
+
+    const headline = useMemo(() => getLocalizedContent(advertisement?.headline), [advertisement, getLocalizedContent]);
+    const description = useMemo(() => getLocalizedContent(advertisement?.description), [advertisement, getLocalizedContent]);
+    const imageUrl = advertisement?.image?.url && !imageError ? advertisement.image.url : null;
+    const ctaText = useMemo(() => getLocalizedContent(advertisement?.ctaText), [advertisement, getLocalizedContent]);
+    const ctaUrl = advertisement?.ctaUrl;
+
+    // Detect WhatsApp number or Link inside the description if not explicitly configured
+    const contactInfo = useMemo(() => {
+        if (!description) return { whatsapp: null, link: null };
+
+        // Match Saudi WhatsApp numbers like +966540098736, 0540098736, or 540098736
+        const phoneMatch = description.match(/(?:\+?966|0)?(5\d{8})/);
+        const whatsappNumber = phoneMatch ? `966${phoneMatch[1]}` : null;
+
+        // Match URLs
+        const urlMatch = description.match(/https?:\/\/[^\s]+/i);
+        const rawLink = urlMatch ? urlMatch[0].replace(/[.,;:)]+$/, '') : null;
+
+        return {
+            whatsapp: whatsappNumber,
+            link: rawLink
+        };
+    }, [description]);
+
+    const whatsappUrl = useMemo(() => {
+        if (!contactInfo.whatsapp) return null;
+        const inquiryText = isRtl
+            ? t('autoGenerated.compText1164', 'مرحباً، أود الاستفسار بخصوص الإعلان في منصة AEC')
+            : 'Hello, I would like to inquire about the advertisement on AEC platform';
+        return `https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(inquiryText)}`;
+    }, [contactInfo.whatsapp, isRtl]);
+
+    // Check if description has multiple lines or is long enough to warrant an expand toggle
+    const isLongDescription = useMemo(() => {
+        if (!description) return false;
+        return description.length > 200 || description.split('\n').filter(l => l.trim()).length > 3;
+    }, [description]);
+
+    // Loading Skeleton
+    if (loading) {
+        return (
+            <div className="py-6 sm:py-10 bg-gradient-to-b from-slate-50/60 to-white" dir={isRtl ? 'rtl' : 'ltr'}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="relative rounded-3xl bg-white border border-slate-200/70 p-6 sm:p-10 shadow-lg shadow-slate-100 overflow-hidden animate-pulse">
+                        <div className="h-1.5 w-full bg-slate-200 absolute top-0 inset-x-0" />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                            <div className="lg:col-span-7 space-y-5">
+                                <div className="h-6 w-32 bg-slate-200 rounded-full" />
+                                <div className="h-10 w-3/4 bg-slate-200 rounded-2xl" />
+                                <div className="space-y-3 pt-2">
+                                    <div className="h-4 w-full bg-slate-200 rounded-lg" />
+                                    <div className="h-4 w-5/6 bg-slate-200 rounded-lg" />
+                                    <div className="h-4 w-2/3 bg-slate-200 rounded-lg" />
+                                </div>
+                                <div className="flex gap-4 pt-4">
+                                    <div className="h-12 w-36 bg-slate-200 rounded-xl" />
+                                    <div className="h-12 w-32 bg-slate-200 rounded-xl" />
+                                </div>
+                            </div>
+                            <div className="lg:col-span-5">
+                                <div className="w-full aspect-[4/3] max-h-80 bg-slate-200 rounded-2xl" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!advertisement || isDismissed) {
+        return null;
+    }
+
+    const hasTextContent = Boolean(headline || description);
+    const hasMedia = Boolean(imageUrl);
+
+    // Dynamic direction arrow
+    const DirectionArrow = isRtl ? ArrowLeft : ArrowRight;
+
+    return (
+        <AnimatePresence>
+            <motion.section
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -20, margin: 0, padding: 0 }}
+                transition={{ duration: 0.45, ease: 'easeOut' }}
+                className="relative py-6 sm:py-10 lg:py-12 bg-gradient-to-b from-slate-50/70 via-white to-slate-50/40 overflow-hidden font-arabic"
+                dir={isRtl ? 'rtl' : 'ltr'}
+            >
+                {/* Subtle Ambient Background Glows */}
+                <div className="absolute top-1/2 start-1/4 -translate-y-1/2 w-96 h-96 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-1/2 end-1/4 -translate-y-1/2 w-96 h-96 bg-secondary-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="relative rounded-[28px] bg-white border border-slate-200/90 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-500/10 transition-all duration-300 overflow-hidden">
+                        
+                        {/* Top Gradient Accent Strip */}
+                        <div className="h-1.5 w-full bg-gradient-to-r from-primary-600 via-secondary-500 to-primary-600" />
+
+                        {/* Dismiss Button */}
+                        <button
+                            onClick={handleDismiss}
+                            className="absolute top-4 end-4 z-20 p-2.5 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-500 hover:text-slate-800 backdrop-blur-md border border-slate-200/60 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95"
+                            aria-label={t('advertisement.dismiss', 'Dismiss advertisement')}
+                            title={t('advertisement.dismiss', 'Dismiss advertisement')}
+                        >
+                            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+
+                        {/* Layout 1: Rich Announcement with Text + Media */}
+                        {hasTextContent && hasMedia && (
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 p-6 sm:p-8 lg:p-12 items-center">
+                                
+                                {/* Content Column */}
+                                <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
+                                    
+                                    {/* Header Badge Pills */}
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-primary-50 text-primary-700 border border-primary-200/70 shadow-sm">
+                                            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-secondary-500 animate-pulse" />
+                                            <span>{t('advertisement.badge', 'Special Announcement')}</span>
+                                        </div>
+
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                                            <span>{t('advertisement.label', 'Advertisement')}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Headline */}
+                                    {headline && (
+                                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-[1.3] tracking-tight">
+                                            {headline}
+                                        </h2>
+                                    )}
+
+                                    {/* Description with Line-Clamp & Expand */}
+                                    {description && (
+                                        <div className="relative">
+                                            <div
+                                                className={`text-slate-600 text-sm sm:text-base leading-relaxed whitespace-pre-line font-medium transition-all duration-300 ${
+                                                    !isExpanded ? 'line-clamp-3 sm:line-clamp-4' : 'line-clamp-none'
+                                                }`}
+                                            >
+                                                {description}
+                                            </div>
+
+                                            {isLongDescription && (
+                                                <button
+                                                    onClick={() => setIsExpanded(!isExpanded)}
+                                                    className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-primary-600 hover:text-primary-700 hover:underline transition-all"
+                                                >
+                                                    <span>
+                                                        {isExpanded
+                                                            ? t('advertisement.readLess', 'Show Less')
+                                                            : t('advertisement.readMore', 'Read More')}
+                                                    </span>
+                                                    {isExpanded ? (
+                                                        <ChevronUp className="w-4 h-4" />
+                                                    ) : (
+                                                        <ChevronDown className="w-4 h-4" />
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Action Buttons */}
+                                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                                        {/* Primary CTA (if configured in API) */}
+                                        {ctaText && ctaUrl && (
+                                            <a
+                                                href={ctaUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base text-white bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/25 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                                            >
+                                                <span>{ctaText}</span>
+                                                <DirectionArrow className="w-4 h-4 sm:w-5 sm:h-5" />
+                                            </a>
+                                        )}
+
+                                        {/* Direct Platform Link if detected & no explicit CTA */}
+                                        {(!ctaText || !ctaUrl) && contactInfo.link && (
+                                            <a
+                                                href={contactInfo.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-bold text-sm sm:text-base text-white bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/25 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                                            >
+                                                <span>{t('advertisement.visitWebsite', 'Register on Platform')}</span>
+                                                <DirectionArrow className="w-4 h-4 sm:w-5 sm:h-5" />
+                                            </a>
+                                        )}
+
+                                        {/* WhatsApp Quick Action if number detected */}
+                                        {whatsappUrl && (
+                                            <a
+                                                href={whatsappUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm sm:text-base text-emerald-700 bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/80 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                                            >
+                                                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                                                <span>{t('advertisement.whatsappContact', 'Contact via WhatsApp')}</span>
+                                            </a>
+                                        )}
+
+                                        {/* View Full Poster Button */}
+                                        <button
+                                            onClick={() => setIsLightboxOpen(true)}
+                                            className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 transition-all duration-200"
+                                            title={t('advertisement.viewFullImage', 'View Full Poster')}
+                                        >
+                                            <Maximize2 className="w-4 h-4 text-slate-500" />
+                                            <span>{t('advertisement.viewFullImage', 'View Full Poster')}</span>
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                                {/* Media / Poster Column */}
+                                <div className="lg:col-span-5 flex justify-center">
+                                    <div
+                                        onClick={() => setIsLightboxOpen(true)}
+                                        className="relative w-full max-w-md lg:max-w-none rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-md group cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-primary-300"
+                                    >
+                                        {/* Background blur mirror for clean aspect ratio framing */}
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-20 scale-125"
+                                            style={{ backgroundImage: `url(${imageUrl})` }}
+                                        />
+
+                                        {/* Poster Image */}
+                                        <div className="relative z-10 w-full flex items-center justify-center p-2 sm:p-3">
+                                            <img
+                                                src={imageUrl}
+                                                alt={headline || 'Advertisement Poster'}
+                                                onError={() => setImageError(true)}
+                                                className="w-full max-h-[380px] sm:max-h-[440px] object-contain rounded-xl transition-transform duration-500 group-hover:scale-[1.02]"
+                                                loading="lazy"
+                                            />
+                                        </div>
+
+                                        {/* Floating Zoom Hint Pill */}
+                                        <div className="absolute bottom-3 end-3 z-20 opacity-90 group-hover:opacity-100 transition-opacity">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-900/75 hover:bg-slate-900 text-white backdrop-blur-md shadow-md transition-transform group-hover:scale-105">
+                                                <Maximize2 className="w-3.5 h-3.5" />
+                                                <span>{t('advertisement.zoomHint', 'Click to enlarge poster')}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        )}
+
+                        {/* Layout 2: Media Only Banner (No headline or description) */}
+                        {!hasTextContent && hasMedia && (
+                            <div className="p-4 sm:p-6 lg:p-8 flex flex-col items-center">
+                                <div
+                                    onClick={() => setIsLightboxOpen(true)}
+                                    className="relative w-full max-w-5xl rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-md group cursor-pointer"
+                                >
+                                    <img
+                                        src={imageUrl}
+                                        alt="Advertisement Banner"
+                                        onError={() => setImageError(true)}
+                                        className="w-full max-h-[500px] object-contain rounded-2xl transition-transform duration-500 group-hover:scale-[1.01]"
+                                        loading="lazy"
+                                    />
+                                    <div className="absolute bottom-4 end-4 z-20">
+                                        <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold bg-slate-900/75 text-white backdrop-blur-md shadow-lg">
+                                            <Maximize2 className="w-3.5 h-3.5" />
+                                            <span>{t('advertisement.zoomHint', 'Click to enlarge poster')}</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {(ctaText && ctaUrl) && (
+                                    <div className="pt-6">
+                                        <a
+                                            href={ctaUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/25 transition-all transform hover:-translate-y-0.5"
+                                        >
+                                            <span>{ctaText}</span>
+                                            <DirectionArrow className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Layout 3: Text Only Announcement (No image) */}
+                        {hasTextContent && !hasMedia && (
+                            <div className="p-6 sm:p-10 lg:p-12 max-w-4xl mx-auto space-y-6 text-center">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-primary-50 text-primary-700 border border-primary-200/70 shadow-sm mx-auto">
+                                    <Megaphone className="w-4 h-4 text-secondary-500 animate-pulse" />
+                                    <span>{t('advertisement.badge', 'Special Announcement')}</span>
+                                </div>
+
+                                {headline && (
+                                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-tight">
+                                        {headline}
+                                    </h2>
+                                )}
+
+                                {description && (
+                                    <p className="text-slate-600 text-base sm:text-lg leading-relaxed whitespace-pre-line max-w-2xl mx-auto">
+                                        {description}
+                                    </p>
+                                )}
+
+                                <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                                    {ctaText && ctaUrl && (
+                                        <a
+                                            href={ctaUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/25 transition-all transform hover:-translate-y-0.5"
+                                        >
+                                            <span>{ctaText}</span>
+                                            <DirectionArrow className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </a>
+                                    )}
+
+                                    {whatsappUrl && (
+                                        <a
+                                            href={whatsappUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 transition-all transform hover:-translate-y-0.5"
+                                        >
+                                            <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                                            <span>{t('advertisement.whatsappContact', 'Contact via WhatsApp')}</span>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+
+                {/* Lightbox Modal for Full Resolution Image */}
+                <AnimatePresence>
+                    {isLightboxOpen && imageUrl && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            onClick={() => setIsLightboxOpen(false)}
+                            className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+                        >
+                            <div
+                                onClick={(e) => e.stopPropagation()}
+                                className="relative max-w-4xl max-h-[92vh] flex flex-col items-center"
+                            >
+                                {/* Close button */}
+                                <button
+                                    onClick={() => setIsLightboxOpen(false)}
+                                    className="absolute -top-12 end-0 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors"
+                                    aria-label={t('advertisement.close', 'Close')}
+                                    title={t('advertisement.close', 'Close')}
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+
+                                {/* Full Image */}
+                                <motion.img
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.9, opacity: 0 }}
+                                    transition={{ duration: 0.25 }}
+                                    src={imageUrl}
+                                    alt={headline || 'Advertisement Full Size'}
+                                    className="max-h-[82vh] max-w-[92vw] w-auto h-auto object-contain rounded-2xl shadow-2xl border border-white/10"
+                                />
+
+                                {headline && (
+                                    <p className="mt-3 text-center text-sm sm:text-base font-bold text-white/90 drop-shadow max-w-2xl px-4">
+                                        {headline}
+                                    </p>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+            </motion.section>
+        </AnimatePresence>
+    );
+};
+
+export default AdvertisementSection;
