@@ -122,129 +122,162 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen w-full flex bg-[#f8fafc] font-arabic overflow-x-hidden relative" dir={isRtl ? 'rtl' : 'ltr'}>
-            {/* Background Decorative Accent */}
-            <div className="absolute bottom-0 end-0 w-36 sm:w-52 h-36 sm:h-52 pointer-events-none z-0">
+        <div className="min-h-screen w-full flex bg-[#f8fafc] font-arabic overflow-x-hidden relative selection:bg-blue-500 selection:text-white" dir={isRtl ? 'rtl' : 'ltr'}>
+            {/* Ambient Background Glows */}
+            <div className="absolute top-0 end-0 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-3xl pointer-events-none -z-0" />
+            <div className="absolute bottom-0 start-0 w-[500px] h-[500px] bg-indigo-400/10 rounded-full blur-3xl pointer-events-none -z-0" />
+            
+            {/* Decorative Corner Geometric Accent */}
+            <div className="absolute bottom-0 end-0 w-44 sm:w-64 h-44 sm:h-64 pointer-events-none z-0 opacity-80">
                 <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-                    <path d="M200,50 C120,50 50,120 50,200 L200,200 Z" fill="#ef4444" opacity="0.8" />
-                    <path d="M200,100 C150,100 100,150 100,200 L200,200 Z" fill="#2563eb" />
+                    <path d="M200,40 C110,40 40,110 40,200 L200,200 Z" fill="#ef4444" opacity="0.85" />
+                    <path d="M200,90 C140,90 90,140 90,200 L200,200 Z" fill="#2563eb" />
                 </svg>
             </div>
 
-            {/* Left Hero Section (Design Banner) - Visible on lg screens */}
-            <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/40 relative flex-col justify-between p-6 xl:p-8 overflow-hidden border-e border-slate-200/70">
-                {/* Background dot pattern */}
-                <div className="absolute top-0 start-0 w-full h-full opacity-10 pointer-events-none bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
+            {/* Left Hero Section (Brand & Highlights) - Visible on lg screens */}
+            <div className="hidden lg:flex lg:w-[46%] xl:w-[44%] bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative flex-col justify-between p-8 xl:p-12 overflow-hidden border-e border-slate-800 shadow-2xl">
+                {/* Background Patterns & Glows */}
+                <div className="absolute -top-32 -start-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-32 -end-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute inset-0 opacity-[0.07] pointer-events-none bg-[radial-gradient(#60a5fa_1.5px,transparent_1.5px)] [background-size:24px_24px]" />
 
                 {/* Top Brand Header */}
                 <div className="relative z-10 flex items-center justify-between">
-                    <Link to="/" className="bg-white px-3.5 py-1.5 rounded-xl shadow-xs border border-slate-200/80 flex items-center gap-2 hover:bg-slate-50 transition-colors">
-                        <img src="/assets/logo.png" alt="AEC Logo" className="h-8 object-contain" />
+                    <Link to="/" className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15 flex items-center gap-3 hover:bg-white/15 transition-all shadow-lg hover:scale-105 duration-200">
+                        <img src="/assets/logo.png" alt="AEC Logo" className="h-10 w-auto object-contain brightness-0 invert" />
                     </Link>
-                    <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold">
+                    <div className="px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold tracking-wide flex items-center gap-2 shadow-inner">
+                        <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
                         {t('auth.login.portalBadge', 'بوابة تسجيل الدخول')}
                     </div>
                 </div>
 
                 {/* Middle Content Section */}
-                <div className="relative z-10 my-auto py-4 max-w-md mx-auto w-full">
-                    <h2 className="text-2xl xl:text-3xl font-black text-slate-900 leading-snug mb-2">
+                <div className="relative z-10 my-auto py-6 max-w-lg mx-auto w-full">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-blue-200 text-xs font-semibold mb-4">
+                        <GraduationCap className="w-4 h-4 text-blue-400" />
+                        <span>{t('auth.login.smartLearning', 'منصة التدريب والتعليم الرائدة')}</span>
+                    </div>
+
+                    <h2 className="text-3xl xl:text-4xl font-black text-white leading-tight mb-4 tracking-tight">
                         {t('auth.login.academyAec', 'مع أكاديمية AEC')} <br />
-                        <span className="text-blue-600">{t('auth.login.learnEasier', 'تتعلم بطريقة أسهل وأكثر فعالية')}</span>
+                        <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent">
+                            {t('auth.login.learnEasier', 'تتعلم بطريقة أسهل وأكثر فعالية')}
+                        </span>
                     </h2>
-                    <p className="text-slate-600 text-xs xl:text-sm mb-5 leading-relaxed">
-                        {t('auth.login.platformDesc', 'منصة تدريبية متكاملة لتطوير مهاراتك في كافة المجالات والمسارات المهنية المعتمدة.')}
+                    
+                    <p className="text-slate-300 text-sm xl:text-base mb-8 leading-relaxed">
+                        {t('auth.login.platformDesc', 'منصة تدريبية متكاملة لتطوير مهاراتك في كافة المجالات والمسارات المهنية المعتمدة مع نخبة من أفضل المدربين.')}
                     </p>
 
                     {/* Academy Building Card */}
-                    <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-md bg-white mb-5">
+                    <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-slate-800/80 mb-7 group">
                         <img 
                             src="/assets/aec-building.jpg" 
                             alt="AEC Campus" 
-                            className="w-full h-36 object-cover object-center"
+                            className="w-full h-44 xl:h-48 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-xl shadow-md border border-white/60">
-                            <img src="/assets/logo.png" alt="AEC" className="h-6 object-contain" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-transparent" />
+                        <div className="absolute bottom-3 start-4 end-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-white/60">
+                                    <img src="/assets/logo.png" alt="AEC" className="h-6 object-contain" />
+                                </div>
+                                <span className="text-white text-xs font-bold drop-shadow">{t('auth.login.campusMain', 'AEC Campus • المقر الرئيسي')}</span>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/80 text-white text-[11px] font-bold backdrop-blur-xs">
+                                {t('auth.login.accreditedBadge', 'معتمد دولياً')}
+                            </span>
                         </div>
                     </div>
 
                     {/* 4 Feature Badges Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <div className="flex flex-col items-center text-center p-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/70 shadow-xs">
-                            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-1.5">
-                                <Globe className="w-4 h-4" />
+                    <div className="grid grid-cols-2 gap-3.5">
+                        <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 transition-colors">
+                            <div className="w-11 h-11 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center justify-center shrink-0">
+                                <Globe className="w-5 h-5" />
                             </div>
-                            <h4 className="font-bold text-[11px] text-slate-800 mb-0.5">{t('auth.login.featureFlexibleLearn', 'تعلم مرن')}</h4>
-                            <p className="text-[9px] text-slate-500 leading-tight">{t('auth.login.featureFlexibleLearnDesc', 'من أي مكان')}</p>
+                            <div className="text-start">
+                                <h4 className="font-bold text-xs xl:text-sm text-white">{t('auth.login.featureFlexibleLearn', 'تعلم مرن')}</h4>
+                                <p className="text-[11px] text-slate-300">{t('auth.login.featureFlexibleLearnDesc', 'من أي مكان وفي أي وقت')}</p>
+                            </div>
                         </div>
 
-                        <div className="flex flex-col items-center text-center p-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/70 shadow-xs">
-                            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-1.5">
-                                <TrendingUp className="w-4 h-4" />
+                        <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 transition-colors">
+                            <div className="w-11 h-11 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center shrink-0">
+                                <TrendingUp className="w-5 h-5" />
                             </div>
-                            <h4 className="font-bold text-[11px] text-slate-800 mb-0.5">{t('auth.login.featureTrackLevel', 'تتبع مستواك')}</h4>
-                            <p className="text-[9px] text-slate-500 leading-tight">{t('auth.login.featureTrackLevelDesc', 'بتقييم متطور')}</p>
+                            <div className="text-start">
+                                <h4 className="font-bold text-xs xl:text-sm text-white">{t('auth.login.featureTrackLevel', 'تتبع مستواك')}</h4>
+                                <p className="text-[11px] text-slate-300">{t('auth.login.featureTrackLevelDesc', 'بتقييم وتدريب متطور')}</p>
+                            </div>
                         </div>
 
-                        <div className="flex flex-col items-center text-center p-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/70 shadow-xs">
-                            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-1.5">
-                                <BookOpen className="w-4 h-4" />
+                        <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 transition-colors">
+                            <div className="w-11 h-11 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center shrink-0">
+                                <BookOpen className="w-5 h-5" />
                             </div>
-                            <h4 className="font-bold text-[11px] text-slate-800 mb-0.5">{t('auth.login.featureAccredited', 'مناهج معتمدة')}</h4>
-                            <p className="text-[9px] text-slate-500 leading-tight">{t('auth.login.featureAccreditedDesc', 'بأحدث الأساليب')}</p>
+                            <div className="text-start">
+                                <h4 className="font-bold text-xs xl:text-sm text-white">{t('auth.login.featureAccredited', 'مناهج معتمدة')}</h4>
+                                <p className="text-[11px] text-slate-300">{t('auth.login.featureAccreditedDesc', 'بأحدث المعايير المهنية')}</p>
+                            </div>
                         </div>
 
-                        <div className="flex flex-col items-center text-center p-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/70 shadow-xs">
-                            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-1.5">
-                                <GraduationCap className="w-4 h-4" />
+                        <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 transition-colors">
+                            <div className="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center justify-center shrink-0">
+                                <GraduationCap className="w-5 h-5" />
                             </div>
-                            <h4 className="font-bold text-[11px] text-slate-800 mb-0.5">{t('auth.login.featureExpertTutors', 'مدربون خبراء')}</h4>
-                            <p className="text-[9px] text-slate-500 leading-tight">{t('auth.login.featureExpertTutorsDesc', 'دعم مستمر')}</p>
+                            <div className="text-start">
+                                <h4 className="font-bold text-xs xl:text-sm text-white">{t('auth.login.featureExpertTutors', 'مدربون خبراء')}</h4>
+                                <p className="text-[11px] text-slate-300">{t('auth.login.featureExpertTutorsDesc', 'دعم ومتابعة مستمرة')}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer Tagline */}
-                <div className="relative z-10 pt-3 border-t border-slate-200/70 text-start font-sans text-xs text-slate-500 font-medium">
-                    Master Skills &bull; <span className="text-blue-600 font-bold">Build Your Future</span>
+                <div className="relative z-10 pt-4 border-t border-white/10 text-start flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <span>American English Center &copy; {new Date().getFullYear()}</span>
+                    <span className="text-blue-300 font-bold tracking-wider">Build Your Future</span>
                 </div>
             </div>
 
             {/* Right Form Container */}
-            <div className="w-full lg:w-[55%] xl:w-[58%] min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
-                {/* White Card Container */}
-                <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgba(15,82,186,0.06)] border border-slate-100 my-auto animate-in fade-in duration-200">
+            <div className="w-full lg:w-[54%] xl:w-[56%] min-h-screen flex items-center justify-center p-4 sm:p-8 lg:p-12 relative z-10">
+                {/* Card Container */}
+                <div className="w-full max-w-[520px] xl:max-w-[560px] bg-white rounded-3xl p-6 sm:p-10 xl:p-12 shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-slate-100 my-auto transition-all">
                     
                     {/* Centered Logo */}
-                    <div className="flex justify-center mb-3">
-                        <Link to="/" className="hover:opacity-80 transition-opacity" title="العودة للرئيسية">
-                            <img src="/assets/logo.png" alt="AEC American English Center" className="h-10 sm:h-11 object-contain" />
+                    <div className="flex justify-center mb-6">
+                        <Link to="/" className="hover:scale-105 transition-transform duration-200" title="العودة للرئيسية">
+                            <img src="/assets/logo.png" alt="AEC American English Center" className="h-12 sm:h-14 object-contain" />
                         </Link>
                     </div>
 
                     {/* Title & Subtitle */}
-                    <div className="text-center mb-5">
-                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 mb-1">
+                    <div className="text-center mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2 tracking-tight">
                             {step === 'login' ? t('auth.login.welcomeAec', 'مرحباً بك مجدداً') : t('auth.login.twoFactorAdmin', 'التحقق الثنائي')}
                         </h1>
-                        <p className="text-slate-500 text-xs leading-relaxed max-w-xs mx-auto">
+                        <p className="text-slate-500 text-sm sm:text-base leading-relaxed max-w-sm mx-auto">
                             {step === 'login' 
-                                ? t('auth.login.loginSubtitle', 'أدخل بيانات حسابك للمتابعة إلى لوحة التحكم') 
+                                ? t('auth.login.loginSubtitle', 'أدخل بيانات حسابك للمتابعة والوصول إلى لوحة التحكم') 
                                 : t('auth.login.enterOtp', 'يرجى إدخال رمز التحقق المرسل إلى بريدك الإلكتروني.')}
                         </p>
                     </div>
 
                     {/* Form Component */}
                     {step === 'login' ? (
-                        <form onSubmit={handleSubmit} className="space-y-3.5">
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Email Field */}
-                            <div className="space-y-1">
-                                <label htmlFor="email" className="block text-[11px] font-bold text-slate-700 text-start">
-                                    {t('auth.login.email')}
+                            <div className="space-y-2">
+                                <label htmlFor="email" className="block text-xs sm:text-sm font-bold text-slate-700 text-start">
+                                    {t('auth.login.email', 'البريد الإلكتروني')}
                                 </label>
                                 <div className="relative flex items-center">
-                                    <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                        <Mail className="w-3.5 h-3.5" />
+                                    <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400">
+                                        <Mail className="w-5 h-5" />
                                     </div>
                                     <input
                                         id="email"
@@ -253,7 +286,7 @@ const Login = () => {
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full ps-9 pe-3 py-2 bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 text-xs font-medium transition-all"
+                                        className="w-full ps-11 pe-4 py-3.5 sm:py-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-500/15 text-sm sm:text-base font-medium transition-all shadow-2xs"
                                         placeholder={t('auth.login.emailPlaceholder', 'you@example.com')}
                                         dir="ltr"
                                     />
@@ -261,13 +294,13 @@ const Login = () => {
                             </div>
 
                             {/* Password Field */}
-                            <div className="space-y-1">
-                                <label htmlFor="password" className="block text-[11px] font-bold text-slate-700 text-start">
-                                    {t('auth.login.password')}
+                            <div className="space-y-2">
+                                <label htmlFor="password" className="block text-xs sm:text-sm font-bold text-slate-700 text-start">
+                                    {t('auth.login.password', 'كلمة المرور')}
                                 </label>
                                 <div className="relative flex items-center">
-                                    <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-slate-400">
-                                        <Lock className="w-3.5 h-3.5" />
+                                    <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400">
+                                        <Lock className="w-5 h-5" />
                                     </div>
                                     <input
                                         id="password"
@@ -276,37 +309,40 @@ const Login = () => {
                                         required
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="w-full ps-9 pe-9 py-2 bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 text-xs font-medium transition-all"
-                                        placeholder={t('auth.login.passwordPlaceholder', 'كلمة المرور')}
+                                        className="w-full ps-11 pe-12 py-3.5 sm:py-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-500/15 text-sm sm:text-base font-medium transition-all shadow-2xs"
+                                        placeholder={t('auth.login.passwordPlaceholder', '••••••••')}
                                     />
                                     <button
                                         type="button"
-                                        className="absolute inset-y-0 end-0 pe-2.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                                        className="absolute inset-y-0 end-0 pe-4 flex items-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                                         onClick={() => setShowPassword(!showPassword)}
                                         tabIndex={-1}
+                                        title={showPassword ? t('auth.login.hidePassword', 'إخفاء كلمة المرور') : t('auth.login.showPassword', 'إظهار كلمة المرور')}
                                     >
-                                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
                             </div>
 
                             {/* Remember Me & Forgot Password Row */}
-                            <div className="flex items-center justify-between text-xs pt-0.5">
-                                <label htmlFor="remember-me" className="flex items-center gap-1.5 cursor-pointer select-none">
+                            <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
+                                <label htmlFor="remember-me" className="flex items-center gap-2 cursor-pointer select-none group">
                                     <input
                                         id="remember-me"
                                         name="remember-me"
                                         type="checkbox"
-                                        className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer accent-blue-600"
+                                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer accent-blue-600 transition-all"
                                     />
-                                    <span className="text-[11px] text-slate-600 font-medium">{t('auth.login.rememberMe')}</span>
+                                    <span className="text-slate-600 font-medium group-hover:text-slate-800 transition-colors">
+                                        {t('auth.login.rememberMe', 'تذكرني')}
+                                    </span>
                                 </label>
 
                                 <Link 
                                     to="/forgot-password" 
-                                    className="text-[11px] text-blue-600 hover:text-blue-700 font-bold transition-colors"
+                                    className="text-blue-600 hover:text-blue-700 font-bold transition-colors hover:underline"
                                 >
-                                    {t('auth.login.forgotPassword')}
+                                    {t('auth.login.forgotPassword', 'نسيت كلمة المرور؟')}
                                 </Link>
                             </div>
 
@@ -314,32 +350,32 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed text-xs sm:text-sm group mt-2"
+                                className="w-full py-3.5 sm:py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 text-white font-bold rounded-2xl shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/35 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base group mt-3 cursor-pointer"
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        <span>{t('auth.login.submitting')}</span>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span>{t('auth.login.submitting', 'جاري تسجيل الدخول...')}</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span>{t('auth.login.submit')}</span>
+                                        <span>{t('auth.login.submit', 'تسجيل الدخول')}</span>
                                         {isRtl ? (
-                                            <MoveLeft className="w-4 h-4 transform transition-transform group-hover:-translate-x-1" />
+                                            <MoveLeft className="w-5 h-5 transform transition-transform group-hover:-translate-x-1" />
                                         ) : (
-                                            <MoveRight className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
+                                            <MoveRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
                                         )}
                                     </>
                                 )}
                             </button>
                         </form>
                     ) : (
-                        <form onSubmit={handleVerifySubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <label htmlFor="verificationCode" className="block text-[11px] font-bold text-slate-700 text-center">
+                        <form onSubmit={handleVerifySubmit} className="space-y-6">
+                            <div className="space-y-3">
+                                <label htmlFor="verificationCode" className="block text-xs sm:text-sm font-bold text-slate-700 text-center">
                                     {t('auth.login.verificationCode', 'أدخل رمز التحقق (OTP)')}
                                 </label>
-                                <div className="flex justify-center gap-1.5 sm:gap-2 my-2" dir="ltr">
+                                <div className="flex justify-center gap-2 sm:gap-3 my-3" dir="ltr">
                                     {otp.map((digit, index) => (
                                         <input
                                             key={index}
@@ -349,7 +385,7 @@ const Login = () => {
                                             value={digit}
                                             onChange={(e) => handleOtpChange(index, e.target.value)}
                                             onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                                            className="w-9 h-11 sm:w-11 sm:h-12 bg-slate-50 border border-slate-200 rounded-lg text-center text-lg sm:text-xl font-bold text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 transition-all outline-none"
+                                            className="w-12 h-14 sm:w-14 sm:h-16 bg-slate-50 border-2 border-slate-200 rounded-2xl text-center text-xl sm:text-2xl font-black text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/15 transition-all outline-none shadow-2xs"
                                         />
                                     ))}
                                 </div>
@@ -358,17 +394,17 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed text-xs sm:text-sm group"
+                                className="w-full py-3.5 sm:py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-600/25 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed text-sm sm:text-base group cursor-pointer"
                             >
                                 {isLoading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
                                     <>
                                         <span>{t('auth.login.verifyAndLogin', 'تأكيد ودخول')}</span>
                                         {isRtl ? (
-                                            <MoveLeft className="w-4 h-4 transform transition-transform group-hover:-translate-x-1" />
+                                            <MoveLeft className="w-5 h-5 transform transition-transform group-hover:-translate-x-1" />
                                         ) : (
-                                            <MoveRight className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
+                                            <MoveRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
                                         )}
                                     </>
                                 )}
@@ -377,7 +413,7 @@ const Login = () => {
                             <button
                                 type="button"
                                 onClick={() => setStep('login')}
-                                className="w-full py-1 text-slate-500 hover:text-slate-700 text-xs font-semibold transition-colors"
+                                className="w-full py-2 text-slate-500 hover:text-slate-800 text-sm font-semibold transition-colors cursor-pointer"
                             >
                                 {t('auth.login.backToLogin', 'العودة لتسجيل الدخول')}
                             </button>
@@ -385,10 +421,10 @@ const Login = () => {
                     )}
 
                     {/* Create Account Link */}
-                    <div className="mt-4 text-center text-xs text-slate-500 border-t border-slate-100 pt-3">
-                        <span>{t('auth.login.noAccount')} </span>
-                        <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
-                            {t('auth.login.createAccount')}
+                    <div className="mt-8 text-center text-sm sm:text-base text-slate-600 border-t border-slate-150 pt-6">
+                        <span>{t('auth.login.noAccount', 'ليس لديك حساب؟')} </span>
+                        <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-bold transition-colors hover:underline ms-1">
+                            {t('auth.login.createAccount', 'إنشاء حساب جديد')}
                         </Link>
                     </div>
 

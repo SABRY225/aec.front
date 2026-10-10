@@ -76,14 +76,22 @@ const Category = () => {
 
             setCategory(categoryData);
 
-            // Fetch subcategories for this category ID
-            const subcategoriesResponse = await api.get(`/subcategories/category/${categoryData._id}`);
-            const subcategoriesData = subcategoriesResponse.data?.data || categoryData.subcategories || [];
-            setSubcategories(subcategoriesData);
+            // Show any immediately available populated data
+            if (categoryData.subcategories && categoryData.subcategories.length > 0) {
+                setSubcategories(categoryData.subcategories);
+            }
+            setLoading(false); // Display initial data immediately
+
+            // Background fetch subcategories to ensure we have the full and latest list
+            api.get(`/subcategories/category/${categoryData._id}`).then(subcategoriesResponse => {
+                const subcategoriesData = subcategoriesResponse.data?.data;
+                if (subcategoriesData && subcategoriesData.length > 0) {
+                    setSubcategories(subcategoriesData);
+                }
+            }).catch(err => console.error('Error in background subcategories fetch:', err));
         } catch (err) {
             console.error('Error fetching category data:', err);
             setError(t('categoryPage.loadFailed', 'تعذّر تحميل بيانات التصنيف'));
-        } finally {
             setLoading(false);
         }
     };
@@ -104,7 +112,6 @@ const Category = () => {
     // Filter and sort subcategories
     const filteredSubcategories = useMemo(() => {
         let list = [...subcategories];
-
         if (searchTerm.trim() !== '') {
             const term = searchTerm.toLowerCase().trim();
             list = list.filter((sub) => {
@@ -516,7 +523,8 @@ const Category = () => {
                                 const subName = getLocalizedName(subcategory);
                                 const subDesc = getLocalizedDescription(subcategory);
                                 const courseCount = Number(subcategory.courseCount) || 0;
-
+                                console.log(subcategory);
+                                
                                 return (
                                     <motion.div
                                         key={subcategory._id || index}

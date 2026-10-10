@@ -26,6 +26,7 @@ import {
     Receipt,
     Calendar
 } from 'lucide-react';
+import TamaraWidget from '../components/TamaraWidget';
 
 const Checkout = () => {
     const { t } = useTranslation();
@@ -84,14 +85,7 @@ const Checkout = () => {
             return;
         }
 
-        if (paymentMethod === 'tabby' || paymentMethod === 'tamara') {
-            toast.info(isRTL 
-                ? 'خدمة التقسيط عبر تابي وتمارا قيد التفعيل وستكون متاحة لجميع عملائنا الكرام خلال أيام قليلة. يرجى إتمام الدفع عبر البطاقة البنكية حالياً.' 
-                : 'Tabby and Tamara installment services are being finalized and will be available to all customers in a few days. Please use card payment for now.'
-            );
-            setPaymentMethod('paymob');
-            return;
-        }
+
 
         setIsProcessingPayment(true);
         
@@ -255,18 +249,23 @@ const Checkout = () => {
                             </div>
 
                             {/* Installments Notice Banner */}
-                            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3.5">
-                                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                                    <Clock className="w-5 h-5" />
+                            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-orange-50 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-orange-950/20 border border-emerald-200/80 dark:border-emerald-800/60 flex items-start gap-3.5">
+                                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                                    <Sparkles className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 text-xs">
-                                    <h4 className="font-bold text-amber-900 dark:text-amber-200 mb-0.5 text-xs sm:text-sm">
-                                        {isRTL ? 'تنويه هام: خدمات التقسيط (تابي وتمارا)' : 'Notice: Installment Services (Tabby & Tamara)'}
-                                    </h4>
-                                    <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
+                                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                                        <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                                            {isRTL ? 'جميع طرق الدفع والتقسيط عبر تابي (Tabby) وتمارا (Tamara) متاحة الآن!' : 'All Payment & Installment Options (Tabby & Tamara) are Now Live!'}
+                                        </h4>
+                                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                                            {isRTL ? '4 دفعات ميسرة' : '4 Easy Payments'}
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
                                         {isRTL 
-                                            ? 'خدمات التقسيط عبر تابي (Tabby) وتمارا (Tamara) ستكون متاحة لجميع عملائنا الكرام خلال أيام قليلة بإذن الله. يمكنك إتمام دفع مشترياتك بأمان حالياً عبر بطاقات مدى وفيزا وماستركارد (Paymob).' 
-                                            : 'Installment payment services via Tabby and Tamara will be available to all customers within a few days. You can currently complete your purchase securely via Mada, Visa, and Mastercard.'}
+                                            ? 'اختر الطريقة الأنسب لك: ادفع فورياً بالبطاقة البنكية (مدى/فيزا/ماستركارد)، أو قسّم مشترياتك على 4 دفعات شهرية ميسرة بدون أي فوائد أو رسوم إضافية عبر تابي أو تمارا.' 
+                                            : 'Choose what suits you best: pay immediately with card (Mada/Visa/Mastercard), or split into 4 interest-free monthly installments with 0 fees via Tabby or Tamara.'}
                                     </p>
                                 </div>
                             </div>
@@ -324,33 +323,36 @@ const Checkout = () => {
                                     </div>
                                 </label>
 
-                                {/* 2. Tabby (Installments - Suspended / Coming Soon) */}
-                                <div 
-                                    onClick={() => toast.info(isRTL ? 'خدمة التقسيط عبر تابي ستكون متاحة لجميع عملائنا الكرام خلال أيام قليلة. يرجى الدفع عبر البطاقة البنكية حالياً.' : 'Tabby installment service will be available within a few days. Please use card payment for now.')}
-                                    className="relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border-2 border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 opacity-80 cursor-not-allowed transition-all"
+                                {/* 2. Tabby (Installments - ACTIVE) */}
+                                <label 
+                                    className={`relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer ${
+                                        paymentMethod === 'tabby'
+                                            ? 'border-[#39E992] bg-emerald-50/20 dark:bg-emerald-950/20 shadow-md ring-2 ring-[#39E992]/20'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
+                                    }`}
                                 >
                                     <input 
                                         type="radio" 
                                         name="paymentMethod" 
-                                        value="tabby"
-                                        disabled
-                                        checked={false}
-                                        className="mt-1 w-4 h-4 text-slate-300 cursor-not-allowed"
+                                        value="tabby" 
+                                        checked={paymentMethod === 'tabby'}
+                                        onChange={() => setPaymentMethod('tabby')}
+                                        className="mt-1 w-4 h-4 text-emerald-600 focus:ring-[#39E992] cursor-pointer"
                                     />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-bold text-slate-700 dark:text-slate-300 text-base">
+                                                <span className="font-bold text-slate-900 dark:text-white text-base">
                                                     {t('checkout.tabbyTitle', 'تابي (Tabby)')}
                                                 </span>
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-                                                    <Clock className="w-3 h-3" />
-                                                    <span>{isRTL ? 'متاح خلال أيام' : 'Coming in a few days'}</span>
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                                                    <Sparkles className="w-3 h-3" />
+                                                    <span>{isRTL ? 'قسّم على 4 دفعات' : 'Split in 4'}</span>
                                                 </span>
                                             </div>
 
                                             {/* Tabby Logo Badge */}
-                                            <span className="px-2.5 py-1 rounded-md bg-[#292929] text-[#39E992] font-black text-xs tracking-wider shadow-xs opacity-75">
+                                            <span className="px-2.5 py-1 rounded-md bg-[#292929] text-[#39E992] font-black text-xs tracking-wider shadow-xs">
                                                 tabby
                                             </span>
                                         </div>
@@ -359,63 +361,84 @@ const Checkout = () => {
                                             {t('checkout.tabbyDesc', 'قسّم فاتورتك على 4 دفعات شهرية ميسرة بدون فوائد أو رسوم إضافية')}
                                         </p>
 
-                                        {/* Notice highlight */}
-                                        <div className="mt-3 p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/40 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300 font-medium">
-                                            <span>
-                                                {isRTL ? '⏳ قيد التفعيل: ستتاح الخدمة لعملائنا خلال أيام قليلة' : '⏳ Finalizing integration: available within a few days'}
-                                            </span>
-                                            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                                                0% {isRTL ? 'مرابحة' : 'Interest'}
+                                        {/* Installment breakdown highlight */}
+                                        <div className="mt-3 p-2.5 sm:p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/40 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                                                <span>{isRTL ? 'ادفع الدفعة الأولى اليوم والباقي شهرياً:' : 'Pay 1st payment today, rest monthly:'}</span>
+                                                <span className="text-emerald-600 dark:text-emerald-400 font-black text-sm">
+                                                    {installmentAmount} {isRTL ? 'ر.س' : 'SAR'}
+                                                </span>
+                                                <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+                                                    {isRTL ? '/ شهرياً' : '/ month'}
+                                                </span>
+                                            </div>
+                                            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-emerald-900/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-700/60">
+                                                {isRTL ? '0% فوائد • 0% رسوم' : '0% Interest • 0% Fees'}
                                             </span>
                                         </div>
                                     </div>
-                                </div>
+                                </label>
 
-                                {/* 3. Tamara (Installments - Suspended / Coming Soon) */}
-                                <div 
-                                    onClick={() => toast.info(isRTL ? 'خدمة التقسيط عبر تمارا ستكون متاحة لجميع عملائنا الكرام خلال أيام قليلة. يرجى الدفع عبر البطاقة البنكية حالياً.' : 'Tamara installment service will be available within a few days. Please use card payment for now.')}
-                                    className="relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border-2 border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 opacity-80 cursor-not-allowed transition-all"
+                                {/* 3. Tamara (Installments - ACTIVE) */}
+                                <label 
+                                    className={`relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer ${
+                                        paymentMethod === 'tamara'
+                                            ? 'border-[#FF5C39] bg-orange-50/25 dark:bg-orange-950/20 shadow-md ring-2 ring-[#FF5C39]/15'
+                                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
+                                    }`}
                                 >
                                     <input 
                                         type="radio" 
                                         name="paymentMethod" 
-                                        value="tamara"
-                                        disabled
-                                        checked={false}
-                                        className="mt-1 w-4 h-4 text-slate-300 cursor-not-allowed"
+                                        value="tamara" 
+                                        checked={paymentMethod === 'tamara'}
+                                        onChange={() => setPaymentMethod('tamara')}
+                                        className="mt-1 w-4 h-4 text-[#FF5C39] focus:ring-[#FF5C39] cursor-pointer"
                                     />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-bold text-slate-700 dark:text-slate-300 text-base">
+                                                <span className="font-bold text-slate-900 dark:text-white text-base">
                                                     {t('checkout.tamaraTitle', 'تمارا (Tamara)')}
                                                 </span>
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-                                                    <Clock className="w-3 h-3" />
-                                                    <span>{isRTL ? 'متاح خلال أيام' : 'Coming in a few days'}</span>
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-orange-100 dark:bg-orange-950/80 text-[#FF5C39]">
+                                                    <Sparkles className="w-3 h-3" />
+                                                    <span>{isRTL ? 'قسّم على 4 دفعات' : 'Split in 4'}</span>
                                                 </span>
                                             </div>
 
-                                            <span className="px-2.5 py-1 rounded-md bg-gradient-to-r from-[#FF5C39] to-[#FF8C38] text-white font-extrabold text-xs tracking-wider shadow-xs opacity-75">
+                                            {/* Tamara Logo Badge */}
+                                            <span className="px-2.5 py-1 rounded-md bg-gradient-to-r from-[#FF5C39] to-[#FF8C38] text-white font-extrabold text-xs tracking-wider shadow-xs">
                                                 tamara
                                             </span>
                                         </div>
 
                                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                            {t('checkout.tamaraDesc', 'قسّم مشترياتك على 4 دفعات بدون أي رسوم تأخير متوافقة مع الشريعة')}
+                                            {t('checkout.tamaraDesc', 'قسّم مشترياتك على 4 دفعات شهرية ميسرة بدون أي فوائد أو رسوم تأخير')}
                                         </p>
 
-                                        {/* Notice highlight */}
-                                        <div className="mt-3 p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/40 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300 font-medium">
-                                            <span>
-                                                {isRTL ? '⏳ قيد التفعيل: ستتاح الخدمة لعملائنا خلال أيام قليلة' : '⏳ Finalizing integration: available within a few days'}
-                                            </span>
-                                            <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400">
-                                                {isRTL ? 'متوافق مع الشريعة' : 'Sharia Approved'}
+                                        {/* Installment breakdown highlight */}
+                                        <div className="mt-3 p-2.5 sm:p-3 rounded-xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/70 dark:border-orange-800/40 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                                                <span>{isRTL ? 'ادفع الدفعة الأولى اليوم والباقي شهرياً:' : 'Pay 1st payment today, rest monthly:'}</span>
+                                                <span className="text-[#FF5C39] font-black text-sm">
+                                                    {installmentAmount} {isRTL ? 'ر.س' : 'SAR'}
+                                                </span>
+                                                <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+                                                    {isRTL ? '/ شهرياً' : '/ month'}
+                                                </span>
+                                            </div>
+                                            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-200/50 dark:border-emerald-800/50">
+                                                {isRTL ? '✓ متوافق مع الشريعة' : '✓ Sharia Approved'}
                                             </span>
                                         </div>
+
+                                        {/* Tamara Official Live Widget */}
+                                        <div className="mt-2.5">
+                                            <TamaraWidget price={totalWithTax} inlineType="2" />
+                                        </div>
                                     </div>
-                                </div>
+                                </label>
                             </div>
                         </div>
 
@@ -561,14 +584,15 @@ const Checkout = () => {
                                             </span>
                                         </div>
 
-                                        <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium pt-1.5 border-t border-primary-200/50 dark:border-primary-800/50 flex items-center gap-1.5">
-                                            <Clock className="w-3.5 h-3.5 shrink-0" />
-                                            <span>
-                                                {isRTL 
-                                                    ? 'خدمة التقسيط على 4 دفعات عبر (تابي وتمارا) ستتاح لعملائنا الكرام خلال أيام قليلة' 
-                                                    : '4-installment payment service (Tabby & Tamara) will be available within a few days'}
+                                        <div className="pt-2 border-t border-primary-200/50 dark:border-primary-800/50 flex flex-wrap items-center justify-between gap-1 text-xs">
+                                            <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                                                <Sparkles className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+                                                <span>{isRTL ? 'أو بالتقسيط عبر (تابي / تمارا):' : 'Or installments via (Tabby / Tamara):'}</span>
                                             </span>
-                                        </p>
+                                            <span className="font-extrabold text-primary-700 dark:text-primary-300">
+                                                4 × {installmentAmount} {isRTL ? 'ر.س / شهر' : 'SAR / mo'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -634,10 +658,14 @@ const Checkout = () => {
                                 <button
                                     onClick={handleCheckout}
                                     disabled={isProcessingPayment || cartItems.length === 0}
-                                    className={`w-full py-4 rounded-2xl font-extrabold text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-primary-500/25 ${
+                                    className={`w-full py-4 rounded-2xl font-extrabold text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-lg ${
                                         isProcessingPayment || cartItems.length === 0 
                                             ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none' 
-                                            : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white hover:scale-[1.01] active:scale-[0.99]'
+                                            : paymentMethod === 'tamara'
+                                            ? 'bg-gradient-to-r from-[#FF5C39] to-[#FF8C38] hover:from-[#e54e2d] hover:to-[#ea7d29] text-white shadow-orange-500/25 hover:scale-[1.01] active:scale-[0.99]'
+                                            : paymentMethod === 'tabby'
+                                            ? 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-emerald-500/25 hover:scale-[1.01] active:scale-[0.99]'
+                                            : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white shadow-primary-500/25 hover:scale-[1.01] active:scale-[0.99]'
                                     }`}
                                 >
                                     {isProcessingPayment ? (

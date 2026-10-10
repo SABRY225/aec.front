@@ -6,8 +6,7 @@ var vite_config_default = defineConfig({
   server: {
     proxy: {
       "/api": {
-        // target: 'https://server.aectraining.com.sa/',
-        target: "http://localhost:5002",
+        target: env.BACKURL || env.VITE_BACKURL || 'http://localhost:5002',
         changeOrigin: true,
         secure: false
       }

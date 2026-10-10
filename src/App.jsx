@@ -87,9 +87,13 @@ import Checkout from './pages/Checkout';
 import TabbySuccess from './pages/TabbySuccess';
 import TabbyCancel from './pages/TabbyCancel';
 import TabbyFailure from './pages/TabbyFailure';
+import TamaraSuccess from './pages/TamaraSuccess';
+import TamaraCancel from './pages/TamaraCancel';
+import TamaraFailure from './pages/TamaraFailure';
 import DocumentTitle from './components/DocumentTitle';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/layouts/ProtectedRoute';
+import InstructorProfile from './pages/InstructorProfile';
 
 
 const RouteTracker = () => {
@@ -141,6 +145,9 @@ const App = () => {
                           <Route path="/tabby/success" element={<TabbySuccess />} />
                           <Route path="/tabby/cancel" element={<TabbyCancel />} />
                           <Route path="/tabby/failure" element={<TabbyFailure />} />
+                          <Route path="/tamara/success" element={<TamaraSuccess />} />
+                          <Route path="/tamara/cancel" element={<TamaraCancel />} />
+                          <Route path="/tamara/failure" element={<TamaraFailure />} />
                           <Route path="/loading" element={<LoadingNew />} />
                           <Route path="/categories" element={<Categories />} />
                           <Route path="/category/:slug" element={<Category />} />
@@ -152,7 +159,7 @@ const App = () => {
                           <Route path="/terms" element={<Terms />} />
                           <Route path="/privacy" element={<Privacy />} />
                           <Route path="/course/:id" element={<CoursePreview />} />
-                          <Route path="/become-tutor" element={<BecomeATutor />} />
+                          <Route path="/profile/:id" element={<InstructorProfile />} />
                         </Routes>
                       </main>
                       <Footer />
@@ -239,7 +246,7 @@ const App = () => {
                         <Route path="my-courses" element={<MyInstructorCourses />} />
                         <Route path="courses-create" element={<CreateCourse />} />
                         <Route path="courses/:id/edit" element={<EditCourse />} />
-                        <Route path="courses/:id/analytics" element={<TranslatedComingSoon titleKey="instructor.comingSoon.analytics.title" messageKey="instructor.comingSoon.analytics.message" />} />
+                        {/* <Route path="courses/:id/analytics" element={<TranslatedComingSoon titleKey="instructor.comingSoon.analytics.title" messageKey="instructor.comingSoon.analytics.message" />} /> */}
                         <Route path="account-settings" element={<InstructorAccountSettings />} />
                         <Route path="profile-settings" element={<InstructorProfileSettings />} />
                         <Route path="settings" element={<InstructorAccountSettings />} />
@@ -257,3 +264,4 @@ const App = () => {
 };
 
 export default App;
+

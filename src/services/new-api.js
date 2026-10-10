@@ -1,7 +1,6 @@
 import axios from 'axios';
 // Cache bust: 1
-// const BASE_URL = 'https://server.aectraining.com.sa/api';
-const BASE_URL = 'http://localhost:5002/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Create axios instance with default config
 const api = axios.create({
@@ -210,6 +209,17 @@ export const userService = {
     
     getProfile: async () => {
         const response = await api.get('/user/profile');
+        return response.data;
+    },
+
+    getInstructorPublicProfile: async (id, params = {}) => {
+        const response = await api.get(`/user/instructor/${id}`, { params });
+        return response.data;
+    },
+
+
+    addInstructorReview: async (id, reviewData) => {
+        const response = await api.post(`/user/instructor/${id}/reviews`, reviewData);
         return response.data;
     },
 
@@ -771,14 +781,24 @@ export const enrollmentService = {
 };
 
 // Dashboard services
+let _instructorDashboardCache = null;
+let _instructorDashboardCacheTime = 0;
+const DASHBOARD_CACHE_TTL = 30 * 1000; // 30 seconds
+
 export const dashboardService = {
     getStudentDashboard: async (params = {}) => {
         const response = await api.get('/student/dashboard', { params });
         return response.data;
     },
 
-    getInstructorDashboard: async () => {
+    getInstructorDashboard: async (forceRefresh = false) => {
+        const now = Date.now();
+        if (!forceRefresh && _instructorDashboardCache && (now - _instructorDashboardCacheTime < DASHBOARD_CACHE_TTL)) {
+            return _instructorDashboardCache;
+        }
         const response = await api.get('/instructor/dashboard');
+        _instructorDashboardCache = response.data;
+        _instructorDashboardCacheTime = now;
         return response.data;
     }
 };
@@ -1015,6 +1035,21 @@ export const adminService = {
     deleteStaff: async (staffId) => {
         const response = await api.delete(`/admin/staff/${staffId}`);
         return response.data;
+    },
+
+    toggleInstructorVerification: async (instructorId) => {
+        const response = await api.patch(`/admin/instructors/${instructorId}/verification`);
+        return response.data;
+    },
+
+    updateInstructor: async (instructorId, instructorData) => {
+        const response = await api.put(`/admin/instructors/${instructorId}`, instructorData);
+        return response.data;
+    },
+
+    deleteInstructor: async (instructorId) => {
+        const response = await api.delete(`/admin/instructors/${instructorId}`);
+        return response.data;
     }
 };
 
@@ -1029,6 +1064,8 @@ export const paymentService = {
         let endpoint = '/payment/create-checkout-session';
         if (paymentMethod === 'tabby') {
             endpoint = '/payment/create-tabby-checkout-session';
+        } else if (paymentMethod === 'tamara') {
+            endpoint = '/payment/create-tamara-checkout-session';
         }
         
         const response = await api.post(endpoint, payload);
@@ -1042,6 +1079,11 @@ export const paymentService = {
     
     verifyTabbyPayment: async (paymentId) => {
         const response = await api.get(`/payment/verify-tabby/${paymentId}`);
+        return response.data;
+    },
+
+    verifyTamaraPayment: async (orderId) => {
+        const response = await api.get(`/payment/verify-tamara/${orderId}`);
         return response.data;
     }
 };
@@ -1153,17 +1195,34 @@ export const couponService = {
     },
 };
 
-// Category and Subcategory Services
+// Category and Subcategory Services with in-memory caching
+let _categoriesCache = null;
+let _categoriesCacheTime = 0;
+const _subcategoriesCache = new Map();
+const CATEGORY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export const categoryService = {
-    // Get all categories with subcategories
-    getCategories: async () => {
+    // Get all categories with subcategories (cached)
+    getCategories: async (forceRefresh = false) => {
+        const now = Date.now();
+        if (!forceRefresh && _categoriesCache && (now - _categoriesCacheTime < CATEGORY_CACHE_TTL)) {
+            return _categoriesCache;
+        }
         const response = await api.get('/categories');
+        _categoriesCache = response.data;
+        _categoriesCacheTime = now;
         return response.data;
     },
 
-    // Get subcategories for a specific category
-    getSubcategories: async (categoryId) => {
+    // Get subcategories for a specific category (cached)
+    getSubcategories: async (categoryId, forceRefresh = false) => {
+        const now = Date.now();
+        const cached = _subcategoriesCache.get(categoryId);
+        if (!forceRefresh && cached && (now - cached.time < CATEGORY_CACHE_TTL)) {
+            return cached.data;
+        }
         const response = await api.get(`/subcategories/category/${categoryId}`);
+        _subcategoriesCache.set(categoryId, { data: response.data, time: now });
         return response.data;
     },
 

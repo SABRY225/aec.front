@@ -328,8 +328,6 @@ const CreateCourse = () => {
                         originalPrice: courseData.originalPrice || null
                     });
                     toast.success(t('instructor.courseCreation.basicUpdated'));
-                    // Fetch updated course data
-                    await fetchCourseData(courseId);
                 }
             } else if (activeStep === 1 && courseId) {
                 // Update course with advanced info
@@ -339,8 +337,6 @@ const CreateCourse = () => {
                     whatYouWillLearn: courseData.whatYouWillLearn
                 });
                 toast.success(t('instructor.courseCreation.advancedSaved'));
-                // Fetch updated course data
-                await fetchCourseData(courseId);
             } else if (activeStep === 2 && courseId) {
                 // Curriculum step is optional - no validation required
                 // Update course sections
@@ -348,14 +344,12 @@ const CreateCourse = () => {
                     sections: courseData.sections
                 });
                 toast.success(t('instructor.courseCreation.curriculumSaved'));
-                await fetchCourseData(courseId);
             } else if (activeStep === 3 && courseId) {
                 // Save additional files (optional - no validation needed)
                 await instructorService.updateCourseAdditionalFiles(courseId, {
                     additionalFiles: courseData.additionalFiles || []
                 });
                 toast.success(t('instructor.courseCreation.filesSaved'));
-                await fetchCourseData(courseId);
             } else if (activeStep === 4 && courseId) {
                 // Submit course for review
                 await instructorService.submitCourseForReview(courseId);
@@ -364,9 +358,14 @@ const CreateCourse = () => {
                 return; // Don't proceed to next step after submission
             }
 
-            // Move to next step (only if not at the last step)
+            // Move to next step immediately
             if (activeStep < steps.length - 1) {
                 setActiveStep(prev => prev + 1);
+            }
+
+            // Refresh data in background without blocking UI
+            if (courseId) {
+                fetchCourseData(courseId).catch(console.error);
             }
         } catch (error) {
             console.error('Error saving course data:', error);
@@ -395,14 +394,13 @@ const CreateCourse = () => {
             // Save current step data before navigating away
             await saveBeforeNavigation();
 
-            // If we have a courseId, refresh data from backend before changing step
-            // This ensures we always display the latest saved data
-            if (courseId) {
-                await fetchCourseData(courseId);
-            }
-
-            // Then change the step
+            // Advance step immediately!
             setActiveStep(prev => prev - 1);
+
+            // Refresh data in background without blocking navigation
+            if (courseId) {
+                fetchCourseData(courseId).catch(console.error);
+            }
         } catch (error) {
             console.error('Error refreshing data on step back:', error);
             toast.error(t('instructor.courseCreation.loadFailed'));

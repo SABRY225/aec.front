@@ -72,10 +72,25 @@ const Subcategory = () => {
 
             setSubcategory(subcategoryData);
             setCourses(subcategoryData.courses || []);
+            setLoading(false); // Display initial data immediately
+
+            // Background fetch to ensure all courses are loaded without blocking UI
+            const subCategoryQuery = subcategoryData.nameEn || subcategoryData.slug || subcategoryData._id;
+            api.get('/courses', {
+                params: {
+                    subCategory: subCategoryQuery,
+                    limit: 500
+                }
+            }).then(coursesRes => {
+                if (coursesRes.data?.courses?.length > 0) {
+                    setCourses(coursesRes.data.courses);
+                }
+            }).catch(err => {
+                console.error('Error fetching all courses for subcategory:', err);
+            });
         } catch (err) {
             console.error('Error fetching subcategory data:', err);
             setError(t('subcategoryPage.loadFailed', 'تعذّر تحميل بيانات التصنيف الفرعي'));
-        } finally {
             setLoading(false);
         }
     };

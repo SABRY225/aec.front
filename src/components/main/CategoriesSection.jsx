@@ -124,16 +124,6 @@ const fallbackCategoriesData = [
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isHovered, setIsHovered] = useState(false);
-    const [autoPlay, setAutoPlay] = useState(true);
-
-    const trackRef = useRef(null);
-    const posRef = useRef(0);
-    const isPausedRef = useRef(false);
-    const targetPosRef = useRef(null);
-    const isDraggingRef = useRef(false);
-    const startXRef = useRef(0);
-    const startPosRef = useRef(0);
 
     useEffect(() => {
         fetchCategories();
@@ -192,123 +182,7 @@ const fallbackCategoriesData = [
         });
     }, [categories, searchQuery]);
 
-    // Duplicate list for seamless infinite marquee loop
-    const displayItems = useMemo(() => {
-        if (filteredCategories.length === 0) return [];
-        // If enough items, duplicate so the loop seamlessly repeats without empty space
-        if (filteredCategories.length >= 3 && !searchQuery.trim()) {
-            return [...filteredCategories, ...filteredCategories];
-        }
-        return filteredCategories;
-    }, [filteredCategories, searchQuery]);
-
-    // High performance continuous animation loop via requestAnimationFrame
-    useEffect(() => {
-        let animationId;
-        // Speed: 1.5 pixels per frame = ~90px/sec at 60Hz. Fast, continuous, and crystal clear.
-        const speed = 1.5;
-
-        const loop = () => {
-            const track = trackRef.current;
-            const hasLoop = displayItems.length > filteredCategories.length;
-
-            if (track && hasLoop) {
-                const halfWidth = track.scrollWidth / 2;
-
-                if (targetPosRef.current !== null) {
-                    // Smooth spring nudge on Next/Prev clicks
-                    const diff = targetPosRef.current - posRef.current;
-                    if (Math.abs(diff) < 1.5) {
-                        posRef.current = targetPosRef.current;
-                        targetPosRef.current = null;
-                    } else {
-                        posRef.current += diff * 0.14;
-                    }
-                } else if (!isPausedRef.current && !isDraggingRef.current && autoPlay) {
-                    posRef.current += speed;
-                }
-
-                // Seamless infinite wrap around halfWidth
-                if (posRef.current >= halfWidth) {
-                    posRef.current -= halfWidth;
-                    if (targetPosRef.current !== null) {
-                        targetPosRef.current -= halfWidth;
-                    }
-                } else if (posRef.current < 0) {
-                    posRef.current += halfWidth;
-                    if (targetPosRef.current !== null) {
-                        targetPosRef.current += halfWidth;
-                    }
-                }
-
-                // In RTL, positive translate shifts track towards the right, revealing upcoming cards from left
-                // In LTR, negative translate shifts track towards the left, revealing upcoming cards from right
-                const sign = isArabic ? 1 : -1;
-                track.style.transform = `translate3d(${sign * posRef.current}px, 0, 0)`;
-            }
-
-            animationId = requestAnimationFrame(loop);
-        };
-
-        animationId = requestAnimationFrame(loop);
-
-        return () => {
-            cancelAnimationFrame(animationId);
-        };
-    }, [displayItems.length, filteredCategories.length, isArabic, autoPlay]);
-
-    // Pause immediately when hovering on any card
-    const handleCardMouseEnter = useCallback(() => {
-        isPausedRef.current = true;
-        setIsHovered(true);
-    }, []);
-
-    const handleCardMouseLeave = useCallback(() => {
-        isPausedRef.current = false;
-        setIsHovered(false);
-    }, []);
-
-    // Manual Step Navigation (glides forward/backward by 1 card)
-    const handleNext = useCallback(() => {
-        const cardStep = 345; // card width + gap
-        const currentTarget = targetPosRef.current !== null ? targetPosRef.current : posRef.current;
-        targetPosRef.current = currentTarget + cardStep;
-    }, []);
-
-    const handlePrev = useCallback(() => {
-        const cardStep = 345;
-        const currentTarget = targetPosRef.current !== null ? targetPosRef.current : posRef.current;
-        targetPosRef.current = currentTarget - cardStep;
-    }, []);
-
-    // Touch / Pointer Dragging Support
-    const handlePointerDown = (e) => {
-        if (e.button !== 0 && e.pointerType === 'mouse') return;
-        isDraggingRef.current = true;
-        startXRef.current = e.clientX;
-        startPosRef.current = posRef.current;
-        targetPosRef.current = null;
-        isPausedRef.current = true;
-    };
-
-    const handlePointerMove = (e) => {
-        if (!isDraggingRef.current) return;
-        const delta = e.clientX - startXRef.current;
-        const factor = isArabic ? delta : -delta;
-        posRef.current = startPosRef.current + factor;
-    };
-
-    const handlePointerUp = () => {
-        if (!isDraggingRef.current) return;
-        isDraggingRef.current = false;
-        setTimeout(() => {
-            isPausedRef.current = false;
-        }, 1200);
-    };
-
     // Direction-aware Icons
-    const ForwardChevron = isArabic ? ChevronLeft : ChevronRight;
-    const BackwardChevron = isArabic ? ChevronRight : ChevronLeft;
     const DirectionArrow = isArabic ? ArrowLeft : ArrowRight;
 
     return (
@@ -386,28 +260,6 @@ const fallbackCategoriesData = [
                             <BookOpen className="w-4 h-4 text-primary-600" />
                             <span>{filteredCategories.length} {t('autoGenerated.compText1205', 'مجال')}</span>
                         </div>
-
-                        {/* Navigation Arrows */}
-                        <div className="flex items-center gap-1.5">
-                            <button
-                                onClick={handlePrev}
-                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-primary-600 hover:text-white hover:border-primary-600 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                                aria-label={t('autoGenerated.compText1206', 'السابق')}
-                                title={t('autoGenerated.compText1207', 'السابق')}
-                            >
-                                <BackwardChevron className="w-5 h-5" />
-                            </button>
-
-                            <button
-                                onClick={handleNext}
-                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-primary-600 hover:text-white hover:border-primary-600 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                                aria-label={t('autoGenerated.compText1208', 'التالي')}
-                                title={t('autoGenerated.compText1209', 'التالي')}
-                            >
-                                <ForwardChevron className="w-5 h-5" />
-                            </button>
-                        </div>
-
                     </div>
 
                 </div>
@@ -451,53 +303,18 @@ const fallbackCategoriesData = [
                     </div>
                 )}
 
-                {/* Continuous Single-Row Auto-Scrolling Marquee Track */}
+                {/* Categories Grid */}
                 {!loading && filteredCategories.length > 0 && (
-                    <div
-                        className="relative group/slider overflow-hidden -mx-4 sm:mx-0 py-4 cursor-grab active:cursor-grabbing"
-                        onPointerDown={handlePointerDown}
-                        onPointerMove={handlePointerMove}
-                        onPointerUp={handlePointerUp}
-                        onPointerCancel={handlePointerUp}
-                    >
-                        {/* Soft Edge Gradient Fade Masks (Apple-style smooth fade) */}
-                        <div className="absolute top-0 bottom-0 start-0 w-8 sm:w-20 bg-gradient-to-e from-white via-white/80 to-transparent pointer-events-none z-10 hidden sm:block" />
-                        <div className="absolute top-0 bottom-0 end-0 w-8 sm:w-20 bg-gradient-to-s from-white via-white/80 to-transparent pointer-events-none z-10 hidden sm:block" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-4">
+                        {filteredCategories.map((category, index) => {
+                            const subCount = category.subcategoriesCount || category.subcategories?.length || 0;
+                            const categoryName = isArabic ? category.nameAr : (category.nameEn || category.nameAr);
 
-                        {/* Floating Navigation Arrows on Left and Right edges */}
-                        <button
-                            onClick={handlePrev}
-                            className="hidden md:flex absolute top-1/2 -translate-y-1/2 start-3 z-20 w-11 h-11 rounded-full bg-white/95 border border-slate-200 shadow-xl text-slate-700 hover:bg-primary-600 hover:text-white hover:border-primary-600 transition-all duration-200 items-center justify-center opacity-0 group-hover/slider:opacity-100 backdrop-blur-sm"
-                            aria-label={t('autoGenerated.compText1211', 'السابق')}
-                        >
-                            <BackwardChevron className="w-5 h-5" />
-                        </button>
-
-                        <button
-                            onClick={handleNext}
-                            className="hidden md:flex absolute top-1/2 -translate-y-1/2 end-3 z-20 w-11 h-11 rounded-full bg-white/95 border border-slate-200 shadow-xl text-slate-700 hover:bg-primary-600 hover:text-white hover:border-primary-600 transition-all duration-200 items-center justify-center opacity-0 group-hover/slider:opacity-100 backdrop-blur-sm"
-                            aria-label={t('autoGenerated.compText1212', 'التالي')}
-                        >
-                            <ForwardChevron className="w-5 h-5" />
-                        </button>
-
-                        {/* Continuous Moving Track Container */}
-                        <div
-                            ref={trackRef}
-                            className="flex flex-nowrap gap-5 sm:gap-6 will-change-transform"
-                            style={{ width: 'max-content' }}
-                        >
-                            {displayItems.map((category, index) => {
-                                const subCount = category.subcategoriesCount || category.subcategories?.length || 0;
-                                const categoryName = isArabic ? category.nameAr : (category.nameEn || category.nameAr);
-
-                                return (
-                                    <div
-                                        key={`${category.id || category.slug}-${index}`}
-                                        onMouseEnter={handleCardMouseEnter}
-                                        onMouseLeave={handleCardMouseLeave}
-                                        className="w-[285px] sm:w-[320px] lg:w-[340px] shrink-0 h-[430px] flex flex-col"
-                                    >
+                            return (
+                                <div
+                                    key={`${category.id || category.slug}-${index}`}
+                                    className="h-[430px] flex flex-col w-full"
+                                >
                                         <Link
                                             to={`/category/${category.slug}`}
                                             className="block h-full group/card outline-none focus:ring-2 focus:ring-primary-500 rounded-2xl"
@@ -551,14 +368,14 @@ const fallbackCategoriesData = [
                                                         </h3>
 
                                                         {/* Description */}
-                                                        <p className="text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed mb-3">
+                                                        <p className="text-sm sm:text-sm text-slate-500 line-clamp-2 leading-relaxed mb-3">
                                                             {category.description || t('home.categories.exploreCoursesIn', { name: categoryName })}
                                                         </p>
 
                                                         {/* Subcategories Pills Preview */}
                                                         {category.subcategories && category.subcategories.length > 0 && (
                                                             <div className="flex flex-wrap gap-1.5 mb-2">
-                                                                {category.subcategories.slice(0, 3).map((sub, idx) => {
+                                                                {category.subcategories.slice(0, 2).map((sub, idx) => {
                                                                     const subName = isArabic ? sub.nameAr : (sub.nameEn || sub.nameAr);
                                                                     return (
                                                                         <span
@@ -597,8 +414,6 @@ const fallbackCategoriesData = [
                                     </div>
                                 );
                             })}
-                        </div>
-
                     </div>
                 )}
 

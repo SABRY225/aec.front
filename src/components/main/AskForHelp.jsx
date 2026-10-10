@@ -33,7 +33,7 @@ function AskForHelp() {
                     {/* Action Buttons */}
                     <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                         <a
-                            href="https://wa.me/201061234567"
+                            href="https://wa.me/966540098736"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold px-7 py-3.5 rounded-full text-base shadow-lg shadow-emerald-600/25 transition-all transform hover:-translate-y-0.5"

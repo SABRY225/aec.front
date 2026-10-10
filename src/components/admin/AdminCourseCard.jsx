@@ -183,11 +183,29 @@ const AdminCourseCard = ({
                     </div>
                 </div>
 
-                {/* Middle: Pricing */}
+                {/* Middle: Pricing: Before & After Display */}
                 <div className="text-start md:text-end shrink-0 px-2">
-                    <span className="text-lg font-bold text-slate-900 dark:text-white block">
-                        {getPricingDisplay()}
-                    </span>
+                    {course.originalPrice && Number(course.originalPrice) > Number(course.price) ? (
+                        <div>
+                            <div className="flex items-center md:justify-end gap-1.5 text-xs text-slate-400">
+                                <span className="text-[11px]">{isRTL ? 'قبل:' : 'Before:'}</span>
+                                <span className="line-through">{formatPrice(course.originalPrice)}</span>
+                                <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/40">
+                                    {`-${Math.round(((Number(course.originalPrice) - Number(course.price)) / Number(course.originalPrice)) * 100)}%`}
+                                </span>
+                            </div>
+                            <div className="flex items-baseline md:justify-end gap-1 mt-0.5">
+                                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">{isRTL ? 'بعد:' : 'Now:'}</span>
+                                <span className="text-lg font-bold text-slate-900 dark:text-white">
+                                    {getPricingDisplay()}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <span className="text-lg font-bold text-slate-900 dark:text-white block">
+                            {getPricingDisplay()}
+                        </span>
+                    )}
                     {course.hasPricingOverride && (
                         <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
                             {t('admin.courses.multiCountryPricing', 'تسعير دولي')}
@@ -319,11 +337,22 @@ const AdminCourseCard = ({
                     </div>
                 )}
 
-                {/* Price pill floating over image bottom-end */}
-                <div className="absolute bottom-3 end-3">
-                    <span className="inline-block px-3 py-1 rounded-xl text-xs font-bold bg-slate-950/80 text-white backdrop-blur-md border border-white/10 shadow-sm">
-                        {getPricingDisplay()}
-                    </span>
+                {/* Price pill floating over image bottom-end: Before & After */}
+                <div className="absolute bottom-3 end-3 flex items-center gap-1.5">
+                    {course.originalPrice && Number(course.originalPrice) > Number(course.price) ? (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs bg-slate-950/85 text-white backdrop-blur-md border border-white/10 shadow-sm">
+                            <span className="text-[10px] text-slate-400 line-through">
+                                {formatPrice(course.originalPrice)}
+                            </span>
+                            <span className="font-bold text-amber-300">
+                                {getPricingDisplay()}
+                            </span>
+                        </div>
+                    ) : (
+                        <span className="inline-block px-3 py-1 rounded-xl text-xs font-bold bg-slate-950/80 text-white backdrop-blur-md border border-white/10 shadow-sm">
+                            {getPricingDisplay()}
+                        </span>
+                    )}
                 </div>
             </div>
 

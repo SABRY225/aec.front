@@ -388,89 +388,97 @@ const CourseManagement = () => {
             {/* ======================================================== */}
             {/* Filter & Search Action Bar */}
             {/* ======================================================== */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 space-y-4">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    {/* Tab Navigation Segmented Control */}
-                    <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl overflow-x-auto">
-                        <button
-                            type="button"
-                            onClick={() => handleTabChange('all')}
-                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
-                                activeTab === 'all'
-                                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                            }`}
-                        >
-                            <BookOpen className="w-4 h-4" />
-                            <span>{t('admin.courses.allCourses', 'جميع الدورات')}</span>
-                            <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                                {stats.total}
-                            </span>
-                        </button>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-5">
+                {/* 1. Tab Navigation */}
+                <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl overflow-x-auto w-full max-w-fit custom-scrollbar">
+                    <button
+                        type="button"
+                        onClick={() => handleTabChange('all')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                            activeTab === 'all'
+                                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'
+                        }`}
+                    >
+                        <BookOpen className="w-4 h-4" />
+                        <span>{t('admin.courses.allCourses', 'جميع الدورات')}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                            {stats.total}
+                        </span>
+                    </button>
 
-                        <button
-                            type="button"
-                            onClick={() => handleTabChange('approved')}
-                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
-                                activeTab === 'approved'
-                                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                            }`}
-                        >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                            <span>{t('admin.courses.approvedCourses', 'المعتمدة')}</span>
-                            <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100/70 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
-                                {stats.approved}
-                            </span>
-                        </button>
+                    <button
+                        type="button"
+                        onClick={() => handleTabChange('approved')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                            activeTab === 'approved'
+                                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'
+                        }`}
+                    >
+                        <CheckCircle2 className={`w-4 h-4 ${activeTab === 'approved' ? 'text-emerald-600 dark:text-emerald-400' : ''}`} />
+                        <span>{t('admin.courses.approvedCourses', 'المعتمدة')}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === 'approved' ? 'bg-emerald-100/70 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
+                            {stats.approved}
+                        </span>
+                    </button>
 
-                        <button
-                            type="button"
-                            onClick={() => handleTabChange('pending')}
-                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
-                                activeTab === 'pending'
-                                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                            }`}
-                        >
-                            <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                            <span>{t('admin.courses.pendingCourses', 'قيد المراجعة')}</span>
-                            <span className="px-2 py-0.5 rounded-full text-xs bg-amber-100/70 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
-                                {stats.pending}
-                            </span>
-                        </button>
+                    <button
+                        type="button"
+                        onClick={() => handleTabChange('pending')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                            activeTab === 'pending'
+                                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'
+                        }`}
+                    >
+                        <Clock className={`w-4 h-4 ${activeTab === 'pending' ? 'text-amber-600 dark:text-amber-400' : ''}`} />
+                        <span>{t('admin.courses.pendingCourses', 'قيد المراجعة')}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === 'pending' ? 'bg-amber-100/70 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
+                            {stats.pending}
+                        </span>
+                    </button>
+                </div>
+
+                <div className="h-px bg-slate-100 dark:bg-slate-800/50 w-full"></div>
+
+                {/* 2. Filters & Search */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    {/* Search Input */}
+                    <div className="relative flex-1">
+                        <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+                            <Search className="w-5 h-5 text-slate-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder={t('admin.courses.searchPlaceholder', 'ابحث باسم الدورة أو المحاضر...')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="block w-full rounded-xl ps-11 pe-10 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white sm:text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:bg-slate-100 dark:hover:bg-slate-800/80 shadow-sm outline-none"
+                        />
+                        {searchTerm && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchTerm('')}
+                                className="absolute inset-y-0 end-0 pe-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
                     </div>
 
-                    {/* Search & Select Controls */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 lg:max-w-xl">
-                        {/* Search Input */}
-                        <div className="relative flex-1">
-                            <Search className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder={t('admin.courses.searchPlaceholder', 'ابحث بالعنوان أو اسم المحاضر...')}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full ps-10 pe-9 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
-                            />
-                            {searchTerm && (
-                                <button
-                                    type="button"
-                                    onClick={() => setSearchTerm('')}
-                                    className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Category Dropdown Filter */}
+                    {/* Selects Container */}
+                    <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 shrink-0">
+                        {/* Category Filter */}
                         {categories.length > 2 && (
-                            <div className="relative shrink-0">
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+                                    <Filter className="w-4 h-4 text-slate-400 group-hover:text-primary-500 transition-colors" />
+                                </div>
                                 <select
                                     value={categoryFilter}
                                     onChange={(e) => setCategoryFilter(e.target.value)}
-                                    className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all cursor-pointer"
+                                    className="block w-full sm:w-[160px] lg:w-[180px] rounded-xl ps-9 pe-8 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/80 appearance-none shadow-sm transition-all truncate outline-none"
                                 >
                                     <option value="all">{t('admin.courses.filterByCategory', 'جميع التصنيفات')}</option>
                                     {categories.filter(c => c !== 'all').map((cat) => (
@@ -480,16 +488,19 @@ const CourseManagement = () => {
                             </div>
                         )}
 
-                        {/* Sort Order Dropdown */}
-                        <div className="relative shrink-0">
+                        {/* Sort Order */}
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+                                <ArrowUpDown className="w-4 h-4 text-slate-400 group-hover:text-primary-500 transition-colors" />
+                            </div>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all cursor-pointer"
+                                className="block w-full sm:w-[160px] lg:w-[180px] rounded-xl ps-9 pe-8 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/80 appearance-none shadow-sm transition-all truncate outline-none"
                             >
-                                <option value="newest">{t('admin.courses.newest', 'الأحدث')}</option>
-                                <option value="priceHigh">{t('admin.courses.priceHighToLow', 'السعر: من الأعلى')}</option>
-                                <option value="priceLow">{t('admin.courses.priceLowToHigh', 'السعر: من الأقل')}</option>
+                                <option value="newest">{t('admin.courses.newest', 'الأحدث إضافتاً')}</option>
+                                <option value="priceHigh">{t('admin.courses.priceHighToLow', 'السعر: الأغلى')}</option>
+                                <option value="priceLow">{t('admin.courses.priceLowToHigh', 'السعر: الأرخص')}</option>
                                 <option value="title">{t('admin.courses.titleAZ', 'العنوان (أ-ي)')}</option>
                             </select>
                         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../hooks/useLanguage';
 import { toast } from 'react-toastify';
-import { userService } from '../../services/new-api';
+import { userService, adminService } from '../../services/new-api';
 import { 
     Users, 
     Search, 
@@ -16,7 +16,18 @@ import {
     ShieldCheck, 
     ArrowUpDown, 
     User,
-    RotateCcw
+    RotateCcw,
+    Trash2,
+    CheckCircle,
+    XCircle,
+    Eye,
+    Edit3,
+    Briefcase,
+    MapPin,
+    Globe,
+    Lock,
+    Save,
+    Loader2
 } from 'lucide-react';
 
 const Instructors = ({ onCountChange, isRefreshingParent }) => {
@@ -30,6 +41,28 @@ const Instructors = ({ onCountChange, isRefreshingParent }) => {
     const [sortBy, setSortBy] = useState('newest');
     const [viewMode, setViewMode] = useState('grid');
     const [failedImages, setFailedImages] = useState({});
+
+    // Edit Instructor Modal State
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingInstructor, setEditingInstructor] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [editForm, setEditForm] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        jobTitle: '',
+        category: '',
+        subCategory: '',
+        bio: '',
+        country: '',
+        city: '',
+        gender: 'Male',
+        website: '',
+        isVerified: false,
+        isActive: true,
+        password: ''
+    });
 
     const fetchInstructors = useCallback(async (isRefresh = false) => {
         try {
@@ -67,8 +100,113 @@ const Instructors = ({ onCountChange, isRefreshingParent }) => {
         }
     }, [isRefreshingParent, fetchInstructors]);
 
+    
+    const handleToggleVerification = async (id, currentStatus) => {
+        try {
+            const res = await adminService.toggleInstructorVerification(id);
+            setInstructors(prev => prev.map(inst => 
+                inst._id === id ? { ...inst, isVerified: res.isVerified } : inst
+            ));
+            toast.success(res.message || t('admin.instructors.verificationToggled', 'تم تحديث حالة توثيق المحاضر بنجاح'));
+        } catch (error) {
+            toast.error(t('admin.instructors.verificationError', 'حدث خطأ أثناء محاولة تحديث التوثيق'));
+            console.error(error);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm(t('admin.instructors.confirmDelete', 'هل أنت متأكد من أنك تريد حذف هذا المحاضر؟'))) return;
+        try {
+            await adminService.deleteInstructor(id);
+            setInstructors(prev => prev.filter(inst => inst._id !== id));
+            toast.success(t('admin.instructors.deleted', 'تم حذف المحاضر بنجاح'));
+        } catch (error) {
+            toast.error(t('admin.instructors.deleteError', 'حدث خطأ أثناء حذف المحاضر'));
+            console.error(error);
+        }
+    };
+
     const handleImageError = (id) => {
         setFailedImages(prev => ({ ...prev, [id]: true }));
+    };
+
+    const handleOpenEdit = (instructor) => {
+        setEditingInstructor(instructor);
+        setEditForm({
+            firstName: instructor.firstName || '',
+            lastName: instructor.lastName || '',
+            email: instructor.email || '',
+            phone: instructor.phone || '',
+            jobTitle: instructor.jobTitle || '',
+            category: instructor.category || '',
+            subCategory: instructor.subCategory || '',
+            bio: instructor.bio || '',
+            country: instructor.country || '',
+            city: instructor.city || '',
+            gender: instructor.gender || 'Male',
+            website: instructor.website || '',
+            isVerified: Boolean(instructor.isVerified),
+            isActive: instructor.isActive !== false,
+            password: ''
+        });
+        setShowEditModal(true);
+    };
+
+    const handleSaveEdit = async (e) => {
+        e.preventDefault();
+        if (!editForm.firstName.trim() || !editForm.lastName.trim()) {
+            toast.error(isRTL ? 'يرجى إدخال الاسم الأول والأخير' : 'First and last name are required');
+            return;
+        }
+        if (!editForm.email.trim()) {
+            toast.error(isRTL ? 'يرجى إدخال البريد الإلكتروني' : 'Email is required');
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            const payload = {
+                firstName: editForm.firstName.trim(),
+                lastName: editForm.lastName.trim(),
+                email: editForm.email.trim(),
+                phone: editForm.phone.trim(),
+                jobTitle: editForm.jobTitle.trim(),
+                category: editForm.category.trim(),
+                subCategory: editForm.subCategory.trim(),
+                bio: editForm.bio.trim(),
+                country: editForm.country.trim(),
+                city: editForm.city.trim(),
+                gender: editForm.gender,
+                website: editForm.website.trim(),
+                isVerified: editForm.isVerified,
+                isActive: editForm.isActive
+            };
+
+            if (editForm.password.trim()) {
+                if (editForm.password.trim().length < 6) {
+                    toast.error(isRTL ? 'كلمة المرور يجب أن لا تقل عن 6 أحرف' : 'Password must be at least 6 characters');
+                    setIsSaving(false);
+                    return;
+                }
+                payload.password = editForm.password.trim();
+            }
+
+            const res = await adminService.updateInstructor(editingInstructor._id, payload);
+            if (res.success || res.instructor) {
+                const updated = res.instructor || { ...editingInstructor, ...payload };
+                setInstructors(prev => prev.map(inst => inst._id === editingInstructor._id ? updated : inst));
+                toast.success(res.message || (isRTL ? 'تم حفظ وتحديث بيانات المعلم بنجاح' : 'Instructor updated successfully'));
+                setShowEditModal(false);
+                setEditingInstructor(null);
+            } else {
+                throw new Error(res.message || 'Update failed');
+            }
+        } catch (error) {
+            console.error('Error updating instructor:', error);
+            toast.error(error.response?.data?.message || (isRTL ? 'تعذّر تحديث بيانات المعلم' : 'Failed to update instructor'));
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Extract unique categories
@@ -302,7 +440,7 @@ const Instructors = ({ onCountChange, isRefreshingParent }) => {
                                                             <span className="font-bold text-slate-900 dark:text-white truncate">
                                                                 {fullName}
                                                             </span>
-                                                            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                                                            {instructor.isVerified && <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" title={t('admin.instructors.verified', 'تم القبول')} />}
                                                         </div>
                                                         <a 
                                                             href={`mailto:${instructor.email}`}
@@ -352,6 +490,41 @@ const Instructors = ({ onCountChange, isRefreshingParent }) => {
                                             <td className="py-3 px-4 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                                                 {instructor.createdAt ? new Date(instructor.createdAt).toLocaleDateString() : '—'}
                                             </td>
+                                            <td className="py-3 px-4 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <a 
+                                                        href={`/profile/${instructor._id}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-1.5 text-slate-400 hover:text-primary-600 transition-colors"
+                                                        title={t('common.viewProfile', 'مشاهدة الملف الشخصي')}
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </a>
+                                                    <button 
+                                                        onClick={() => handleOpenEdit(instructor)}
+                                                        className="p-1.5 text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
+                                                        title={isRTL ? 'تعديل البيانات الأساسية' : 'Edit instructor'}
+                                                    >
+                                                        <Edit3 className="w-4 h-4" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleToggleVerification(instructor._id, instructor.isVerified)}
+                                                        className={`p-1.5 transition-colors ${instructor.isVerified ? 'text-emerald-500 hover:text-slate-500' : 'text-slate-400 hover:text-emerald-500'}`}
+                                                        title={instructor.isVerified ? t('admin.instructors.unverify', 'إلغاء التوثيق') : t('admin.instructors.verify', 'توثيق المحاضر')}
+                                                    >
+                                                        {instructor.isVerified ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDelete(instructor._id)}
+                                                        className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                                                        title={t('common.delete', 'حذف المحاضر')}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+
                                         </tr>
                                     );
                                 })}
@@ -388,9 +561,11 @@ const Instructors = ({ onCountChange, isRefreshingParent }) => {
                                                 )}
                                             </div>
                                             {/* Verified Badge */}
-                                            <div className="absolute bottom-0 end-0 bg-emerald-500 text-white p-1 rounded-full shadow-md ring-2 ring-white dark:ring-slate-800">
+                                            {instructor.isVerified && (
+                                            <div className="absolute bottom-0 end-0 bg-emerald-500 text-white p-1 rounded-full shadow-md ring-2 ring-white dark:ring-slate-800" title={t('admin.instructors.verified', '????')}>
                                                 <ShieldCheck className="w-4 h-4" />
                                             </div>
+                                            )}
                                         </div>
 
                                         <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-3 line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
@@ -461,32 +636,401 @@ const Instructors = ({ onCountChange, isRefreshingParent }) => {
                                     </div>
                                 </div>
 
+                                
                                 {/* Quick Action Footer */}
-                                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2">
-                                    {instructor.email && (
+                                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                                    <div className="flex gap-1.5">
                                         <a 
-                                            href={`mailto:${instructor.email}`}
-                                            title={instructor.email}
-                                            className="flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold text-center bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-primary-50 hover:text-primary-600 dark:hover:bg-primary-950/60 dark:hover:text-primary-400 transition-colors flex items-center justify-center gap-1.5"
+                                            href={`/profile/${instructor._id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                                            title={t('common.viewProfile', '??? ????? ??????')}
                                         >
-                                            <Mail className="w-3.5 h-3.5" />
-                                            <span>{t('admin.detailLabels.email', 'البريد')}</span>
+                                            <Eye className="w-4 h-4" />
                                         </a>
-                                    )}
-                                    {instructor.phone && (
-                                        <a 
-                                            href={`tel:${instructor.phone}`}
-                                            title={instructor.phone}
-                                            className="flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold text-center bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 transition-colors flex items-center justify-center gap-1.5"
+                                        {instructor.email && (
+                                            <a 
+                                                href={`mailto:${instructor.email}`}
+                                                title={instructor.email}
+                                                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                                            >
+                                                <Mail className="w-4 h-4" />
+                                            </a>
+                                        )}
+                                        {instructor.phone && (
+                                            <a 
+                                                href={`tel:${instructor.phone}`}
+                                                title={instructor.phone}
+                                                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                                            >
+                                                <Phone className="w-4 h-4" />
+                                            </a>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-1.5">
+                                        <button 
+                                            onClick={() => handleOpenEdit(instructor)}
+                                            className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                                            title={isRTL ? 'تعديل البيانات الأساسية' : 'Edit instructor'}
                                         >
-                                            <Phone className="w-3.5 h-3.5" />
-                                            <span>{t('admin.detailLabels.phone', 'اتصال')}</span>
-                                        </a>
-                                    )}
+                                            <Edit3 className="w-4 h-4" />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleToggleVerification(instructor._id, instructor.isVerified)}
+                                            className={`p-2 rounded-lg transition-colors ${instructor.isVerified ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-400' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400'}`}
+                                            title={instructor.isVerified ? t('admin.instructors.unverify', 'إلغاء التوثيق') : t('admin.instructors.verify', 'توثيق المحاضر')}
+                                        >
+                                            {instructor.isVerified ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDelete(instructor._id)}
+                                            className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 transition-colors"
+                                            title={t('common.delete', 'حذف المحاضر')}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+</div>
                         );
                     })}
+                </div>
+            )}
+            {/* ======================================================== */}
+            {/* Edit Instructor Modal */}
+            {/* ======================================================== */}
+            {showEditModal && editingInstructor && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+                    <div 
+                        className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-3xl overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                    <Edit3 className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                        {isRTL ? 'تعديل بيانات المعلم الأساسية' : 'Edit Instructor Details'}
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        {editingInstructor.firstName} {editingInstructor.lastName} ({editingInstructor.email})
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowEditModal(false);
+                                    setEditingInstructor(null);
+                                }}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Modal Form */}
+                        <form onSubmit={handleSaveEdit} className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                            {/* 1. Personal & Contact Information */}
+                            <div>
+                                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
+                                    <User className="w-4 h-4 text-primary-500" />
+                                    <span>{isRTL ? 'البيانات الشخصية والاتصال' : 'Personal & Contact Information'}</span>
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* First Name */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'الاسم الأول *' : 'First Name *'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={editForm.firstName}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                        />
+                                    </div>
+
+                                    {/* Last Name */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'الاسم الأخير *' : 'Last Name *'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={editForm.lastName}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                        />
+                                    </div>
+
+                                    {/* Email */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'البريد الإلكتروني *' : 'Email Address *'}
+                                        </label>
+                                        <div className="relative">
+                                            <Mail className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="email"
+                                                required
+                                                value={editForm.email}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                                                className="w-full ps-9.5 pe-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Phone */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'رقم الهاتف' : 'Phone Number'}
+                                        </label>
+                                        <div className="relative">
+                                            <Phone className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                dir="ltr"
+                                                value={editForm.phone}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                                                className="w-full ps-9.5 pe-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-start"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Gender */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'الجنس' : 'Gender'}
+                                        </label>
+                                        <select
+                                            value={editForm.gender}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all cursor-pointer"
+                                        >
+                                            <option value="Male">{isRTL ? 'ذكر' : 'Male'}</option>
+                                            <option value="Female">{isRTL ? 'أنثى' : 'Female'}</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Country */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'الدولة' : 'Country'}
+                                        </label>
+                                        <div className="relative">
+                                            <MapPin className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                value={editForm.country}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, country: e.target.value }))}
+                                                className="w-full ps-9.5 pe-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                                placeholder={isRTL ? 'مثال: السعودية، مصر...' : 'e.g., Saudi Arabia, Egypt'}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* City */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'المدينة' : 'City'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editForm.city}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                            placeholder={isRTL ? 'مثال: الرياض، القاهرة...' : 'e.g., Riyadh, Cairo'}
+                                        />
+                                    </div>
+
+                                    {/* Website */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'الموقع الإلكتروني' : 'Website'}
+                                        </label>
+                                        <div className="relative">
+                                            <Globe className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="url"
+                                                dir="ltr"
+                                                value={editForm.website}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
+                                                className="w-full ps-9.5 pe-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-start"
+                                                placeholder="https://..."
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2. Professional & Academic Info */}
+                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
+                                    <Briefcase className="w-4 h-4 text-indigo-500" />
+                                    <span>{isRTL ? 'البيانات المهنية والتخصص' : 'Professional & Track Information'}</span>
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* Job Title */}
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'المسمى الوظيفي والمهني' : 'Job Title / Designation'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editForm.jobTitle}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, jobTitle: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                            placeholder={isRTL ? 'مثال: مدرب ومحاضر معتمد في إدارة الأعمال' : 'e.g., Certified Instructor in Business'}
+                                        />
+                                    </div>
+
+                                    {/* Category */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'التصنيف / المجال الرئيسي' : 'Primary Category'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editForm.category}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                            placeholder={isRTL ? 'مثال: تقنية المعلومات' : 'e.g., Information Technology'}
+                                        />
+                                    </div>
+
+                                    {/* Sub Category */}
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'التخصص الفرعي' : 'Sub-Category'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editForm.subCategory}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, subCategory: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                            placeholder={isRTL ? 'مثال: البرمجة والتطوير' : 'e.g., Programming'}
+                                        />
+                                    </div>
+
+                                    {/* Bio */}
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {isRTL ? 'النبذة التعريفية عن المعلم' : 'Instructor Bio'}
+                                        </label>
+                                        <textarea
+                                            rows={3}
+                                            value={editForm.bio}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-y"
+                                            placeholder={isRTL ? 'اكتب نبذة مختصرة عن مؤهلات وخبرات المعلم...' : 'Write a short bio about instructor qualifications...'}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3. Account Status & Password Reset */}
+                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
+                                    <Lock className="w-4 h-4 text-emerald-500" />
+                                    <span>{isRTL ? 'حالة الحساب والأمان' : 'Account Status & Security'}</span>
+                                </h4>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* Verification Card */}
+                                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${editForm.isVerified ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={editForm.isVerified}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, isVerified: e.target.checked }))}
+                                            className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                                        />
+                                        <div>
+                                            <span className="block text-xs font-bold text-slate-900 dark:text-white">
+                                                {isRTL ? 'توثيق واعتماد المحاضر' : 'Verified Instructor'}
+                                            </span>
+                                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                {isRTL ? 'يمنح المحاضر شارة التوثيق الرسمي' : 'Displays verification badge'}
+                                            </span>
+                                        </div>
+                                    </label>
+
+                                    {/* Active Account Card */}
+                                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${editForm.isActive ? 'border-primary-500 bg-primary-50/40 dark:bg-primary-950/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={editForm.isActive}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, isActive: e.target.checked }))}
+                                            className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 cursor-pointer"
+                                        />
+                                        <div>
+                                            <span className="block text-xs font-bold text-slate-900 dark:text-white">
+                                                {isRTL ? 'تفعيل الحساب (نشط)' : 'Account Active'}
+                                            </span>
+                                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                                {isRTL ? 'السماح بتسجيل الدخول والوصول' : 'Allows login and access'}
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {/* Password Reset */}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                        {isRTL ? 'تعيين كلمة مرور جديدة (اتركه فارغاً للإبقاء على الحالية)' : 'Reset Password (leave empty to keep current)'}
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input
+                                            type="password"
+                                            value={editForm.password}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))}
+                                            className="w-full ps-9.5 pe-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                                            placeholder={isRTL ? 'أدخل كلمة مرور جديدة إذا أردت تغييرها...' : 'Enter new password if you want to reset...'}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Footer Actions */}
+                            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setEditingInstructor(null);
+                                    }}
+                                    disabled={isSaving}
+                                    className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                                >
+                                    {isRTL ? 'إلغاء' : 'Cancel'}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-500/20 flex items-center gap-2 transition-all disabled:opacity-50"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <span>{isRTL ? 'جاري الحفظ...' : 'Saving...'}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-4 h-4" />
+                                            <span>{isRTL ? 'حفظ التعديلات' : 'Save Changes'}</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

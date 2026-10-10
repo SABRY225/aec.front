@@ -380,11 +380,6 @@ const Header = () => {
                                     <span>🇸🇦</span>
                                     <span dir="ltr">+966 54 009 8736</span>
                                 </a>
-                                <span className="text-slate-300">|</span>
-                                <a href="tel:+201061234567" className="flex items-center gap-1 text-slate-700 hover:text-blue-600">
-                                    <span>🇪🇬</span>
-                                    <span dir="ltr">+20 106 123 4567</span>
-                                </a>
                             </div>
                         </div>
                     )}
