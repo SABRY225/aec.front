@@ -21,7 +21,8 @@ import {
     Moon,
     Sun,
     Languages,
-    Compass
+    Compass,
+    ExternalLink
 } from 'lucide-react';
 
 const StudentLayout = () => {
@@ -193,6 +194,29 @@ const StudentLayout = () => {
                         </button>
                     </div>
 
+                    {/* Go to Platform Button in Sidebar (Drawer & Desktop) */}
+                    <div className="p-3 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
+                        <Link
+                            to="/"
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-slate-800/90 dark:via-blue-950/30 dark:to-slate-800/90 text-blue-700 dark:text-blue-300 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-slate-800 dark:hover:to-slate-800 font-bold text-xs sm:text-sm border border-blue-200/60 dark:border-blue-900/40 shadow-2xs transition-all group"
+                        >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                                    <Globe className="w-4 h-4" />
+                                </div>
+                                <div className="text-start min-w-0">
+                                    <span className="block leading-tight font-bold truncate">
+                                        {isRtl ? 'الانتقال إلى المنصة' : 'Go to Platform'}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal block mt-0.5 truncate">
+                                        {isRtl ? 'الرئيسية وتصفح الدورات' : 'Home & Browse'}
+                                    </span>
+                                </div>
+                            </div>
+                            <ExternalLink className="w-3.5 h-3.5 text-blue-500 opacity-70 group-hover:opacity-100 transition-opacity shrink-0 ms-2" />
+                        </Link>
+                    </div>
 
                     {/* Scrollable Navigation Groups */}
                     <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-3 space-y-6">
@@ -273,11 +297,21 @@ const StudentLayout = () => {
                         </div>
 
                         {/* End side: Quick Action Buttons */}
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            {/* Explore Courses Link */}
+                        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                            {/* Go to Platform Button (Responsive & Desktop) */}
+                            <Link
+                                to="/"
+                                title={isRtl ? 'الانتقال إلى المنصة' : 'Go to Platform'}
+                                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/60 dark:to-indigo-950/60 text-blue-700 dark:text-blue-300 hover:from-blue-100 hover:to-indigo-100 dark:hover:bg-blue-900/80 border border-blue-200/70 dark:border-blue-800/60 font-bold text-xs transition-all shadow-2xs"
+                            >
+                                <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                                <span>{isRtl ? 'المنصة' : 'Platform'}</span>
+                            </Link>
+
+                            {/* Explore Courses Link (Desktop) */}
                             <Link
                                 to="/explore"
-                                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 font-semibold text-xs transition-colors"
+                                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold text-xs transition-colors"
                             >
                                 <Compass className="w-3.5 h-3.5" />
                                 <span>{t('student.dashboard.quickActions.browseCourses', 'تصفح الدورات')}</span>

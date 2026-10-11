@@ -255,17 +255,6 @@ const PaymentSettings = () => {
                         {courses.length}
                     </span>
                 </button>
-                <button
-                    onClick={() => setActiveTab('policies')}
-                    className={`flex items-center gap-2 px-5 py-3 font-bold text-sm rounded-t-2xl transition-all duration-200 border-b-2 whitespace-nowrap cursor-pointer ${
-                        activeTab === 'policies'
-                            ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20'
-                            : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/50'
-                    }`}
-                >
-                    <FileText className="w-4 h-4" />
-                    <span>{t('student.settings.payment.tabPolicies', 'سياسة الفوترة والضمان')}</span>
-                </button>
             </div>
 
             {/* TAB 1: TRANSACTIONS & INVOICE HISTORY */}
@@ -456,57 +445,6 @@ const PaymentSettings = () => {
                 </div>
             )}
 
-
-            {/* TAB 3: BILLING & REFUND POLICIES */}
-            {activeTab === 'policies' && (
-                <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
-                    <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
-                        <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
-                            <FileText className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                {t('student.settings.payment.policyTitle', 'سياسات الدفع والاسترداد وضمان الجودة')}
-                            </h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {t('student.settings.payment.policySubtitle', 'شروط الاشتراك وطلب الفواتير الضريبية المعتمدة')}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                            <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                <span>إيصالات دفع رسمية فورية:</span>
-                            </h4>
-                            <p className="text-slate-500 dark:text-slate-400">
-                                فور تأكيد عملية السداد، يتم إصدار إيصال اشتراك رقمي معتمد ومزود بكود QR مشفر للتحقق الفوري.
-                            </p>
-                        </div>
-
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                            <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                <span>الفواتير الضريبية للشركات والجهات:</span>
-                            </h4>
-                            <p className="text-slate-500 dark:text-slate-400">
-                                إذا كنت ترغب في إصدار فاتورة ضريبية مسجلة باسم جهة عملك متضمنة الرقم الضريبي، يمكنك التواصل مباشرة مع قسم المالية عبر مركز المساعدة.
-                            </p>
-                        </div>
-
-                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-1">
-                            <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                <span>سياسة الإلغاء والاسترداد:</span>
-                            </h4>
-                            <p className="text-slate-500 dark:text-slate-400">
-                                يحق للطالب استرداد كامل الرسوم وفقاً للائحة الأكاديمية للدورات الحضورية قبل بدء الدورة بـ 48 ساعة، وللدورات المسجلة قبل مشاهدة أكثر من 15% من محتوى البرنامج.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
 
         </div>
     );

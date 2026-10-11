@@ -122,20 +122,42 @@ const CourseEdit = () => {
     ];
 
     const WORLD_LANGUAGES = [
-        { value: 'العربية', label: isRTL ? 'العربية' : 'Arabic' },
-        { value: 'English', label: isRTL ? 'الإنجليزية' : 'English' },
-        { value: 'Français', label: isRTL ? 'الفرنسية' : 'French' },
-        { value: 'Español', label: isRTL ? 'الإسبانية' : 'Spanish' },
-        { value: 'Deutsch', label: isRTL ? 'الألمانية' : 'German' },
-        { value: 'Italiano', label: isRTL ? 'الإيطالية' : 'Italian' },
-        { value: 'Português', label: isRTL ? 'البرتغالية' : 'Portuguese' },
-        { value: 'Русский', label: isRTL ? 'الروسية' : 'Russian' },
-        { value: '中文', label: isRTL ? 'الصينية' : 'Chinese' },
-        { value: '日本語', label: isRTL ? 'اليابانية' : 'Japanese' },
-        { value: '한국어', label: isRTL ? 'الكورية' : 'Korean' },
-        { value: 'Türkçe', label: isRTL ? 'التركية' : 'Turkish' },
-        { value: 'हिन्दी', label: isRTL ? 'الهندية' : 'Hindi' },
-        { value: 'اردو', label: isRTL ? 'الأوردو' : 'Urdu' }
+        { value: 'arabic', label: isRTL ? 'العربية (العربية)' : 'Arabic (العربية)' },
+        { value: 'english', label: isRTL ? 'الإنجليزية (English)' : 'English' },
+        { value: 'french', label: isRTL ? 'الفرنسية (Français)' : 'French (Français)' },
+        { value: 'spanish', label: isRTL ? 'الإسبانية (Español)' : 'Spanish (Español)' },
+        { value: 'german', label: isRTL ? 'الألمانية (Deutsch)' : 'German (Deutsch)' },
+        { value: 'italian', label: isRTL ? 'الإيطالية (Italiano)' : 'Italian (Italiano)' },
+        { value: 'portuguese', label: isRTL ? 'البرتغالية (Português)' : 'Portuguese (Português)' },
+        { value: 'russian', label: isRTL ? 'الروسية (Русский)' : 'Russian (Русский)' },
+        { value: 'turkish', label: isRTL ? 'التركية (Türkçe)' : 'Turkish (Türkçe)' },
+        { value: 'chinese', label: isRTL ? 'الصينية (中文)' : 'Chinese (中文)' },
+        { value: 'japanese', label: isRTL ? 'اليابانية (日本語)' : 'Japanese (日本語)' },
+        { value: 'korean', label: isRTL ? 'الكورية (한국어)' : 'Korean (한국어)' },
+        { value: 'hindi', label: isRTL ? 'الهندية (हिन्दी)' : 'Hindi (हिन्दी)' },
+        { value: 'urdu', label: isRTL ? 'الأوردو (اردو)' : 'Urdu (اردو)' },
+        { value: 'persian', label: isRTL ? 'الفارسية (فارسی)' : 'Persian (فارسی)' },
+        { value: 'dutch', label: isRTL ? 'الهولندية (Nederlands)' : 'Dutch (Nederlands)' },
+        { value: 'swedish', label: isRTL ? 'السويدية (Svenska)' : 'Swedish (Svenska)' },
+        { value: 'norwegian', label: isRTL ? 'النرويجية (Norsk)' : 'Norwegian (Norsk)' },
+        { value: 'danish', label: isRTL ? 'الدنماركية (Dansk)' : 'Danish (Dansk)' },
+        { value: 'finnish', label: isRTL ? 'الفنلندية (Suomi)' : 'Finnish (Suomi)' },
+        { value: 'polish', label: isRTL ? 'البولندية (Polski)' : 'Polish (Polski)' },
+        { value: 'czech', label: isRTL ? 'التشيكية (Čeština)' : 'Czech (Čeština)' },
+        { value: 'hungarian', label: isRTL ? 'المجرية (Magyar)' : 'Hungarian (Magyar)' },
+        { value: 'romanian', label: isRTL ? 'الرومانية (Română)' : 'Romanian (Română)' },
+        { value: 'greek', label: isRTL ? 'اليونانية (Ελληνικά)' : 'Greek (Ελληνικά)' },
+        { value: 'hebrew', label: isRTL ? 'العبرية (עברית)' : 'Hebrew (עברית)' },
+        { value: 'indonesian', label: isRTL ? 'الإندونيسية (Bahasa Indonesia)' : 'Indonesian (Bahasa Indonesia)' },
+        { value: 'malay', label: isRTL ? 'الملايو (Bahasa Melayu)' : 'Malay (Bahasa Melayu)' },
+        { value: 'tagalog', label: isRTL ? 'الفلبينية (Tagalog)' : 'Filipino (Tagalog)' },
+        { value: 'thai', label: isRTL ? 'التايلاندية (ไทย)' : 'Thai (ไทย)' },
+        { value: 'vietnamese', label: isRTL ? 'الفيتنامية (Tiếng Việt)' : 'Vietnamese (Tiếng Việt)' },
+        { value: 'bengali', label: isRTL ? 'البنغالية (বাংলা)' : 'Bengali (বাংলা)' },
+        { value: 'ukrainian', label: isRTL ? 'الأوكرانية (Українська)' : 'Ukrainian (Українська)' },
+        { value: 'swahili', label: isRTL ? 'السواحلية (Kiswahili)' : 'Swahili (Kiswahili)' },
+        { value: 'kurdish', label: isRTL ? 'الكردية (Kurdî)' : 'Kurdish (Kurdî)' },
+        { value: 'other', label: isRTL ? 'لغة أخرى (Other)' : 'Other Language' }
     ];
 
     const courseLevels = [
@@ -742,6 +764,27 @@ const CourseEdit = () => {
                                     className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium"
                                 >
                                     <option value="">{isRTL ? '-- اختر لغة الشرح --' : '-- Select Language --'}</option>
+                                    {WORLD_LANGUAGES.map(lang => (
+                                        <option key={lang.value} value={lang.value}>{lang.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Subtitle / Translation Language */}
+                            <div>
+                                <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    {isRTL ? 'لغة الترجمة النصية (Subtitles)' : 'Subtitle Language'}
+                                </label>
+                                <select
+                                    value={formData.subtitleLanguage || ''}
+                                    onChange={(e) => handleInputChange('subtitleLanguage', e.target.value)}
+                                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium"
+                                >
+                                    <option value="">{isRTL ? 'بدون ترجمة نصية (None)' : 'None (No subtitles)'}</option>
+                                    <option value="multiple">{isRTL ? 'متعدد اللغات (Multiple Languages)' : 'Multiple Languages'}</option>
+                                    {formData.subtitleLanguage && !WORLD_LANGUAGES.some(l => l.value === formData.subtitleLanguage) && formData.subtitleLanguage !== 'multiple' && (
+                                        <option value={formData.subtitleLanguage}>{formData.subtitleLanguage}</option>
+                                    )}
                                     {WORLD_LANGUAGES.map(lang => (
                                         <option key={lang.value} value={lang.value}>{lang.label}</option>
                                     ))}

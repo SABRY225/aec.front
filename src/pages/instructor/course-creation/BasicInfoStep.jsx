@@ -25,6 +25,45 @@ import { useFileUpload } from '../../../hooks/useFileUpload';
 import FileUpload from '../../../components/shared/FileUpload/FileUpload';
 import { useLanguage } from '../../../hooks/useLanguage';
 
+export const WORLD_LANGUAGES = [
+    { value: 'arabic', labelAr: 'العربية', labelEn: 'Arabic', nativeName: 'العربية' },
+    { value: 'english', labelAr: 'الإنجليزية', labelEn: 'English', nativeName: 'English' },
+    { value: 'french', labelAr: 'الفرنسية', labelEn: 'French', nativeName: 'Français' },
+    { value: 'spanish', labelAr: 'الإسبانية', labelEn: 'Spanish', nativeName: 'Español' },
+    { value: 'german', labelAr: 'الألمانية', labelEn: 'German', nativeName: 'Deutsch' },
+    { value: 'italian', labelAr: 'الإيطالية', labelEn: 'Italian', nativeName: 'Italiano' },
+    { value: 'portuguese', labelAr: 'البرتغالية', labelEn: 'Portuguese', nativeName: 'Português' },
+    { value: 'russian', labelAr: 'الروسية', labelEn: 'Russian', nativeName: 'Русский' },
+    { value: 'turkish', labelAr: 'التركية', labelEn: 'Turkish', nativeName: 'Türkçe' },
+    { value: 'chinese', labelAr: 'الصينية', labelEn: 'Chinese', nativeName: '中文' },
+    { value: 'japanese', labelAr: 'اليابانية', labelEn: 'Japanese', nativeName: '日本語' },
+    { value: 'korean', labelAr: 'الكورية', labelEn: 'Korean', nativeName: '한국어' },
+    { value: 'hindi', labelAr: 'الهندية', labelEn: 'Hindi', nativeName: 'हिन्दी' },
+    { value: 'urdu', labelAr: 'الأوردو', labelEn: 'Urdu', nativeName: 'اردو' },
+    { value: 'persian', labelAr: 'الفارسية', labelEn: 'Persian', nativeName: 'فارسی' },
+    { value: 'dutch', labelAr: 'الهولندية', labelEn: 'Dutch', nativeName: 'Nederlands' },
+    { value: 'swedish', labelAr: 'السويدية', labelEn: 'Swedish', nativeName: 'Svenska' },
+    { value: 'norwegian', labelAr: 'النرويجية', labelEn: 'Norwegian', nativeName: 'Norsk' },
+    { value: 'danish', labelAr: 'الدنماركية', labelEn: 'Danish', nativeName: 'Dansk' },
+    { value: 'finnish', labelAr: 'الفنلندية', labelEn: 'Finnish', nativeName: 'Suomi' },
+    { value: 'polish', labelAr: 'البولندية', labelEn: 'Polish', nativeName: 'Polski' },
+    { value: 'czech', labelAr: 'التشيكية', labelEn: 'Czech', nativeName: 'Čeština' },
+    { value: 'hungarian', labelAr: 'المجرية', labelEn: 'Hungarian', nativeName: 'Magyar' },
+    { value: 'romanian', labelAr: 'الرومانية', labelEn: 'Romanian', nativeName: 'Română' },
+    { value: 'greek', labelAr: 'اليونانية', labelEn: 'Greek', nativeName: 'Ελληνικά' },
+    { value: 'hebrew', labelAr: 'العبرية', labelEn: 'Hebrew', nativeName: 'עברית' },
+    { value: 'indonesian', labelAr: 'الإندونيسية', labelEn: 'Indonesian', nativeName: 'Bahasa Indonesia' },
+    { value: 'malay', labelAr: 'الملايو', labelEn: 'Malay', nativeName: 'Bahasa Melayu' },
+    { value: 'tagalog', labelAr: 'الفلبينية', labelEn: 'Filipino', nativeName: 'Tagalog' },
+    { value: 'thai', labelAr: 'التايلاندية', labelEn: 'Thai', nativeName: 'ไทย' },
+    { value: 'vietnamese', labelAr: 'الفيتنامية', labelEn: 'Vietnamese', nativeName: 'Tiếng Việt' },
+    { value: 'bengali', labelAr: 'البنغالية', labelEn: 'Bengali', nativeName: 'বাংলা' },
+    { value: 'ukrainian', labelAr: 'الأوكرانية', labelEn: 'Ukrainian', nativeName: 'Українська' },
+    { value: 'swahili', labelAr: 'السواحلية', labelEn: 'Swahili', nativeName: 'Kiswahili' },
+    { value: 'kurdish', labelAr: 'الكردية', labelEn: 'Kurdish', nativeName: 'Kurdî' },
+    { value: 'other', labelAr: 'لغة أخرى', labelEn: 'Other Language', nativeName: 'Other' }
+];
+
 const BasicInfoStep = ({ courseData, handleChange, onNext = null }) => {
     const { t } = useTranslation();
     const { language, isRTL } = useLanguage();
@@ -612,7 +651,7 @@ const BasicInfoStep = ({ courseData, handleChange, onNext = null }) => {
                 {/* Language */}
                 <div className="col-span-1">
                     <label htmlFor="language" className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                        {t('instructor.courseCreation.languageLabel')} <span className="text-red-500">*</span>
+                        {t('instructor.courseCreation.languageLabel', 'لغة الشرح')} <span className="text-red-500">*</span>
                     </label>
                     <select
                         id="language"
@@ -622,12 +661,15 @@ const BasicInfoStep = ({ courseData, handleChange, onNext = null }) => {
                         className={`w-full px-4 py-3 rounded-2xl border ${errors.language ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-slate-50/50 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium cursor-pointer`}
                         required
                     >
-                        <option value="">{t('instructor.courseCreation.selectLanguage')}</option>
-                        <option value="arabic">{t('student.settings.account.languages.arabic', 'العربية')}</option>
-                        <option value="english">{t('student.settings.account.languages.english', 'الإنجليزية')}</option>
-                        <option value="french">{t('student.settings.account.languages.french', 'الفرنسية')}</option>
-                        <option value="spanish">{t('student.settings.account.languages.spanish', 'الإسبانية')}</option>
-                        <option value="german">{t('student.settings.account.languages.german', 'الألمانية')}</option>
+                        <option value="">{t('instructor.courseCreation.selectLanguage', '-- اختر لغة الدورة --')}</option>
+                        {courseData.language && !WORLD_LANGUAGES.some(l => l.value === courseData.language) && (
+                            <option value={courseData.language}>{courseData.language}</option>
+                        )}
+                        {WORLD_LANGUAGES.map(lang => (
+                            <option key={lang.value} value={lang.value}>
+                                {isRTL ? `${lang.labelAr} (${lang.nativeName})` : `${lang.labelEn} (${lang.nativeName})`}
+                            </option>
+                        ))}
                     </select>
                     {errors.language && <p className="mt-1 text-xs text-red-500 font-semibold">{errors.language}</p>}
                 </div>
@@ -644,9 +686,16 @@ const BasicInfoStep = ({ courseData, handleChange, onNext = null }) => {
                         onBlur={(e) => handleBlur('subtitleLanguage', e.target.value)}
                         className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium cursor-pointer"
                     >
-                        <option value="">{t('instructor.courseCreation.selectSubtitle', 'بدون ترجمة')}</option>
-                        <option value="arabic">{t('student.settings.account.languages.arabic', 'العربية')}</option>
-                        <option value="english">{t('student.settings.account.languages.english', 'الإنجليزية')}</option>
+                        <option value="">{t('instructor.courseCreation.selectSubtitle', 'بدون ترجمة (None)')}</option>
+                        <option value="multiple">{isRTL ? 'متعدد اللغات (عدة لغات)' : 'Multiple Languages'}</option>
+                        {courseData.subtitleLanguage && !WORLD_LANGUAGES.some(l => l.value === courseData.subtitleLanguage) && courseData.subtitleLanguage !== 'multiple' && (
+                            <option value={courseData.subtitleLanguage}>{courseData.subtitleLanguage}</option>
+                        )}
+                        {WORLD_LANGUAGES.map(lang => (
+                            <option key={lang.value} value={lang.value}>
+                                {isRTL ? `${lang.labelAr} (${lang.nativeName})` : `${lang.labelEn} (${lang.nativeName})`}
+                            </option>
+                        ))}
                     </select>
                 </div>
 

@@ -17,8 +17,10 @@ import {
     Image as ImageIcon,
     Tag,
     Sparkles,
-    ShieldCheck
+    ShieldCheck,
+    Captions
 } from 'lucide-react';
+import { WORLD_LANGUAGES } from './BasicInfoStep';
 
 const PublishStep = ({ courseData, handleSubmitForReview }) => {
     const { t } = useTranslation();
@@ -256,7 +258,27 @@ const PublishStep = ({ courseData, handleSubmitForReview }) => {
                             {courseData.language && (
                                 <div className="flex items-center gap-1.5">
                                     <Globe className="w-4 h-4 text-emerald-500" />
-                                    <span>{courseData.language}</span>
+                                    <span>
+                                        {(() => {
+                                            const match = WORLD_LANGUAGES?.find(l => l.value === courseData.language);
+                                            return match ? (isRTL ? match.labelAr : match.labelEn) : courseData.language;
+                                        })()}
+                                    </span>
+                                </div>
+                            )}
+                            {courseData.subtitleLanguage && (
+                                <div className="flex items-center gap-1.5">
+                                    <Captions className="w-4 h-4 text-cyan-500" />
+                                    <span>
+                                        {isRTL ? 'ترجمة: ' : 'Subtitles: '}
+                                        {(() => {
+                                            if (courseData.subtitleLanguage === 'multiple') {
+                                                return isRTL ? 'متعدد اللغات' : 'Multiple Languages';
+                                            }
+                                            const match = WORLD_LANGUAGES?.find(l => l.value === courseData.subtitleLanguage);
+                                            return match ? (isRTL ? match.labelAr : match.labelEn) : courseData.subtitleLanguage;
+                                        })()}
+                                    </span>
                                 </div>
                             )}
                         </div>

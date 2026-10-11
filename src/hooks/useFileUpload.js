@@ -28,6 +28,14 @@ export const useFileUpload = () => {
         return chunks;
     };
     
+    const getApiBaseUrl = () => {
+        const envUrl = import.meta.env?.VITE_API_BASE_URL;
+        if (envUrl) {
+            return envUrl.replace(/\/+$/, '');
+        }
+        return 'http://localhost:5002/api';
+    };
+
     // Helper function to upload a single chunk
     const uploadChunk = async (chunk, chunkIndex, totalChunks, file, folder, fileId) => {
         const formData = new FormData();
@@ -40,10 +48,7 @@ export const useFileUpload = () => {
         formData.append('folder', folder);
         
         try {
-            // Use local server URL for development, production URL for production
-            const apiUrl = process.env.NODE_ENV === 'production' 
-                ? 'https://server.aectraining.com.sa/api/upload/chunk'
-                : 'http://localhost:5002/api/upload/chunk';
+            const apiUrl = `${getApiBaseUrl()}/upload/chunk`;
             
             // Get current access token for authentication
             const token = getCurrentToken();
@@ -98,10 +103,7 @@ export const useFileUpload = () => {
         formData.append('folder', folder);
         
         try {
-            // Use local server URL for development, production URL for production
-             const apiUrl = process.env.NODE_ENV === 'production' 
-                 ? 'https://server.aectraining.com.sa/api/upload'
-                 : 'http://localhost:5002/api/upload';
+            const apiUrl = `${getApiBaseUrl()}/upload`;
             
             // Get current access token for authentication
             const token = getCurrentToken();
@@ -142,10 +144,7 @@ export const useFileUpload = () => {
     // Helper function to check chunk upload status and identify missing chunks
     const checkChunkStatus = async (fileId, totalChunks) => {
         try {
-            // Use local server URL for development, production URL for production
-            const apiUrl = process.env.NODE_ENV === 'production' 
-                ? 'https://server.aectraining.com.sa/api/upload/chunk-status/'
-                : 'http://localhost:5002/api/upload/chunk-status/';
+            const apiUrl = `${getApiBaseUrl()}/upload/chunk-status/`;
             
             // Get current access token for authentication
             const token = getCurrentToken();
@@ -217,15 +216,15 @@ export const useFileUpload = () => {
             // After all chunks are uploaded, poll for completion
             console.log('All chunks uploaded, waiting for server processing...');
             
-            // Calculate max attempts based on file size (larger files need more time)
-            // Base attempts: 20, add 1 attempt per 10MB (reduced from 5MB to be more generous)
+            // Calculate max attempts based on file size (larger files need more time to merge and upload)
             const fileSizeMB = file.size / (1024 * 1024);
-            const maxAttempts = Math.max(20, Math.ceil(20 + (fileSizeMB / 10)));
-            // Reduced delay: 2 seconds for small files, 3 seconds for larger files
-            const delayBetweenChecks = fileSizeMB > 50 ? 3000 : 2000;
+            const baseAttempts = 60; // 60 attempts * 2s = 120s base
+            const maxAttempts = Math.max(baseAttempts, Math.ceil(baseAttempts + (fileSizeMB * 2)));
+            const delayBetweenChecks = fileSizeMB > 50 ? 2500 : 2000;
             
             console.log(`File size: ${fileSizeMB.toFixed(2)}MB, Max attempts: ${maxAttempts}, Delay: ${delayBetweenChecks}ms`);
             
+            let processingCount = 0;
             for (let attempt = 0; attempt < maxAttempts; attempt++) {
                 // Wait before checking status
                 await new Promise(resolve => setTimeout(resolve, delayBetweenChecks));
@@ -247,11 +246,17 @@ export const useFileUpload = () => {
                     throw new Error(status.message || 'Upload failed');
                 }
                 
-                // If still processing, show progress
+                // If still processing, show progress and allow extra processing time
                 if (status.processing) {
+                    processingCount++;
                     const progress = status.progress || 0;
                     setUploadProgress(Math.min(99, progress)); // Cap at 99% until fully complete
                     console.log(`Processing... ${progress}% - ${status.message || 'Uploading'}`);
+                    
+                    // If the backend is actively reporting progress/processing, don't deplete attempts too quickly
+                    if (attempt > maxAttempts - 10 && processingCount < 100) {
+                        attempt -= 5;
+                    }
                 }
                 
                 // Handle missing chunks

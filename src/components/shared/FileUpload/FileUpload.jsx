@@ -211,6 +211,11 @@ const FileUpload = ({
     <div className={`file-upload-container ${className}`}>
       <div
         className={`file-upload-area ${isDragging ? 'dragging' : ''} ${disabled ? 'disabled' : ''}`}
+        onClick={(e) => {
+          if (disabled || uploading) return;
+          if (e.target.tagName === 'INPUT' || e.target.closest('label')) return;
+          fileInputRef.current?.click();
+        }}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
