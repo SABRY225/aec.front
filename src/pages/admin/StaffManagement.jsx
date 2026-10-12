@@ -179,7 +179,6 @@ const StaffManagement = () => {
             const matchesRole = roleFilter === 'all' || staff.staffRole === roleFilter;
             const q = searchQuery.trim().toLowerCase();
             if (!q) return matchesRole;
-
             const name = `${staff.firstName || ''} ${staff.lastName || ''}`.toLowerCase();
             const email = (staff.email || '').toLowerCase();
             const phone = (staff.phone || '').toLowerCase();
@@ -587,14 +586,14 @@ const StaffManagement = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredStaff.map((staff) => {
+                                filteredStaff.map((staff, index) => {
                                     const roleDetails = getRoleDetails(staff.staffRole);
                                     const RoleIcon = roleDetails.icon;
-                                    const isCurrentUser = (currentUser?._id || currentUser?.id) === staff._id;
+                                    const isCurrentUser = (currentUser?._id || currentUser?.id) === (staff._id || staff.id || staff._doc?._id);
                                     const initials = `${staff.firstName?.[0] || ''}${staff.lastName?.[0] || ''}`.toUpperCase() || 'U';
 
                                     return (
-                                        <tr key={staff._id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors group">
+                                        <tr key={staff._id || staff.id || staff._doc?._id || index} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors group">
                                             {/* Staff Info */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">

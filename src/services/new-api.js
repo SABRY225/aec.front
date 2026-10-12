@@ -1115,6 +1115,11 @@ export const contactService = {
     deleteMessage: async (messageId) => {
         const response = await api.delete(`/contact/messages/${messageId}`);
         return response.data;
+    },
+
+    replyToMessage: async (messageId, replyData) => {
+        const response = await api.post(`/contact/messages/${messageId}/reply`, replyData);
+        return response.data;
     }
 };
 

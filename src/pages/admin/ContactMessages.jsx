@@ -22,7 +22,8 @@ import {
     CheckCircle2,
     MessageSquare,
     ExternalLink,
-    Filter
+    Filter,
+    Send
 } from 'lucide-react';
 import { contactService } from '../../services/new-api';
 import { formatDateTime } from '../../utils/formatDate';
@@ -42,6 +43,9 @@ const ContactMessages = () => {
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [updating, setUpdating] = useState(false);
+    const [replyText, setReplyText] = useState('');
+    const [replySubject, setReplySubject] = useState('');
+    const [sendingReply, setSendingReply] = useState(false);
 
     useEffect(() => {
         fetchMessages();
@@ -91,6 +95,45 @@ const ContactMessages = () => {
             toast.error(t('admin.contactMessages.updateFailed', 'فشل في تحديث حالة الرسالة'));
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const openMessageModal = (message) => {
+        setSelectedMessage(message);
+        setReplyText('');
+        setReplySubject(`الرد على استفسارك | أكاديمية تدريب الخبراء AEC`);
+        setShowModal(true);
+        if (message.status === 'unread') {
+            handleStatusUpdate(message._id, 'read');
+        }
+    };
+
+    const handleSendReply = async () => {
+        if (!replyText.trim() || !selectedMessage) return;
+        try {
+            setSendingReply(true);
+            const res = await contactService.replyToMessage(selectedMessage._id, {
+                replyMessage: replyText.trim(),
+                subject: replySubject.trim() || undefined
+            });
+            if (res.success) {
+                toast.success(t('admin.contactMessages.replySuccess', 'تم إرسال الرد إلى بريد المستخدم بنجاح'));
+                const updated = res.data || {
+                    ...selectedMessage,
+                    status: 'replied',
+                    replyMessage: replyText.trim(),
+                    repliedAt: new Date()
+                };
+                setSelectedMessage(updated);
+                setReplyText('');
+                fetchMessages();
+                fetchStats();
+            }
+        } catch (error) {
+            console.error('Error sending reply:', error);
+            toast.error(error.response?.data?.message || t('admin.contactMessages.replyFailed', 'فشل في إرسال الرد إلى البريد'));
+        } finally {
+            setSendingReply(false);
         }
     };
 
@@ -330,13 +373,7 @@ const ContactMessages = () => {
                                             className={`hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors cursor-pointer group ${
                                                 message.status === 'unread' ? 'bg-indigo-50/20 dark:bg-indigo-950/10 font-medium' : ''
                                             }`}
-                                            onClick={() => {
-                                                setSelectedMessage(message);
-                                                setShowModal(true);
-                                                if (message.status === 'unread') {
-                                                    handleStatusUpdate(message._id, 'read');
-                                                }
-                                            }}
+                                            onClick={() => openMessageModal(message)}
                                         >
                                             {/* Sender Info */}
                                             <td className="px-6 py-4">
@@ -391,17 +428,19 @@ const ContactMessages = () => {
                                             <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                 <div className="flex items-center justify-center gap-1.5">
                                                     <button
-                                                        onClick={() => {
-                                                            setSelectedMessage(message);
-                                                            setShowModal(true);
-                                                            if (message.status === 'unread') {
-                                                                handleStatusUpdate(message._id, 'read');
-                                                            }
-                                                        }}
+                                                        onClick={() => openMessageModal(message)}
                                                         className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
                                                         title={t('common.view', 'عرض')}
                                                     >
                                                         <Eye size={15} />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => openMessageModal(message)}
+                                                        className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
+                                                        title={t('admin.contactMessages.reply', 'الرد على الرسالة')}
+                                                    >
+                                                        <Reply size={15} />
                                                     </button>
 
                                                     <button
@@ -504,6 +543,86 @@ const ContactMessages = () => {
                                 </span>
                             </div>
 
+                            {/* Previous Reply if any */}
+                            {selectedMessage.replyMessage && (
+                                <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 space-y-2">
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                                            <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" />
+                                            {t('admin.contactMessages.previousReply', 'الرد المُرسل مسبقاً')}
+                                        </span>
+                                        {selectedMessage.repliedAt && (
+                                            <span className="text-emerald-600/80 dark:text-emerald-400/80 text-[11px] font-mono">
+                                                {formatDateTime(selectedMessage.repliedAt)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-xs text-emerald-950 dark:text-emerald-200 leading-relaxed whitespace-pre-wrap bg-white/60 dark:bg-slate-900/60 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                                        {selectedMessage.replyMessage}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Reply by Email Form */}
+                            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-white">
+                                        <Reply size={15} className="text-indigo-600 dark:text-indigo-400" />
+                                        <span>{selectedMessage.replyMessage ? t('admin.contactMessages.sendAnotherReply', 'إرسال رد إضافي للبريد') : t('admin.contactMessages.writeReply', 'كتابة رد وإرساله إلى البريد')}</span>
+                                    </div>
+                                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                        إلى: <span className="font-mono font-medium text-indigo-600 dark:text-indigo-400">{selectedMessage.email}</span>
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                        عنوان الرسالة (Subject)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={replySubject}
+                                        onChange={(e) => setReplySubject(e.target.value)}
+                                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
+                                        placeholder="عنوان البريد الإلكتروني..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                        نص الرد
+                                    </label>
+                                    <textarea
+                                        rows={4}
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        className="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none leading-relaxed"
+                                        placeholder="اكتب ردك هنا، سيتم إرساله بتنسيق رسمي إلى بريد العميل..."
+                                    />
+                                </div>
+
+                                <div className="flex justify-end pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={handleSendReply}
+                                        disabled={sendingReply || !replyText.trim()}
+                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-sm"
+                                    >
+                                        {sendingReply ? (
+                                            <>
+                                                <RefreshCw size={13} className="animate-spin" />
+                                                <span>{t('admin.contactMessages.sending', 'جاري الإرسال...')}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send size={13} />
+                                                <span>{t('admin.contactMessages.sendReply', 'إرسال الرد للبريد الإلكتروني')}</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
                             {/* Quick Status Update */}
                             <div className="pt-2">
                                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -547,10 +666,11 @@ const ContactMessages = () => {
                             <div className="flex items-center gap-2">
                                 <a
                                     href={`mailto:${selectedMessage.email}?subject=Re: Your message to AEC Academy`}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+                                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                                    title="فتح في تطبيق البريد الخارجي"
                                 >
-                                    <Reply size={15} />
-                                    <span>{t('admin.contactMessages.replyEmail', 'الرد عبر البريد')}</span>
+                                    <ExternalLink size={13} />
+                                    <span>{t('admin.contactMessages.externalApp', 'تطبيق البريد')}</span>
                                 </a>
 
                                 <button

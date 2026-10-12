@@ -200,17 +200,18 @@ const InstructorManagement = () => {
             {/* Tab Content Display */}
             {/* ======================================================== */}
             <div>
-                {activeTab === 'instructors' ? (
+                <div className={activeTab === 'instructors' ? 'block' : 'hidden'}>
                     <Instructors 
                         onCountChange={handleInstructorsCount} 
                         isRefreshingParent={isRefreshing}
                     />
-                ) : (
+                </div>
+                <div className={activeTab === 'applications' ? 'block' : 'hidden'}>
                     <InstructorApplications 
                         onCountChange={handleApplicationsCount} 
                         isRefreshingParent={isRefreshing}
                     />
-                )}
+                </div>
             </div>
         </div>
     );

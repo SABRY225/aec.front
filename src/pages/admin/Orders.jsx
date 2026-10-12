@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
     ShoppingCart, Search, Filter, Eye, Trash2, CheckCircle, 
-    XCircle, Clock, MoreVertical, Edit2, ChevronLeft, ChevronRight 
+    XCircle, Clock, MoreVertical, Edit2, ChevronLeft, ChevronRight, Phone 
 } from 'lucide-react';
 import { adminService } from '../../services/new-api';
 import { toast } from 'react-toastify';
@@ -131,7 +131,7 @@ const Orders = () => {
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input 
                         type="text" 
-                        placeholder="ابحث برقم الطلب (Order ID)..." 
+                        placeholder="ابحث برقم الطلب، اسم الطالب، البريد، أو رقم الهاتف..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full pl-4 pr-10 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-green-500"
@@ -187,6 +187,19 @@ const Orders = () => {
                                                 {payment.userId?.firstName} {payment.userId?.lastName}
                                             </span>
                                             <span className="text-slate-500 text-sm">{payment.userId?.email}</span>
+                                            {payment.userId?.phone && (
+                                                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                    <Phone size={12} className="text-emerald-500 flex-shrink-0" />
+                                                    <a 
+                                                        href={`tel:${payment.userId.phone}`} 
+                                                        className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-mono"
+                                                        dir="ltr"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {payment.userId.phone}
+                                                    </a>
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="p-4 font-medium text-slate-800 dark:text-white">
@@ -269,9 +282,22 @@ const Orders = () => {
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">المستخدم</p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">المستخدم / الطالب</p>
                                     <p className="font-semibold text-slate-800 dark:text-white">{selectedPayment.userId?.firstName} {selectedPayment.userId?.lastName}</p>
                                     <p className="text-sm text-slate-600 dark:text-slate-300">{selectedPayment.userId?.email}</p>
+                                    {selectedPayment.userId?.phone && (
+                                        <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700/50">
+                                            <Phone size={14} className="text-emerald-500 flex-shrink-0" />
+                                            <span className="text-slate-500 text-xs">الهاتف:</span>
+                                            <a 
+                                                href={`tel:${selectedPayment.userId.phone}`} 
+                                                className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline font-mono" 
+                                                dir="ltr"
+                                            >
+                                                {selectedPayment.userId.phone}
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">معلومات مالية</p>
