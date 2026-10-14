@@ -52,6 +52,19 @@ import {
     Eye
 } from 'lucide-react';
 
+// Inject the official Tabby promo snippet (web component) once per page
+function useTabbyPromoScript() {
+    useEffect(() => {
+        if (!document.getElementById('tabby-promo-script')) {
+            const s = document.createElement('script');
+            s.id = 'tabby-promo-script';
+            s.src = 'https://checkout.tabby.ai/tabby-promo.js';
+            s.async = true;
+            document.head.appendChild(s);
+        }
+    }, []);
+}
+
 const CoursePreview = () => {
     const { t } = useTranslation();
     const { language, isRTL } = useLanguage();
@@ -60,6 +73,8 @@ const CoursePreview = () => {
     const { addToCart, isInCart } = useCart();
     const { localizeCategory, localizeSubcategory } = useCategoryLookup();
     const { user } = useAuth();
+
+    useTabbyPromoScript();
 
     const [course, setCourse] = useState(null);
     const [relatedCourses, setRelatedCourses] = useState([]);
@@ -1279,6 +1294,18 @@ const CoursePreview = () => {
                                         {course.isFull && (
                                             <div className="mt-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold text-center">
                                                 {t('course.preview.courseFull', 'عذراً، مقاعد هذه الدورة مكتملة حالياً')}
+                                            </div>
+                                        )}
+
+                                        {/* Official Tabby product-page promo snippet (Issue #1) */}
+                                        {user && coursePrice > 0 && (
+                                            <div className="mt-3" dir="ltr">
+                                                <tabby-card
+                                                    currency="SAR"
+                                                    price={String(coursePrice.toFixed(2))}
+                                                    lang={language}
+                                                    source="product"
+                                                />
                                             </div>
                                         )}
                                     </div>

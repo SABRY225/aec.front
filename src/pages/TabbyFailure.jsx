@@ -8,8 +8,14 @@ const TabbyFailure = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        toast.error(t('payment.failed.defaultError', 'فشلت عملية الدفع. يرجى المحاولة مرة أخرى.'));
-        navigate('/payment-failed');
+        // Issue #6: Correct rejection message per Tabby guidelines (not a card/bank failure)
+        toast.error(
+            t(
+                'tabby.failure.message',
+                'Sorry, Tabby is unable to approve this purchase. Please use an alternative payment method for your order.'
+            )
+        );
+        navigate('/checkout');
     }, [navigate, t]);
 
     return (

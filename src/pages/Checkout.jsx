@@ -27,14 +27,30 @@ import {
     Calendar
 } from 'lucide-react';
 import TamaraWidget from '../components/TamaraWidget';
+import { useEffect as useEffectTabby } from 'react';
+
+// Inject the official Tabby promo snippet (web component) once
+function useTabbyPromoScript() {
+    useEffectTabby(() => {
+        if (!document.getElementById('tabby-promo-script')) {
+            const s = document.createElement('script');
+            s.id = 'tabby-promo-script';
+            s.src = 'https://checkout.tabby.ai/tabby-promo.js';
+            s.async = true;
+            document.head.appendChild(s);
+        }
+    }, []);
+}
 
 const Checkout = () => {
     const { t } = useTranslation();
-    const { isRTL } = useLanguage();
+    const { isRTL, language } = useLanguage();
     const { cartItems, removeFromCart, getTotalPrice } = useCart();
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, loading } = useAuth();
+    
+    useTabbyPromoScript();
     
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [couponCode, setCouponCode] = useState('');
@@ -264,8 +280,8 @@ const Checkout = () => {
                                     </div>
                                     <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
                                         {isRTL 
-                                            ? 'اختر الطريقة الأنسب لك: ادفع فورياً بالبطاقة البنكية (مدى/فيزا/ماستركارد)، أو قسّم مشترياتك على 4 دفعات شهرية ميسرة بدون أي فوائد أو رسوم إضافية عبر تابي أو تمارا.' 
-                                            : 'Choose what suits you best: pay immediately with card (Mada/Visa/Mastercard), or split into 4 interest-free monthly installments with 0 fees via Tabby or Tamara.'}
+                                            ? 'اختر الطريقة الأنسب لك: ادفع فورياً بالبطاقة البنكية (مدى/فيزا/ماستركارد)، أو قسّم مشترياتك على 4 دفعات شهرية عبر تابي أو تمارا.' 
+                                            : 'Choose what suits you best: pay immediately with card (Mada/Visa/Mastercard), or split into installments via Tabby or Tamara.'}
                                     </p>
                                 </div>
                             </div>
@@ -343,38 +359,30 @@ const Checkout = () => {
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-bold text-slate-900 dark:text-white text-base">
-                                                    {t('checkout.tabbyTitle', 'تابي (Tabby)')}
-                                                </span>
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
-                                                    <Sparkles className="w-3 h-3" />
-                                                    <span>{isRTL ? 'قسّم على 4 دفعات' : 'Split in 4'}</span>
+                                                    {isRTL ? 'ادفع لاحقاً مع تابي' : 'Pay later with Tabby'}
                                                 </span>
                                             </div>
 
-                                            {/* Tabby Logo Badge */}
-                                            <span className="px-2.5 py-1 rounded-md bg-[#292929] text-[#39E992] font-black text-xs tracking-wider shadow-xs">
-                                                tabby
-                                            </span>
+                                            {/* Official Tabby logo */}
+                                            <img
+                                                src="https://checkout.tabby.ai/tabby-logo.svg"
+                                                alt="Tabby"
+                                                className="h-6 w-auto"
+                                            />
                                         </div>
 
                                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                            {t('checkout.tabbyDesc', 'قسّم فاتورتك على 4 دفعات شهرية ميسرة بدون فوائد أو رسوم إضافية')}
+                                            {isRTL ? 'قسّم مشترياتك على دفعات ميسّرة مع تابي' : 'Split your purchase into easy installments with Tabby'}
                                         </p>
 
-                                        {/* Installment breakdown highlight */}
-                                        <div className="mt-3 p-2.5 sm:p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/40 flex flex-wrap items-center justify-between gap-2 text-xs">
-                                            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                                                <span>{isRTL ? 'ادفع الدفعة الأولى اليوم والباقي شهرياً:' : 'Pay 1st payment today, rest monthly:'}</span>
-                                                <span className="text-emerald-600 dark:text-emerald-400 font-black text-sm">
-                                                    {installmentAmount} {isRTL ? 'ر.س' : 'SAR'}
-                                                </span>
-                                                <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
-                                                    {isRTL ? '/ شهرياً' : '/ month'}
-                                                </span>
-                                            </div>
-                                            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-emerald-900/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-700/60">
-                                                {isRTL ? '0% فوائد • 0% رسوم' : '0% Interest • 0% Fees'}
-                                            </span>
+                                        {/* Official Tabby checkout snippet */}
+                                        <div className="mt-3" dir="ltr">
+                                            <tabby-card
+                                                currency="SAR"
+                                                price={String(totalWithTax.toFixed(2))}
+                                                lang={language}
+                                                source="cart"
+                                            />
                                         </div>
                                     </div>
                                 </label>
@@ -584,14 +592,14 @@ const Checkout = () => {
                                             </span>
                                         </div>
 
-                                        <div className="pt-2 border-t border-primary-200/50 dark:border-primary-800/50 flex flex-wrap items-center justify-between gap-1 text-xs">
-                                            <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                                                <Sparkles className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
-                                                <span>{isRTL ? 'أو بالتقسيط عبر (تابي / تمارا):' : 'Or installments via (Tabby / Tamara):'}</span>
-                                            </span>
-                                            <span className="font-extrabold text-primary-700 dark:text-primary-300">
-                                                4 × {installmentAmount} {isRTL ? 'ر.س / شهر' : 'SAR / mo'}
-                                            </span>
+                                        {/* Official Tabby checkout snippet (replaces custom installment copy) */}
+                                        <div className="pt-2 border-t border-primary-200/50 dark:border-primary-800/50" dir="ltr">
+                                            <tabby-card
+                                                currency="SAR"
+                                                price={String(totalWithTax.toFixed(2))}
+                                                lang={language}
+                                                source="cart"
+                                            />
                                         </div>
                                     </div>
                                 </div>

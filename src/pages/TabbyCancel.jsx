@@ -8,7 +8,13 @@ const TabbyCancel = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        toast.info(t('payment.failed.defaultError', 'تم إلغاء عملية الدفع.'));
+        // Issue #6: Correct cancellation message per Tabby guidelines
+        toast.info(
+            t(
+                'tabby.cancel.message',
+                'You aborted the payment. Please retry or choose another payment method.'
+            )
+        );
         navigate('/checkout');
     }, [navigate, t]);
 
