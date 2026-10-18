@@ -82,7 +82,8 @@ function CourseCategories() {
     const [showFilters, setShowFilters] = useState(true);
     const [availableSubcategories, setAvailableSubcategories] = useState([]);
     const [page, setPage] = useState(1);
-    const [pagination, setPagination] = useState({ total: 0, pages: 1, page: 1, limit: 12 });
+    const [limit, setLimit] = useState(25);
+    const [pagination, setPagination] = useState({ total: 0, pages: 1, page: 1, limit: 25 });
     const [categoryCounts, setCategoryCounts] = useState({});
     const [featuredCourses, setFeaturedCourses] = useState([]);
 
@@ -167,7 +168,7 @@ function CourseCategories() {
 
                 const response = await courseService.getAllCourses({
                     page,
-                    limit: 12,
+                    limit,
                     sort: sortBy,
                     includeCategoryCounts: page === 1 ? 'true' : undefined,
                     ...(debouncedSearch ? { search: debouncedSearch } : {}),
@@ -201,6 +202,7 @@ function CourseCategories() {
         fetchCourses();
     }, [
         page,
+        limit,
         sortBy,
         debouncedSearch,
         selectedCategory,
@@ -299,6 +301,14 @@ function CourseCategories() {
 
     const handlePageChange = (newPage) => {
         setPage(newPage);
+        if (catalogTopRef.current) {
+            catalogTopRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const handleLimitChange = (newLimit) => {
+        setLimit(newLimit);
+        setPage(1);
         if (catalogTopRef.current) {
             catalogTopRef.current.scrollIntoView({ behavior: 'smooth' });
         }
@@ -698,9 +708,27 @@ function CourseCategories() {
                             })}
                         </div>
 
-                        {/* Controls Group: Sort & Advanced Filter Toggle */}
-                        <div className="flex items-center gap-3 self-end lg:self-auto w-full lg:w-auto justify-between lg:justify-end">
+                        {/* Controls Group: Items Per Page & Sort & Advanced Filter Toggle */}
+                        <div className="flex flex-wrap items-center gap-3 self-end lg:self-auto w-full lg:w-auto justify-between lg:justify-end">
                             
+                            {/* Items Per Page Dropdown (25, 50, 75, 100) */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-slate-500 hidden sm:inline">
+                                    {t('explore.perPage', 'عرض')}:
+                                </span>
+                                <select
+                                    value={limit}
+                                    onChange={(e) => handleLimitChange(Number(e.target.value))}
+                                    className="px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 bg-white hover:border-slate-300 focus:outline-none cursor-pointer shadow-xs transition"
+                                    aria-label="عدد الدورات في الصفحة"
+                                >
+                                    <option value={25}>25 {t('explore.coursesCount', 'دورة')}</option>
+                                    <option value={50}>50 {t('explore.coursesCount', 'دورة')}</option>
+                                    <option value={75}>75 {t('explore.coursesCount', 'دورة')}</option>
+                                    <option value={100}>100 {t('explore.coursesCount', 'دورة')}</option>
+                                </select>
+                            </div>
+
                             {/* Sort By Dropdown */}
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold text-slate-500 hidden sm:inline">
@@ -709,7 +737,7 @@ function CourseCategories() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 bg-white hover:border-slate-300 focus:outline-none cursor-pointer"
+                                    className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 bg-white hover:border-slate-300 focus:outline-none cursor-pointer shadow-xs transition"
                                 >
                                     {sortOptions.map((opt) => (
                                         <option key={opt.value} value={opt.value}>
@@ -968,58 +996,92 @@ function CourseCategories() {
                                 ))}
                             </div>
 
-                            {/* MODERN NUMBERED PAGINATION */}
-                            {pagination.pages > 1 && (
-                                <div className="flex items-center justify-center gap-2 mt-14">
-                                    <button
-                                        type="button"
-                                        disabled={page <= 1}
-                                        onClick={() => handlePageChange(Math.max(1, page - 1))}
-                                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 bg-white text-slate-700 flex items-center gap-1.5 transition"
-                                    >
-                                        <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-                                        <span>{t('common.previous', t('autoGenerated.compText1113', 'السابق'))}</span>
-                                    </button>
-
+                            {/* RESULTS SUMMARY & PAGINATION FOOTER */}
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-5 mt-14 pt-6 border-t border-slate-200/80">
+                                {/* Showing Count & Quick per-page buttons */}
+                                <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-600 font-medium">
+                                    <span>
+                                        {t('explore.showing', 'عرض')}{' '}
+                                        <strong className="text-slate-900 font-bold">{courses.length}</strong>{' '}
+                                        {t('explore.outOf', 'من أصل')}{' '}
+                                        <strong className="text-slate-900 font-bold">{pagination.total || courses.length}</strong>{' '}
+                                        {t('explore.coursesCount', 'دورة')}
+                                    </span>
+                                    <span className="text-slate-300 hidden sm:inline">|</span>
                                     <div className="flex items-center gap-1.5">
-                                        {Array.from({ length: pagination.pages }, (_, i) => i + 1)
-                                            .filter((p) => p === 1 || p === pagination.pages || Math.abs(p - page) <= 1)
-                                            .map((p, idx, arr) => {
-                                                const prev = arr[idx - 1];
-                                                const showEllipsis = prev && p - prev > 1;
-
-                                                return (
-                                                    <div key={p} className="flex items-center gap-1.5">
-                                                        {showEllipsis && (
-                                                            <span className="px-2 text-slate-400 font-bold">...</span>
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handlePageChange(p)}
-                                                            className={`w-10 h-10 rounded-xl text-sm font-black transition ${
-                                                                page === p
-                                                                    ? 'bg-[#004C97] text-white shadow-md shadow-blue-900/20'
-                                                                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-                                                            }`}
-                                                        >
-                                                            {p}
-                                                        </button>
-                                                    </div>
-                                                );
-                                            })}
+                                        <span className="text-xs text-slate-500 font-medium">{t('explore.perPage', 'في الصفحة')}:</span>
+                                        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-0.5 shadow-xs">
+                                            {[25, 50, 75, 100].map((num) => (
+                                                <button
+                                                    key={num}
+                                                    type="button"
+                                                    onClick={() => handleLimitChange(num)}
+                                                    className={`px-2.5 py-1 text-xs font-bold rounded-lg transition ${
+                                                        limit === num
+                                                            ? 'bg-[#004C97] text-white shadow-xs'
+                                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {num}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-
-                                    <button
-                                        type="button"
-                                        disabled={page >= pagination.pages}
-                                        onClick={() => handlePageChange(Math.min(pagination.pages, page + 1))}
-                                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 bg-white text-slate-700 flex items-center gap-1.5 transition"
-                                    >
-                                        <span>{t('common.next', t('autoGenerated.compText1114', 'التالي'))}</span>
-                                        <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-                                    </button>
                                 </div>
-                            )}
+
+                                {/* MODERN NUMBERED PAGINATION */}
+                                {pagination.pages > 1 && (
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            type="button"
+                                            disabled={page <= 1}
+                                            onClick={() => handlePageChange(Math.max(1, page - 1))}
+                                            className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 bg-white text-slate-700 flex items-center gap-1.5 transition shadow-xs"
+                                        >
+                                            <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                                            <span>{t('common.previous', t('autoGenerated.compText1113', 'السابق'))}</span>
+                                        </button>
+
+                                        <div className="flex items-center gap-1">
+                                            {Array.from({ length: pagination.pages }, (_, i) => i + 1)
+                                                .filter((p) => p === 1 || p === pagination.pages || Math.abs(p - page) <= 1)
+                                                .map((p, idx, arr) => {
+                                                    const prev = arr[idx - 1];
+                                                    const showEllipsis = prev && p - prev > 1;
+
+                                                    return (
+                                                        <div key={p} className="flex items-center gap-1">
+                                                            {showEllipsis && (
+                                                                <span className="px-1 text-slate-400 font-bold">...</span>
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handlePageChange(p)}
+                                                                className={`w-9 h-9 rounded-xl text-xs sm:text-sm font-black transition ${
+                                                                    page === p
+                                                                        ? 'bg-[#004C97] text-white shadow-sm'
+                                                                        : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                                                                }`}
+                                                            >
+                                                                {p}
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            disabled={page >= pagination.pages}
+                                            onClick={() => handlePageChange(Math.min(pagination.pages, page + 1))}
+                                            className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 bg-white text-slate-700 flex items-center gap-1.5 transition shadow-xs"
+                                        >
+                                            <span>{t('common.next', t('autoGenerated.compText1114', 'التالي'))}</span>
+                                            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </>
                     )}
                 </div>
