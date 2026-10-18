@@ -52,18 +52,7 @@ import {
     Eye
 } from 'lucide-react';
 
-// Inject the official Tabby promo snippet (web component) once per page
-function useTabbyPromoScript() {
-    useEffect(() => {
-        if (!document.getElementById('tabby-promo-script')) {
-            const s = document.createElement('script');
-            s.id = 'tabby-promo-script';
-            s.src = 'https://checkout.tabby.ai/tabby-promo.js';
-            s.async = true;
-            document.head.appendChild(s);
-        }
-    }, []);
-}
+import TabbyPromo from '../components/TabbyPromo';
 
 const CoursePreview = () => {
     const { t } = useTranslation();
@@ -73,8 +62,6 @@ const CoursePreview = () => {
     const { addToCart, isInCart } = useCart();
     const { localizeCategory, localizeSubcategory } = useCategoryLookup();
     const { user } = useAuth();
-
-    useTabbyPromoScript();
 
     const [course, setCourse] = useState(null);
     const [relatedCourses, setRelatedCourses] = useState([]);
@@ -185,6 +172,19 @@ const CoursePreview = () => {
 
     const handleAddToCart = () => {
         if (!course) return;
+
+        if (!user) {
+            toast.info(t('cart.loginRequired', 'يرجى تسجيل الدخول بحساب طالب أولاً لإضافة الدورة إلى سلة المشتريات'));
+            navigate('/login', { state: { from: `/course/${id}` } });
+            return;
+        }
+
+        if (user.role && user.role !== 'student') {
+            navigate(`/login`);
+            toast.warning(t('cart.studentRoleRequired', 'إضافة الدورات إلى سلة المشتريات متاحة لحسابات الطلاب فقط'));
+            return;
+        }
+
         if (isInCart(course._id)) {
             toast.info(t('course.toast.alreadyInCart', 'الدورة موجودة بالفعل في السلة'));
             return;
@@ -195,6 +195,19 @@ const CoursePreview = () => {
 
     const handleEnrollNow = () => {
         if (!course) return;
+
+        if (!user) {
+            toast.info(t('cart.loginRequired', 'يرجى تسجيل الدخول بحساب طالب أولاً لإضافة الدورة إلى سلة المشتريات'));
+            navigate('/login', { state: { from: `/course/${id}` } });
+            return;
+        }
+
+        if (user.role && user.role !== 'student') {
+            navigate(`/login`);
+            toast.warning(t('cart.studentRoleRequired', 'إضافة الدورات إلى سلة المشتريات متاحة لحسابات الطلاب فقط'));
+            return;
+        }
+
         if (course?.isFull) {
             toast.error(t('course.preview.courseFull', 'عذراً، مقاعد هذه الدورة مكتملة'));
             return;
@@ -1298,13 +1311,13 @@ const CoursePreview = () => {
                                         )}
 
                                         {/* Official Tabby product-page promo snippet (Issue #1) */}
-                                        {user && coursePrice > 0 && (
-                                            <div className="mt-3" dir="ltr">
-                                                <tabby-card
+                                        {coursePrice > 0 && (
+                                            <div className="mt-3">
+                                                <TabbyPromo
+                                                    price={coursePrice}
                                                     currency="SAR"
-                                                    price={String(coursePrice.toFixed(2))}
-                                                    lang={language}
                                                     source="product"
+                                                    lang={language}
                                                 />
                                             </div>
                                         )}
@@ -1313,29 +1326,15 @@ const CoursePreview = () => {
                                     {/* Action Buttons (CTAs) */}
                                     <div className="space-y-3 mb-6">
                                         {enrollmentStatus?.isInstructor ? (
-                                            <button
-                                                onClick={() => navigate(`/instructor/courses/${id}/edit`)}
+                                            <Link
+                                                to={`/instructor/courses/${id}/edit`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                                 className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3.5 px-6 rounded-2xl font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-purple-900/20"
                                             >
                                                 <span>{t('course.card.actions.manageCourse', 'إدارة وتعديل الدورة')}</span>
-                                            </button>
-                                        ) : (user?.role === 'admin' || enrollmentStatus?.isAdmin) ? (
-                                            <button
-                                                onClick={handleContinueCourse}
-                                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 px-6 rounded-2xl font-extrabold transition-all duration-300 flex items-center justify-center gap-2.5 shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-98"
-                                            >
-                                                <Play className="w-5 h-5 fill-white" />
-                                                <span>{t('course.preview.adminViewContent', 'معاينة محتوى ومحاضرات الدورة (إدارة)')}</span>
-                                            </button>
-                                        ) : enrollmentStatus ? (
-                                            <button
-                                                onClick={handleContinueCourse}
-                                                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-4 px-6 rounded-2xl font-extrabold transition-all duration-300 flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-900/20 hover:scale-[1.02] active:scale-98"
-                                            >
-                                                <Play className="w-5 h-5 fill-white" />
-                                                <span>{t('course.card.actions.continueCourse', 'متابعة الدورة الآن')}</span>
-                                            </button>
-                                        ) : isAvailable ? (
+                                            </Link>
+                                        ) : (user?.role === 'admin' || enrollmentStatus?.isAdmin) ? ("") : enrollmentStatus ? ("") : isAvailable ? (
                                             <>
                                                 {/* Primary CTA: Enroll Now */}
                                                 <button
@@ -1508,12 +1507,14 @@ const CoursePreview = () => {
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl p-3 z-40">
                     <div className="flex items-center gap-3">
                         {enrollmentStatus?.isInstructor ? (
-                            <button
-                                onClick={() => navigate(`/instructor/courses/${id}/edit`)}
+                            <Link
+                                to={`/instructor/courses/${id}/edit`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-full bg-purple-600 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2"
                             >
                                 {t('course.card.actions.manageCourse', 'إدارة الدورة')}
-                            </button>
+                            </Link>
                         ) : (user?.role === 'admin' || enrollmentStatus?.isAdmin) ? (
                             <button
                                 onClick={handleContinueCourse}

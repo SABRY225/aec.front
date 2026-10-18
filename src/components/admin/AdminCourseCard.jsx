@@ -31,6 +31,7 @@ const AdminCourseCard = ({
     const statusLabel = (status) => {
         const map = {
             approved: t('admin.courses.approved', 'معتمد'),
+            published: t('admin.courses.approved', 'معتمد'),
             pending: t('admin.courses.pendingStatus', 'قيد المراجعة'),
             rejected: t('admin.courses.rejected', 'مرفوض'),
             draft: t('admin.courses.draft', 'مسودة'),
@@ -41,6 +42,7 @@ const AdminCourseCard = ({
     const getStatusStyle = (status) => {
         switch (status) {
             case 'approved':
+            case 'published':
                 return {
                     badge: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
                     dot: 'bg-emerald-500',
@@ -227,6 +229,8 @@ const AdminCourseCard = ({
                     {/* Edit */}
                     <Link
                         to={`/admin/courses/${course._id}/edit`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         title={t('admin.courses.edit', 'تعديل')}
                         className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
@@ -234,17 +238,31 @@ const AdminCourseCard = ({
                     </Link>
 
                     {/* Status Toggle */}
-                    {course.status !== 'approved' ? (
-                        <button
-                            type="button"
-                            onClick={() => handleAction('approve')}
-                            disabled={actionLoading}
-                            title={t('admin.courses.approve', 'اعتماد')}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors disabled:opacity-50"
-                        >
-                            {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                            <span>{t('admin.courses.approve', 'اعتماد')}</span>
-                        </button>
+                    {course.status !== 'approved' && course.status !== 'published' ? (
+                        <div className="flex items-center gap-1">
+                            <button
+                                type="button"
+                                onClick={() => handleAction('approve')}
+                                disabled={actionLoading}
+                                title={t('admin.courses.approve', 'اعتماد')}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors disabled:opacity-50"
+                            >
+                                {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                                <span>{t('admin.courses.approve', 'اعتماد')}</span>
+                            </button>
+                            {course.status !== 'rejected' && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleAction('reject')}
+                                    disabled={actionLoading}
+                                    title={t('admin.courses.reject', 'رفض')}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors disabled:opacity-50"
+                                >
+                                    <XCircle className="w-3.5 h-3.5" />
+                                    <span>{t('admin.courses.reject', 'رفض')}</span>
+                                </button>
+                            )}
+                        </div>
                     ) : (
                         <button
                             type="button"
@@ -259,7 +277,7 @@ const AdminCourseCard = ({
                     )}
 
                     {/* Featured */}
-                    {course.status === 'approved' && (
+                    {(course.status === 'approved' || course.status === 'published') && (
                         <button
                             type="button"
                             onClick={() => handleAction('toggle-featured')}
@@ -407,6 +425,8 @@ const AdminCourseCard = ({
                         </Link>
                         <Link
                             to={`/admin/courses/${course._id}/edit`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             title={t('admin.courses.edit', 'تعديل الدورة')}
                             className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
@@ -417,21 +437,34 @@ const AdminCourseCard = ({
                     {/* Right Actions: Status, Feature, Delete */}
                     <div className="flex items-center gap-1">
                         {/* Status Change Button */}
-                        {course.status !== 'approved' ? (
-                            <button
-                                type="button"
-                                onClick={() => handleAction('approve')}
-                                disabled={actionLoading}
-                                title={t('admin.courses.approve', 'اعتماد')}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors disabled:opacity-50"
-                            >
-                                {actionLoading ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                        {course.status !== 'approved' && course.status !== 'published' ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => handleAction('approve')}
+                                    disabled={actionLoading}
+                                    title={t('admin.courses.approve', 'اعتماد')}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors disabled:opacity-50"
+                                >
+                                    {actionLoading ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>{t('admin.courses.approve', 'اعتماد')}</span>
+                                </button>
+                                {course.status !== 'rejected' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAction('reject')}
+                                        disabled={actionLoading}
+                                        title={t('admin.courses.reject', 'رفض')}
+                                        className="p-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors disabled:opacity-50"
+                                    >
+                                        <XCircle className="w-3.5 h-3.5" />
+                                    </button>
                                 )}
-                                <span>{t('admin.courses.approve', 'اعتماد')}</span>
-                            </button>
+                            </>
                         ) : (
                             <button
                                 type="button"
@@ -450,7 +483,7 @@ const AdminCourseCard = ({
                         )}
 
                         {/* Feature Toggle Button (Only for approved courses) */}
-                        {course.status === 'approved' && (
+                        {(course.status === 'approved' || course.status === 'published') && (
                             <button
                                 type="button"
                                 onClick={() => handleAction('toggle-featured')}

@@ -10,6 +10,7 @@ import {
     Clock, 
     Search, 
     X, 
+    XCircle,
     RotateCcw, 
     LayoutGrid, 
     List, 
@@ -37,7 +38,8 @@ const CourseManagement = () => {
     const [stats, setStats] = useState({
         total: 0,
         approved: 0,
-        pending: 0
+        pending: 0,
+        rejected: 0
     });
     
     // UI Enhancements: view mode, category filter, sort order
@@ -67,14 +69,11 @@ const CourseManagement = () => {
                 ...(debouncedSearch ? { search: debouncedSearch } : {})
             };
 
-            let endpoint = '/admin/courses';
-            if (activeTab === 'pending') {
-                endpoint = '/admin/courses/pending';
-            } else if (activeTab === 'approved') {
-                params.status = 'approved';
+            if (activeTab !== 'all') {
+                params.status = activeTab;
             }
 
-            const response = await api.get(endpoint, { params });
+            const response = await api.get('/admin/courses', { params });
             const payload = response.data;
             const coursesData = payload.courses || payload;
             setCourses(Array.isArray(coursesData) ? coursesData : []);
@@ -106,22 +105,10 @@ const CourseManagement = () => {
         fetchCourses();
     }, [fetchCourses]);
 
-    // Keep tab counts fresh when switching tabs
-    useEffect(() => {
-        if (activeTab === 'pending') {
-            api.get('/admin/courses', { params: { page: 1, limit: 1 } })
-                .then((response) => {
-                    if (response.data?.stats) {
-                        setStats(response.data.stats);
-                    }
-                })
-                .catch(() => {});
-        }
-    }, [activeTab]);
-
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setPage(1);
+        setCategoryFilter('all');
     };
 
     const handleStatusChange = async (courseId, newStatus) => {
@@ -131,7 +118,8 @@ const CourseManagement = () => {
             );
             
             fetchCourses();
-            toast.success(t('admin.courses.statusChanged', { status: newStatus }));
+            const statusArabic = newStatus === 'approved' ? 'اعتماد' : newStatus === 'rejected' ? 'رفض' : 'تعليق';
+            toast.success(t('admin.courses.statusChanged', { status: statusArabic }) || `تم ${statusArabic} الدورة بنجاح`);
         } catch (error) {
             console.error('Error updating course status:', error);
             toast.error(t('admin.courses.updateStatusFailed', 'تعذر تحديث حالة الدورة'));
@@ -283,7 +271,7 @@ const CourseManagement = () => {
             {/* ======================================================== */}
             {/* Interactive KPI / Statistics Cards */}
             {/* ======================================================== */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Total Courses Card */}
                 <button
                     type="button"
@@ -383,6 +371,37 @@ const CourseManagement = () => {
                         <div className="absolute bottom-0 inset-x-0 h-1 bg-amber-500"></div>
                     )}
                 </button>
+
+                {/* Rejected Courses Card */}
+                <button
+                    type="button"
+                    onClick={() => handleTabChange('rejected')}
+                    className={`text-start relative overflow-hidden rounded-2xl p-5 border transition-all duration-200 group ${
+                        activeTab === 'rejected'
+                            ? 'bg-gradient-to-br from-rose-50/80 to-red-50/40 dark:from-rose-950/40 dark:to-red-950/20 border-rose-500 shadow-md ring-2 ring-rose-500/20'
+                            : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm hover:shadow-md'
+                    }`}
+                >
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 rounded-xl bg-rose-100/70 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400">
+                            <XCircle className="w-5 h-5" />
+                        </div>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60">
+                            {stats.rejected || 0}
+                        </span>
+                    </div>
+                    <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            {t('admin.courses.rejected', 'المرفوضة')}
+                        </h3>
+                        <p className="text-3xl font-extrabold text-rose-600 dark:text-rose-400">
+                            {stats.rejected || 0}
+                        </p>
+                    </div>
+                    {activeTab === 'rejected' && (
+                        <div className="absolute bottom-0 inset-x-0 h-1 bg-rose-500"></div>
+                    )}
+                </button>
             </div>
 
             {/* ======================================================== */}
@@ -436,6 +455,22 @@ const CourseManagement = () => {
                         <span>{t('admin.courses.pendingCourses', 'قيد المراجعة')}</span>
                         <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === 'pending' ? 'bg-amber-100/70 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
                             {stats.pending}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => handleTabChange('rejected')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                            activeTab === 'rejected'
+                                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'
+                        }`}
+                    >
+                        <XCircle className={`w-4 h-4 ${activeTab === 'rejected' ? 'text-rose-600 dark:text-rose-400' : ''}`} />
+                        <span>{t('admin.courses.rejected', 'المرفوضة')}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === 'rejected' ? 'bg-rose-100/70 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
+                            {stats.rejected || 0}
                         </span>
                     </button>
                 </div>

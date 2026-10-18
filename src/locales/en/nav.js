@@ -117,6 +117,7 @@ export default {
       advertisements: 'Advertisements',
       coupons: 'Coupons',
       contactMessages: 'Contact Messages',
+      abandonedCarts: 'Cart Tracking & Recovery',
     },
     instructorNav: {
       dashboard: 'Dashboard',
@@ -126,6 +127,7 @@ export default {
       profileSettings: 'Profile Settings',
       accountSettings: 'Account Settings',
       myCourses: 'My Courses',
+      notifications: 'Notifications',
     },
   },
 };

@@ -16,31 +16,13 @@ import {
     Trash2, 
     CheckCircle2, 
     Sparkles, 
-    Clock, 
-    ChevronRight, 
-    AlertCircle, 
-    Zap, 
-    Check, 
     Loader2,
     ShoppingBag,
-    Receipt,
-    Calendar
+    Receipt
 } from 'lucide-react';
 import TamaraWidget from '../components/TamaraWidget';
-import { useEffect as useEffectTabby } from 'react';
-
-// Inject the official Tabby promo snippet (web component) once
-function useTabbyPromoScript() {
-    useEffectTabby(() => {
-        if (!document.getElementById('tabby-promo-script')) {
-            const s = document.createElement('script');
-            s.id = 'tabby-promo-script';
-            s.src = 'https://checkout.tabby.ai/tabby-promo.js';
-            s.async = true;
-            document.head.appendChild(s);
-        }
-    }, []);
-}
+import TabbyPromo from '../components/TabbyPromo';
+import TabbyCard from '../components/TabbyCard';
 
 const Checkout = () => {
     const { t } = useTranslation();
@@ -49,8 +31,6 @@ const Checkout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, loading } = useAuth();
-    
-    useTabbyPromoScript();
     
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [couponCode, setCouponCode] = useState('');
@@ -106,11 +86,13 @@ const Checkout = () => {
         setIsProcessingPayment(true);
         
         try {
+            const lang=localStorage.getItem('aec-language')
             const courseIds = cartItems.map(course => course._id);
             const paymentData = await paymentService.createCheckoutSession(
                 courseIds,
                 appliedCoupon?.code || null,
-                paymentMethod
+                paymentMethod,
+                lang
             );
             
             // Redirect to payment page (Paymob uses iframURL, Tabby uses paymentUrl)
@@ -318,17 +300,16 @@ const Checkout = () => {
                                             {/* Card Brand Badges */}
                                             <div className="flex items-center gap-1.5">
                                                 {/* Mada Badge */}
-                                                <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-extrabold text-[10px] tracking-wider shadow-xs">
-                                                    mada
+                                                <span className="">
+                                                    <img src='https://cdn.prod.website-files.com/69425f6d131b9d00a72f1b1e/69ca1d2e43942239354b7220_67433ffa1de0e95197cee96b_639b9ad5322b3527747c4903_APMsLPMs%252520-%252520Website%252520Logo%252520Template.png' alt='made' className='w-10 h-6'/>
                                                 </span>
                                                 {/* VISA Badge */}
-                                                <span className="px-2 py-0.5 rounded bg-blue-900 text-white font-black italic text-[10px] tracking-wider shadow-xs">
-                                                    VISA
+                                                <span >
+                                                    <img src='https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg/3840px-Visa_Inc._logo_%282021%E2%80%93present%29.svg.png?utm_source=ar.wikipedia.org&utm_campaign=index&utm_content=thumbnail' alt='made' className='w-10 h-5'/>
                                                 </span>
                                                 {/* Mastercard Badge */}
-                                                <span className="px-2 py-0.5 rounded bg-slate-900 text-white font-bold text-[10px] shadow-xs flex items-center gap-0.5">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block -mr-1"></span>
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                                                 <span >
+                                                    <img src='https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1280px-MasterCard_Logo.svg.png?utm_source=ar.wikipedia.org&utm_campaign=index&utm_content=thumbnail' alt='made' className='w-10 h-6'/>
                                                 </span>
                                             </div>
                                         </div>
@@ -365,7 +346,7 @@ const Checkout = () => {
 
                                             {/* Official Tabby logo */}
                                             <img
-                                                src="https://checkout.tabby.ai/tabby-logo.svg"
+                                                src="https://mintcdn.com/tabby-5f40add6/1f-EIKwKexPNgWGm/logo/tabby-badge.svg?fit=max&auto=format&n=1f-EIKwKexPNgWGm&q=85&s=f9bf7cbe04bdae76df344b4746a6b12d"
                                                 alt="Tabby"
                                                 className="h-6 w-auto"
                                             />
@@ -375,15 +356,16 @@ const Checkout = () => {
                                             {isRTL ? 'قسّم مشترياتك على دفعات ميسّرة مع تابي' : 'Split your purchase into easy installments with Tabby'}
                                         </p>
 
-                                        {/* Official Tabby checkout snippet */}
-                                        <div className="mt-3" dir="ltr">
-                                            <tabby-card
-                                                currency="SAR"
-                                                price={String(totalWithTax.toFixed(2))}
-                                                lang={language}
-                                                source="cart"
-                                            />
-                                        </div>
+                                        {/* Official Tabby checkout snippet (Issue #1, Issue #4) */}
+                                        {paymentMethod === 'tabby' && totalWithTax > 0 && (
+                                            <div className="mt-3">
+                                                <TabbyCard
+                                                    price={totalWithTax}
+                                                    currency="SAR"
+                                                    lang={language}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </label>
 
@@ -416,8 +398,8 @@ const Checkout = () => {
                                             </div>
 
                                             {/* Tamara Logo Badge */}
-                                            <span className="px-2.5 py-1 rounded-md bg-gradient-to-r from-[#FF5C39] to-[#FF8C38] text-white font-extrabold text-xs tracking-wider shadow-xs">
-                                                tamara
+                                            <span>
+                                                <img src='https://marketplace.botble.com/storage/products/5X7DtvACvJXV3UNc1s4so791hqFQ0oT5bZmSDuzp.png' alt='Tamara' className='w-16 h-7' />
                                             </span>
                                         </div>
 
@@ -592,15 +574,17 @@ const Checkout = () => {
                                             </span>
                                         </div>
 
-                                        {/* Official Tabby checkout snippet (replaces custom installment copy) */}
-                                        <div className="pt-2 border-t border-primary-200/50 dark:border-primary-800/50" dir="ltr">
-                                            <tabby-card
-                                                currency="SAR"
-                                                price={String(totalWithTax.toFixed(2))}
-                                                lang={language}
-                                                source="cart"
-                                            />
-                                        </div>
+                                        {/* Official Tabby cart promo snippet (replaces custom installment copy) */}
+                                        {/* {totalWithTax > 0 && (
+                                            <div className="pt-2 border-t border-primary-200/50 dark:border-primary-800/50">
+                                                <TabbyPromo
+                                                    price={totalWithTax}
+                                                    currency="SAR"
+                                                    source="cart"
+                                                    lang={language}
+                                                />
+                                            </div>
+                                        )} */}
                                     </div>
                                 </div>
                             </div>

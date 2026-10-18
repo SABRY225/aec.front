@@ -33,6 +33,7 @@ import Help from './pages/student/Help';
 import MyCourses from './pages/student/MyCourses';
 import MyInstructorCourses from './pages/instructor/MyInstructorCourses';
 import CourseStudy from './pages/CourseStudy';
+import NotificationsPage from './pages/NotificationsPage';
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -45,11 +46,13 @@ import CategoriesManagement from './components/admin/CategoriesManagement';
 import SubcategoriesManagement from './components/admin/SubcategoriesManagement';
 import StudentManagement from './pages/admin/StudentManagement';
 import Analytics from './pages/admin/Analytics';
+import PageAnalytics from './pages/admin/PageAnalytics';
 import ActiveSessions from './pages/admin/ActiveSessions';
-import AdminNotifications from './pages/admin/AdminNotifications';
 import AdminReviews from './pages/admin/AdminReviews';
+import PageTracker from './components/common/PageTracker';
 import StaffManagement from './pages/admin/StaffManagement';
 import Payments from './pages/admin/Payments'; import Orders from './pages/admin/Orders';
+import AbandonedCarts from './pages/admin/AbandonedCarts';
 import Backups from './pages/admin/Backups';
 // Instructor imports
 import InstructorLayout from './pages/instructor/InstructorLayout';
@@ -92,8 +95,9 @@ import TamaraCancel from './pages/TamaraCancel';
 import TamaraFailure from './pages/TamaraFailure';
 import DocumentTitle from './components/DocumentTitle';
 import ScrollToTop from './components/ScrollToTop';
-import ProtectedRoute from './components/layouts/ProtectedRoute';
 import InstructorProfile from './pages/InstructorProfile';
+import AdminNotificationsSettings from './pages/admin/AdminNotificationsSettings';
+import AdminNotifications from './pages/admin/AdminNotifications';
 
 
 const RouteTracker = () => {
@@ -116,6 +120,7 @@ const App = () => {
         <CartProvider>
           <CategoryLookupProvider>
             <DocumentTitle />
+            <PageTracker />
             <Cart />
             <div className="min-h-screen bg-white">
               <ToastContainer position="top-right" autoClose={5000} rtl={isRTL} />
@@ -176,7 +181,7 @@ const App = () => {
                         <Route index element={<Dashboard />} />
                         <Route path="dashboard" element={<Dashboard />} />
                         <Route path="my-courses" element={<MyCourses />} />
-                        <Route path="notifications" element={<TranslatedComingSoon titleKey="student.comingSoon.notifications.title" messageKey="student.comingSoon.notifications.message" />} />
+                        <Route path="notifications" element={<NotificationsPage />} />
                         <Route path="assignments" element={<TranslatedComingSoon titleKey="student.comingSoon.assignments.title" messageKey="student.comingSoon.assignments.message" />} />
                         <Route path="certificate" element={<TranslatedComingSoon titleKey="student.comingSoon.certificates.title" messageKey="student.comingSoon.certificates.message" />} />
                         <Route path="reviews" element={<TranslatedComingSoon titleKey="student.comingSoon.reviews.title" messageKey="student.comingSoon.reviews.message" />} />
@@ -200,9 +205,11 @@ const App = () => {
                           <Route path="" element={<AdminLayout />}>
                             <Route index element={<AdminDashboard />} />
                             <Route path="dashboard" element={<AdminDashboard />} />
+                            <Route path="user-tracking" element={<PageAnalytics />} />
                             <Route path="analytics" element={<Analytics />} />
                             <Route path="active-sessions" element={<ActiveSessions />} />
                             <Route path="notifications" element={<AdminNotifications />} />
+                            <Route path="notifications-setting" element={<AdminNotificationsSettings />} />
                             <Route path="instructors" element={<InstructorManagement />} />
                             <Route path="courses" element={<CourseManagement />} />
                             <Route path="courses/:id" element={<CourseDetail />} />
@@ -219,6 +226,7 @@ const App = () => {
                             <Route path="enrollment-logs" element={<EnrollmentLogs />} />
                             <Route path="system-logs" element={<SystemLogs />} />
                             <Route path="payments" element={<Payments />} /> <Route path="orders" element={<Orders />} />
+                            <Route path="abandoned-carts" element={<AbandonedCarts />} />
                             <Route path="backups" element={<Backups />} />
                             <Route path="online-enrollments" element={<ManagedEnrollments />} />
                             <Route path="offline-enrollments" element={<ManagedEnrollments />} />
@@ -249,6 +257,7 @@ const App = () => {
                         {/* <Route path="courses/:id/analytics" element={<TranslatedComingSoon titleKey="instructor.comingSoon.analytics.title" messageKey="instructor.comingSoon.analytics.message" />} /> */}
                         <Route path="account-settings" element={<InstructorAccountSettings />} />
                         <Route path="profile-settings" element={<InstructorProfileSettings />} />
+                        <Route path="notifications" element={<NotificationsPage />} />
                         <Route path="settings" element={<InstructorAccountSettings />} />
                       </Route>
                     </Routes>

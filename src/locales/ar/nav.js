@@ -117,6 +117,7 @@ export default {
       advertisements: 'الإعلانات',
       coupons: 'القسائم',
       contactMessages: 'رسائل التواصل',
+      abandonedCarts: 'سلات الشراء والتحويل',
     },
     instructorNav: {
       dashboard: 'لوحة التحكم',
@@ -126,6 +127,7 @@ export default {
       profileSettings: 'الملف الشخصي',
       accountSettings: 'إعدادات الحساب',
       myCourses: 'دوراتي',
+      notifications: 'التنبيهات والإشعارات',
     },
   },
 };

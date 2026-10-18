@@ -5,6 +5,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import TabbyPromo from './TabbyPromo';
 import {
     ShoppingCart,
     ShoppingBag,
@@ -261,6 +262,18 @@ const Cart = () => {
                                             </span>
                                         </div>
                                     </div>
+
+                                    {/* Official Tabby Cart Promo Snippet (Issue #1) */}
+                                    {totalWithTax > 0 && (
+                                        <div className="pt-1">
+                                            <TabbyPromo
+                                                price={totalWithTax}
+                                                currency="SAR"
+                                                source="cart"
+                                                lang={language}
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Coupon Hint */}
                                     <p className="text-[11px] text-slate-500 text-center bg-white p-2 rounded-xl border border-slate-200/60">

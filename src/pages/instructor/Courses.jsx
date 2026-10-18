@@ -371,6 +371,8 @@ const InstructorCourses = () => {
                                     <div className="pt-2 flex items-center gap-2">
                                         <Link
                                             to={`/instructor/courses/${course._id || course.id}/edit`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold transition-colors"
                                         >
                                             <Edit3 className="w-3.5 h-3.5" />

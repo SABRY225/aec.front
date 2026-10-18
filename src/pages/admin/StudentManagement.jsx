@@ -32,6 +32,7 @@ const StudentManagement = () => {
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalStudents, setTotalStudents] = useState(0);
@@ -42,8 +43,16 @@ const StudentManagement = () => {
     const [sortOrder, setSortOrder] = useState('desc');
 
     useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm.trim());
+            setCurrentPage(1);
+        }, 350);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    useEffect(() => {
         fetchStudents();
-    }, [currentPage, searchTerm, sortBy, sortOrder]);
+    }, [currentPage, debouncedSearch, sortBy, sortOrder]);
 
     const fetchStudents = async () => {
         try {
@@ -51,14 +60,16 @@ const StudentManagement = () => {
             const response = await adminService.getStudents({
                 page: currentPage,
                 limit: 20,
-                search: searchTerm,
+                search: debouncedSearch,
                 sortBy,
                 sortOrder
             });
             
-            setStudents(response.students || []);
-            setTotalPages(response.pagination?.totalPages || 1);
-            setTotalStudents(response.pagination?.totalStudents || 0);
+            const list = response?.students || response?.data?.students || (Array.isArray(response) ? response : []);
+            const pagination = response?.pagination || response?.data?.pagination;
+            setStudents(list);
+            setTotalPages(pagination?.totalPages || 1);
+            setTotalStudents(pagination?.totalStudents || list.length);
         } catch (error) {
             console.error('Error fetching students:', error);
             toast.error(t('admin.students.fetchError', 'Failed to load students data'));
@@ -71,7 +82,7 @@ const StudentManagement = () => {
         try {
             setDetailsLoading(true);
             const response = await adminService.getStudentDetails(studentId);
-            setStudentDetails(response);
+            setStudentDetails(response?.student ? response : (response?.data || response));
         } catch (error) {
             console.error('Error fetching student details:', error);
             toast.error(t('admin.students.detailsError', 'Failed to load student details'));

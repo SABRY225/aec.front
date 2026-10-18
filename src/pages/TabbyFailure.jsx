@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
 
 const TabbyFailure = () => {
     const navigate = useNavigate();
@@ -12,17 +13,20 @@ const TabbyFailure = () => {
         toast.error(
             t(
                 'tabby.failure.message',
-                'Sorry, Tabby is unable to approve this purchase. Please use an alternative payment method for your order.'
+                'نعتذر، تابي غير قادرة على الموافقة على هذه العملية. الرجاء استخدام طريقة دفع أخرى لطلبك.'
             )
         );
         navigate('/checkout');
     }, [navigate, t]);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-             <div className="text-center p-8">
-                 <p className="text-slate-600 dark:text-slate-400">جاري إعادة التوجيه...</p>
-             </div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+            <div className="text-center p-8 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+                <p className="text-slate-600 dark:text-slate-400 font-medium text-sm">
+                    {t('tabby.failure.redirecting', 'جاري إعادة التوجيه إلى صفحة الدفع...')}
+                </p>
+            </div>
         </div>
     );
 };

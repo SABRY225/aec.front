@@ -422,6 +422,8 @@ const CourseDetail = () => {
                             {/* Edit Course Button */}
                             <Link
                                 to={`/admin/courses/${id}/edit`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs sm:text-sm font-semibold transition"
                             >
                                 <Pencil className="w-4 h-4 text-slate-500" />
@@ -1197,6 +1199,8 @@ const CourseDetail = () => {
                                 {/* Edit Course */}
                                 <Link
                                     to={`/admin/courses/${id}/edit`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="w-full py-3 px-4 rounded-2xl bg-primary-50 text-primary-700 dark:bg-primary-950/50 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
                                 >
                                     <Pencil className="w-4 h-4" />

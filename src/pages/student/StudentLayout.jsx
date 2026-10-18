@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../../components/layouts/ProtectedRoute';
+import NotificationBell from '../../components/shared/NotificationBell';
 import {
     LayoutDashboard,
     BookOpen,
@@ -105,6 +106,11 @@ const StudentLayout = () => {
         {
             title: i18n.language === 'ar' ? 'الحساب والدعم' : 'Account & Support',
             items: [
+                {
+                    path: '/student/notifications',
+                    label: t('nav.studentSidebar.items.notifications', 'التنبيهات والإشعارات'),
+                    icon: <Bell className="h-4.5 w-4.5" />
+                },
                 {
                     path: '/student/profile-settings',
                     label: t('nav.studentSidebar.items.account', 'الملف الشخصي'),
@@ -317,15 +323,8 @@ const StudentLayout = () => {
                                 <span>{t('student.dashboard.quickActions.browseCourses', 'تصفح الدورات')}</span>
                             </Link>
 
-                            {/* Notifications */}
-                            <Link
-                                to="/student/notifications"
-                                className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative"
-                                title={t('nav.studentSidebar.items.notifications', 'الإشعارات')}
-                            >
-                                <Bell className="w-4.5 h-4.5" />
-                                <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white dark:ring-slate-900" />
-                            </Link>
+                            {/* In-app Notification Bell */}
+                            <NotificationBell />
 
                             {/* Language Switch */}
                             <button

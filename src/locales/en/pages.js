@@ -37,7 +37,7 @@ export default {
     tryAgain: 'Try Again',
     selectPaymentMethod: 'Select Payment Method',
     selectPaymentMethodSub: 'All transactions are secure and encrypted with 256-bit SSL',
-    paymobTitle: 'Credit / Debit Card (Paymob)',
+    paymobTitle: 'Credit / Debit Card',
     paymobDesc: 'Mada, Visa, Mastercard & bank cards via secure Paymob',
     paymobBadge: 'Instant Access',
     tabbyTitle: 'Pay later with Tabby',
@@ -122,6 +122,16 @@ export default {
         verifyFailed: 'Payment verification failed',
         processError: 'Failed to process payment',
       },
+    },
+  },
+  tabby: {
+    cancel: {
+      message: 'You aborted the payment. Please retry or choose another payment method.',
+      redirecting: 'Redirecting to checkout...',
+    },
+    failure: {
+      message: 'Sorry, Tabby is unable to approve this purchase. Please use an alternative payment method for your order.',
+      redirecting: 'Redirecting to checkout...',
     },
   },
   contact: {

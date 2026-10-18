@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { courseService } from '../services/new-api';
 import LanguageSwitcher from './LanguageSwitcher';
+import NotificationBell from './shared/NotificationBell';
 import {
     Search,
     ShoppingCart,
@@ -289,6 +290,11 @@ const Header = () => {
 
                             {/* Language Switcher */}
                             <LanguageSwitcher />
+
+                            {/* In-app Notification Bell */}
+                            {isAuthenticated && (
+                                <NotificationBell />
+                            )}
 
                             {/* Register Now button / User Profile */}
                             {isAuthenticated ? (

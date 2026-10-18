@@ -197,103 +197,6 @@ export const authService = {
     }
 };
 
-// User services
-export const userService = {
-    getUsers: async (params = {}) => {
-        const response = await api.get('/user', { params });
-        return {
-            users: response.data || [],
-            ...response
-        };
-    },
-    
-    getProfile: async () => {
-        const response = await api.get('/user/profile');
-        return response.data;
-    },
-
-    getInstructorPublicProfile: async (id, params = {}) => {
-        const response = await api.get(`/user/instructor/${id}`, { params });
-        return response.data;
-    },
-
-
-    addInstructorReview: async (id, reviewData) => {
-        const response = await api.post(`/user/instructor/${id}/reviews`, reviewData);
-        return response.data;
-    },
-
-    updateProfile: async (profileData) => {
-        const formData = new FormData();
-        
-        // Handle basic fields - only send non-empty values
-        const basicFields = ['firstName', 'lastName', 'jobTitle', 'phone', 'website', 'bio', 'country', 'city'];
-        basicFields.forEach(field => {
-            if (profileData[field] !== undefined && profileData[field] !== null && profileData[field] !== '') {
-                formData.append(field, profileData[field]);
-            }
-        });
-
-        // Handle social media links - only send non-empty values
-        if (profileData.socials) {
-            const filteredSocials = {};
-            Object.keys(profileData.socials).forEach(key => {
-                if (profileData.socials[key] && profileData.socials[key].trim() !== '') {
-                    filteredSocials[key] = profileData.socials[key];
-                }
-            });
-            
-            // Only send socials if there are non-empty values
-            if (Object.keys(filteredSocials).length > 0) {
-                formData.append('socials', JSON.stringify(filteredSocials));
-            }
-        }
-
-        // Handle photo
-        if (profileData.photo instanceof File) {
-            formData.append('photo', profileData.photo);
-        } else if (typeof profileData.photo === 'string') {
-            // If photo is a URL string, pass it as photoUrl
-            formData.append('photoUrl', profileData.photo);
-        }
-
-        try {
-            const response = await api.put('/user/profile', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            return response.data;
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            throw error;
-        }
-    },
-
-    updateSettings: async (settingsData) => {
-        const response = await api.put('/user/settings', settingsData);
-        return response.data;
-    },
-
-    changePassword: async (currentPassword, newPassword) => {
-        const payload = (typeof currentPassword === 'object' && currentPassword !== null)
-            ? currentPassword
-            : { currentPassword, newPassword };
-        const response = await api.put('/user/change-password', payload);
-        return response.data;
-    },
-
-    // Notifications
-    getMyNotifications: async () => {
-        const response = await api.get('/user/notifications');
-        return response.data;
-    },
-    markNotificationAsRead: async (id) => {
-        const response = await api.put(`/user/notifications/${id}/read`);
-        return response.data;
-    }
-};
-
 // Course services
 export const courseService = {
     getAllCourses: async (params = {}) => {
@@ -836,6 +739,11 @@ export const adminService = {
         return response.data;
     },
 
+    getPageAnalytics: async (params = {}) => {
+        const response = await api.get('/admin/page-analytics', { params });
+        return response.data;
+    },
+
     getActiveSessions: async (params = {}) => {
         const response = await api.get('/admin/active-sessions', { params });
         return response.data;
@@ -1050,14 +958,118 @@ export const adminService = {
     deleteInstructor: async (instructorId) => {
         const response = await api.delete(`/admin/instructors/${instructorId}`);
         return response.data;
+    },
+
+    sendBroadcastNotification: async (data) => {
+        const response = await api.post('/admin/notifications/broadcast', data);
+        return response.data;
+    }
+};
+
+// User services & notifications
+export const userService = {
+    getUsers: async (params = {}) => {
+        const response = await api.get('/user', { params });
+        return {
+            users: response.data || [],
+            ...response
+        };
+    },
+    
+    getProfile: async () => {
+        const response = await api.get('/user/profile');
+        return response.data;
+    },
+
+    getInstructorPublicProfile: async (id, params = {}) => {
+        const response = await api.get(`/user/instructor/${id}`, { params });
+        return response.data;
+    },
+
+    addInstructorReview: async (id, reviewData) => {
+        const response = await api.post(`/user/instructor/${id}/reviews`, reviewData);
+        return response.data;
+    },
+
+    updateProfile: async (profileData) => {
+        const formData = new FormData();
+        
+        // Handle basic fields - only send non-empty values
+        const basicFields = ['firstName', 'lastName', 'jobTitle', 'phone', 'website', 'bio', 'country', 'city'];
+        basicFields.forEach(field => {
+            if (profileData[field] !== undefined && profileData[field] !== null && profileData[field] !== '') {
+                formData.append(field, profileData[field]);
+            }
+        });
+
+        // Handle social media links - only send non-empty values
+        if (profileData.socials) {
+            const filteredSocials = {};
+            Object.keys(profileData.socials).forEach(key => {
+                if (profileData.socials[key] && profileData.socials[key].trim() !== '') {
+                    filteredSocials[key] = profileData.socials[key];
+                }
+            });
+            
+            // Only send socials if there are non-empty values
+            if (Object.keys(filteredSocials).length > 0) {
+                formData.append('socials', JSON.stringify(filteredSocials));
+            }
+        }
+
+        // Handle photo
+        if (profileData.photo instanceof File) {
+            formData.append('photo', profileData.photo);
+        } else if (typeof profileData.photo === 'string') {
+            formData.append('photoUrl', profileData.photo);
+        }
+
+        try {
+            const response = await api.put('/user/profile', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            throw error;
+        }
+    },
+
+    updateSettings: async (settingsData) => {
+        const response = await api.put('/user/settings', settingsData);
+        return response.data;
+    },
+
+    changePassword: async (currentPassword, newPassword) => {
+        const payload = (typeof currentPassword === 'object' && currentPassword !== null)
+            ? currentPassword
+            : { currentPassword, newPassword };
+        const response = await api.put('/user/change-password', payload);
+        return response.data;
+    },
+
+    // Notifications
+    getMyNotifications: async () => {
+        const response = await api.get('/user/notifications');
+        return response.data;
+    },
+    markNotificationAsRead: async (id) => {
+        const response = await api.put(`/user/notifications/${id}/read`);
+        return response.data;
+    },
+    deleteNotification: async (id) => {
+        const response = await api.delete(`/user/notifications/${id}`);
+        return response.data;
     }
 };
 
 // Payment services
 export const paymentService = {
-    createCheckoutSession: async (courseIds, couponCode = null, paymentMethod = 'paymob') => {
-        const payload = { courseIds, paymentMethod };
-        if (couponCode) {
+    createCheckoutSession: async (courseIds, couponCode = null, paymentMethod = 'paymob', lang ) => {
+        const payload = { courseIds, paymentMethod, lang };
+        if (couponCode) {   
             payload.couponCode = couponCode;
         }
         
@@ -1084,6 +1096,46 @@ export const paymentService = {
 
     verifyTamaraPayment: async (orderId) => {
         const response = await api.get(`/payment/verify-tamara/${orderId}`);
+        return response.data;
+    }
+};
+
+// Cart services (DB-persisted, no localStorage)
+export const cartService = {
+    getCart: async () => {
+        const response = await api.get('/cart');
+        return response.data;
+    },
+    addToCart: async (courseId) => {
+        const response = await api.post('/cart/add', { courseId });
+        return response.data;
+    },
+    removeFromCart: async (courseId) => {
+        const response = await api.delete(`/cart/remove/${courseId}`);
+        return response.data;
+    },
+    clearCart: async () => {
+        const response = await api.delete('/cart/clear');
+        return response.data;
+    },
+    syncCart: async (courseIds) => {
+        const response = await api.post('/cart/sync', { courseIds });
+        return response.data;
+    }
+};
+
+// Admin Cart & Sales Recovery Service
+export const adminCartService = {
+    getCarts: async (params = {}) => {
+        const response = await api.get('/admin/carts', { params });
+        return response.data;
+    },
+    deleteCart: async (id) => {
+        const response = await api.delete(`/admin/carts/${id}`);
+        return response.data;
+    },
+    sendCartReminder: async (id, data = {}) => {
+        const response = await api.post(`/admin/carts/${id}/send-reminder`, data);
         return response.data;
     }
 };
@@ -1280,6 +1332,16 @@ export const subcategoryService = {
     deleteSubcategory: async (id) => {
         const response = await api.delete(`/subcategories/${id}`);
         return response.data;
+    }
+};
+
+export const analyticsService = {
+    recordPageView: async (pageData) => {
+        try {
+            await api.post('/analytics/pageview', pageData);
+        } catch (err) {
+            // Silently ignore to not interrupt user navigation
+        }
     }
 };
 
