@@ -888,6 +888,16 @@ export const adminService = {
         return response.data;
     },
 
+    deleteStudent: async (studentId) => {
+        const response = await api.delete(`/admin/students/${studentId}`);
+        return response.data;
+    },
+
+    changeStudentPassword: async (studentId, newPassword) => {
+        const response = await api.put(`/admin/students/${studentId}/password`, { newPassword });
+        return response.data;
+    },
+
     getCourseEnrollmentCount: async (courseId) => {
         const response = await api.get(`/courses/${courseId}/enrollment-count`);
         return response.data;

@@ -670,7 +670,7 @@ const Checkout = () => {
                                             <Lock className="w-4 h-4" />
                                             <span>
                                                 {paymentMethod === 'tabby'
-                                                    ? (isRTL ? `المتابعة مع تابي (${installmentAmount} ر.س / شهرياً)` : `Pay with Tabby (${installmentAmount} SAR / mo)`)
+                                                    ? (isRTL ? 'المتابعة مع تابي' : 'Pay with Tabby')
                                                     : paymentMethod === 'tamara'
                                                     ? (isRTL ? `المتابعة مع تمارا (${installmentAmount} ر.س / شهرياً)` : `Pay with Tamara (${installmentAmount} SAR / mo)`)
                                                     : (isRTL ? `إتمام الدفع (${totalWithTax.toFixed(2)} ر.س)` : `Complete Payment (${totalWithTax.toFixed(2)} SAR)`)}

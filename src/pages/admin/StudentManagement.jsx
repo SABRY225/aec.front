@@ -23,7 +23,12 @@ import {
     CheckCircle2,
     Clock,
     RefreshCw,
-    Award
+    Award,
+    EyeOff,
+    Key,
+    Trash2,
+    AlertTriangle,
+    Lock
 } from 'lucide-react';
 
 const StudentManagement = () => {
@@ -41,6 +46,20 @@ const StudentManagement = () => {
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [sortBy, setSortBy] = useState('createdAt');
     const [sortOrder, setSortOrder] = useState('desc');
+
+    // Password modal state
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordTargetStudent, setPasswordTargetStudent] = useState(null);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordLoading, setPasswordLoading] = useState(false);
+
+    // Delete modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteTargetStudent, setDeleteTargetStudent] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -99,6 +118,85 @@ const StudentManagement = () => {
     const handleCloseModal = () => {
         setSelectedStudent(null);
         setStudentDetails(null);
+    };
+
+    // Open Password Modal
+    const handleOpenPasswordModal = (student) => {
+        setPasswordTargetStudent(student);
+        setNewPassword('');
+        setConfirmPassword('');
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
+        setShowPasswordModal(true);
+    };
+
+    const handleClosePasswordModal = () => {
+        if (passwordLoading) return;
+        setShowPasswordModal(false);
+        setPasswordTargetStudent(null);
+        setNewPassword('');
+        setConfirmPassword('');
+    };
+
+    // Submit Password Change
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        if (!newPassword || newPassword.trim().length < 6) {
+            toast.error(t('admin.students.passwordMin', 'كلمة المرور يجب ألا تقل عن 6 أحرف'));
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            toast.error(t('admin.students.passwordMismatch', 'كلمتا المرور غير متطابقتين'));
+            return;
+        }
+
+        try {
+            setPasswordLoading(true);
+            const res = await adminService.changeStudentPassword(passwordTargetStudent._id, newPassword);
+            if (res?.success) {
+                toast.success(res.message || t('admin.students.passwordChangedSuccess', 'تم تغيير كلمة المرور بنجاح'));
+                handleClosePasswordModal();
+            }
+        } catch (error) {
+            console.error('Error changing student password:', error);
+            toast.error(error?.response?.data?.message || t('admin.students.passwordChangeError', 'فشل في تغيير كلمة المرور'));
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
+    // Open Delete Modal
+    const handleOpenDeleteModal = (student) => {
+        setDeleteTargetStudent(student);
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        if (deleteLoading) return;
+        setShowDeleteModal(false);
+        setDeleteTargetStudent(null);
+    };
+
+    // Confirm Delete
+    const handleConfirmDelete = async () => {
+        if (!deleteTargetStudent?._id) return;
+        try {
+            setDeleteLoading(true);
+            const res = await adminService.deleteStudent(deleteTargetStudent._id);
+            if (res?.success) {
+                toast.success(res.message || t('admin.students.deletedSuccess', 'تم حذف حساب الطالب بنجاح'));
+                if (selectedStudent?._id === deleteTargetStudent._id) {
+                    handleCloseModal();
+                }
+                handleCloseDeleteModal();
+                fetchStudents();
+            }
+        } catch (error) {
+            console.error('Error deleting student:', error);
+            toast.error(error?.response?.data?.message || t('admin.students.deleteError', 'فشل في حذف حساب الطالب'));
+        } finally {
+            setDeleteLoading(false);
+        }
     };
 
     const handleSearch = (e) => {
@@ -387,13 +485,32 @@ const StudentManagement = () => {
 
                                         {/* Actions */}
                                         <td className="px-5 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                onClick={() => handleStudentClick(student)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white text-xs font-medium border border-blue-200 dark:border-blue-900/60 transition-all shadow-sm"
-                                            >
-                                                <Eye size={14} />
-                                                <span>{t('admin.students.viewDetails', 'التفاصيل')}</span>
-                                            </button>
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <button
+                                                    onClick={() => handleStudentClick(student)}
+                                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white text-xs font-medium border border-blue-200 dark:border-blue-900/60 transition-all shadow-sm"
+                                                    title={t('admin.students.viewDetails', 'التفاصيل')}
+                                                >
+                                                    <Eye size={14} />
+                                                    <span className="hidden xl:inline">{t('admin.students.viewDetails', 'التفاصيل')}</span>
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleOpenPasswordModal(student)}
+                                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-200 dark:hover:border-amber-800 transition-colors shadow-sm"
+                                                    title={t('admin.students.changePassword', 'تغيير كلمة المرور')}
+                                                >
+                                                    <Key size={14} />
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleOpenDeleteModal(student)}
+                                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-200 dark:hover:border-rose-800 transition-colors shadow-sm"
+                                                    title={t('admin.students.deleteStudent', 'حذف حساب الطالب')}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -641,13 +758,243 @@ const StudentManagement = () => {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+                        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handleOpenPasswordModal(selectedStudent)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-xs font-semibold transition-colors"
+                                >
+                                    <Key size={14} />
+                                    <span>{t('admin.students.changePassword', 'تغيير كلمة المرور')}</span>
+                                </button>
+
+                                <button
+                                    onClick={() => handleOpenDeleteModal(selectedStudent)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs font-semibold transition-colors"
+                                >
+                                    <Trash2 size={14} />
+                                    <span>{t('admin.students.deleteStudent', 'حذف الحساب')}</span>
+                                </button>
+                            </div>
+
                             <button
                                 onClick={handleCloseModal}
-                                className="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors"
+                                className="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors self-end sm:self-auto"
                             >
                                 {t('common.close', 'إغلاق')}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Change Password Modal */}
+            {showPasswordModal && passwordTargetStudent && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div 
+                        className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                    >
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                                    <Key size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                                        {t('admin.students.changePasswordTitle', 'تغيير كلمة المرور')}
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        {t('admin.students.changePasswordSubtitle', 'تعيين كلمة مرور جديدة لحساب الطالب')}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleClosePasswordModal}
+                                disabled={passwordLoading}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors disabled:opacity-50"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Form */}
+                        <form onSubmit={handlePasswordSubmit} className="p-6 space-y-4">
+                            {/* Student Info */}
+                            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
+                                    {getInitials(passwordTargetStudent.firstName, passwordTargetStudent.lastName)}
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                                        {passwordTargetStudent.firstName} {passwordTargetStudent.lastName}
+                                    </div>
+                                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                        {passwordTargetStudent.email}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* New Password */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <Lock size={13} className="text-slate-400" />
+                                    <span>{t('admin.students.newPassword', 'كلمة المرور الجديدة')}</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showNewPassword ? 'text' : 'password'}
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        placeholder={t('admin.students.newPasswordPlaceholder', 'أدخل كلمة المرور الجديدة (6 أحرف على الأقل)')}
+                                        className={`w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900 text-slate-800 dark:text-white outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-xs transition-all ${
+                                            isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'
+                                        }`}
+                                        required
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ${
+                                            isRTL ? 'left-3' : 'right-3'
+                                        }`}
+                                    >
+                                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Confirm Password */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <Lock size={13} className="text-slate-400" />
+                                    <span>{t('admin.students.confirmPassword', 'تأكيد كلمة المرور')}</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder={t('admin.students.confirmPasswordPlaceholder', 'أعد إدخال كلمة المرور للتأكيد')}
+                                        className={`w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900 text-slate-800 dark:text-white outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-xs transition-all ${
+                                            isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'
+                                        }`}
+                                        required
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ${
+                                            isRTL ? 'left-3' : 'right-3'
+                                        }`}
+                                    >
+                                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                                <button
+                                    type="button"
+                                    onClick={handleClosePasswordModal}
+                                    disabled={passwordLoading}
+                                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors disabled:opacity-50"
+                                >
+                                    {t('common.cancel', 'إلغاء')}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={passwordLoading}
+                                    className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all disabled:opacity-50"
+                                >
+                                    {passwordLoading && <RefreshCw size={14} className="animate-spin" />}
+                                    <span>{t('admin.students.savePassword', 'حفظ كلمة المرور')}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Student Confirmation Modal */}
+            {showDeleteModal && deleteTargetStudent && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div 
+                        className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                    >
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400">
+                                    <Trash2 size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                                        {t('admin.students.deleteStudentTitle', 'حذف حساب الطالب')}
+                                    </h3>
+                                    <p className="text-xs text-rose-500 dark:text-rose-400 mt-0.5">
+                                        {t('admin.students.deleteIrreversible', 'إجراء نهائي لا يمكن التراجع عنه')}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleCloseDeleteModal}
+                                disabled={deleteLoading}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors disabled:opacity-50"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 space-y-4">
+                            <div className="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 flex items-start gap-3">
+                                <AlertTriangle className="text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" size={18} />
+                                <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                                    {t('admin.students.deleteWarning', 'هل أنت متأكد من رغبتك في حذف حساب الطالب نهائياً؟ سيتم حذف جميع تسجيلات الدورات والمشتريات وسلة التسوق المرتبطة بهذا الطالب.')}
+                                </div>
+                            </div>
+
+                            {/* Student Info */}
+                            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                    {getInitials(deleteTargetStudent.firstName, deleteTargetStudent.lastName)}
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                                        {deleteTargetStudent.firstName} {deleteTargetStudent.lastName}
+                                    </div>
+                                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                        {deleteTargetStudent.email}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseDeleteModal}
+                                    disabled={deleteLoading}
+                                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors disabled:opacity-50"
+                                >
+                                    {t('common.cancel', 'إلغاء')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleConfirmDelete}
+                                    disabled={deleteLoading}
+                                    className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all disabled:opacity-50"
+                                >
+                                    {deleteLoading && <RefreshCw size={14} className="animate-spin" />}
+                                    <span>{t('admin.students.confirmDeleteBtn', 'تأكيد حذف الحساب')}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
