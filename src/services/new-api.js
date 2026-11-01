@@ -895,8 +895,8 @@ export const adminService = {
         return response.data;
     },
 
-    getManualEnrollmentLogs: async () => {
-        const response = await api.get('/admin/enrollments/manual/logs');
+    getManualEnrollmentLogs: async (params = {}) => {
+        const response = await api.get('/admin/enrollments/manual/logs', { params });
         return response.data;
     },
 

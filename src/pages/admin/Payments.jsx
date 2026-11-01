@@ -2,8 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
     CreditCard, Search, Filter, Eye, Trash2, CheckCircle, 
-    XCircle, Clock, MoreVertical, Edit2, ChevronLeft, ChevronRight, Phone, Download, Loader2, BookOpen, Printer 
+    XCircle, Clock, MoreVertical, Edit2, ChevronLeft, ChevronRight, Phone, Download, Loader2, BookOpen, Printer,
+    Calendar, FileSpreadsheet, X
 } from 'lucide-react';
+
+const getTodayFormatted = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const getFirstDayOfMonthFormatted = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+};
+
+const getCurrentMonthName = (isRtl = true) => {
+    return new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+        month: 'long',
+        year: 'numeric'
+    });
+};
 import { adminService } from '../../services/new-api';
 import { toast } from 'react-toastify';
 import LoadingNew from '../../components/shared/LoadingNew/LoadingNew';
@@ -34,10 +57,18 @@ const getCourseTypeLabel = (type) => {
 };
 
 const Payments = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isRTL = !i18n?.language || i18n.language.startsWith('ar');
+
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
+
+    // Excel Export Period States
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [exportPeriod, setExportPeriod] = useState('current_month'); // 'current_month' | 'custom' | 'all'
+    const [customStartDate, setCustomStartDate] = useState(getFirstDayOfMonthFormatted());
+    const [customEndDate, setCustomEndDate] = useState(getTodayFormatted());
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(25);
     const [totalPages, setTotalPages] = useState(1);
@@ -54,16 +85,62 @@ const Payments = () => {
     const handleExportExcel = async () => {
         try {
             setExporting(true);
-            toast.info('جاري تجهيز وتصدير كافة بيانات العمليات...');
-            // Fetch all payments matching active filters without pagination limit
-            const res = await adminService.getPayments({
+
+            let filterStart = null;
+            let filterEnd = null;
+            let periodFileLabel = 'all';
+
+            const now = new Date();
+
+            if (exportPeriod === 'current_month') {
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                filterStart = new Date(year, month, 1, 0, 0, 0, 0);
+                filterEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
+                periodFileLabel = `month_${year}_${String(month + 1).padStart(2, '0')}`;
+            } else if (exportPeriod === 'custom') {
+                if (!customStartDate || !customEndDate) {
+                    toast.error('يرجى تحديد تاريخ البداية وتاريخ النهاية');
+                    setExporting(false);
+                    return;
+                }
+                filterStart = new Date(`${customStartDate}T00:00:00`);
+                filterEnd = new Date(`${customEndDate}T23:59:59.999`);
+                if (filterStart > filterEnd) {
+                    toast.error('تاريخ البداية لا يمكن أن يكون بعد تاريخ النهاية');
+                    setExporting(false);
+                    return;
+                }
+                periodFileLabel = `${customStartDate}_to_${customEndDate}`;
+            } else {
+                periodFileLabel = 'all_records';
+            }
+
+            toast.info('جاري تجهيز وتصدير بيانات العمليات...');
+
+            const queryParams = {
                 limit: 0,
                 search,
                 status: statusFilter,
                 gateway: gatewayFilter
-            });
+            };
+            if (filterStart) queryParams.startDate = filterStart.toISOString();
+            if (filterEnd) queryParams.endDate = filterEnd.toISOString();
 
-            const dataToExport = res?.payments || payments || [];
+            // Fetch all payments matching active filters and date period
+            const res = await adminService.getPayments(queryParams);
+            let dataToExport = res?.payments || [];
+
+            // Double check date bounds on client-side
+            if (filterStart || filterEnd) {
+                dataToExport = dataToExport.filter(item => {
+                    const d = item.createdAt ? new Date(item.createdAt) : null;
+                    if (!d) return false;
+                    if (filterStart && d < filterStart) return false;
+                    if (filterEnd && d > filterEnd) return false;
+                    return true;
+                });
+            }
 
             if (dataToExport.length === 0) {
                 toast.warning('لا توجد بيانات لتصديرها');
@@ -188,13 +265,14 @@ const Payments = () => {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `payments_full_export_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.setAttribute('download', `payments_export_${periodFileLabel}_${getTodayFormatted()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
 
             toast.success(`تم تصدير ملف الإكسيل بنجاح (${dataToExport.length} عملية)`);
+            setIsExportModalOpen(false);
         } catch (error) {
             console.error('Export error:', error);
             toast.error('حدث خطأ أثناء تصدير البيانات');
@@ -302,22 +380,13 @@ const Payments = () => {
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                     <button
-                        onClick={handleExportExcel}
-                        disabled={exporting || payments.length === 0}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm cursor-pointer"
-                        title="تصدير شيت إكسيل شامل لكافة البيانات والعمليات"
+                        onClick={() => setIsExportModalOpen(true)}
+                        disabled={exporting || total === 0}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm shadow-emerald-600/20 active:scale-95 cursor-pointer"
+                        title="تصدير شيت إكسيل مع تحديد الفترة الزمنية"
                     >
-                        {exporting ? (
-                            <>
-                                <Loader2 size={16} className="animate-spin" />
-                                <span>جاري التصدير...</span>
-                            </>
-                        ) : (
-                            <>
-                                <Download size={16} />
-                                <span>تصدير إكسيل (شامل كافة البيانات)</span>
-                            </>
-                        )}
+                        <FileSpreadsheet size={16} />
+                        <span>تصدير إكسيل</span>
                     </button>
                     <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
                         إجمالي العمليات: <span className="font-bold text-slate-800 dark:text-white">{total}</span>
@@ -660,6 +729,198 @@ const Payments = () => {
                                     إلغاء
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Export to Excel Modal */}
+            {isExportModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-200/50 dark:border-emerald-800/50">
+                                    <FileSpreadsheet size={22} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+                                        تصدير شيت إكسيل (Excel Export)
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        حدد الفترة الزمنية المراد تصدير بيانات المدفوعات لها
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => !exporting && setIsExportModalOpen(false)}
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 space-y-4">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">
+                                اختر الفترة الزمنية المطلوبة:
+                            </label>
+
+                            {/* Option 1: Current Month */}
+                            <div
+                                onClick={() => setExportPeriod('current_month')}
+                                className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                                    exportPeriod === 'current_month'
+                                        ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20 ring-2 ring-emerald-500/20'
+                                        : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="exportPeriodPayments"
+                                    checked={exportPeriod === 'current_month'}
+                                    onChange={() => setExportPeriod('current_month')}
+                                    className="mt-1 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-semibold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                            <Calendar size={15} className="text-emerald-500" />
+                                            الشهر الحالي
+                                        </span>
+                                        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                            موصى به
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        تصدير عمليات الدفع لشهر <strong>{getCurrentMonthName(isRTL)}</strong> (من أول الشهر حتى نهايته)
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Option 2: Custom Period */}
+                            <div
+                                className={`p-4 rounded-xl border transition-all ${
+                                    exportPeriod === 'custom'
+                                        ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20 ring-2 ring-emerald-500/20'
+                                        : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                }`}
+                            >
+                                <div
+                                    onClick={() => setExportPeriod('custom')}
+                                    className="flex items-start gap-3 cursor-pointer"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="exportPeriodPayments"
+                                        checked={exportPeriod === 'custom'}
+                                        onChange={() => setExportPeriod('custom')}
+                                        className="mt-1 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                                    />
+                                    <div className="flex-1">
+                                        <span className="font-semibold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                            <Filter size={15} className="text-purple-500" />
+                                            فترة زمنية محددة
+                                        </span>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            تحديد تاريخ البداية والنهاية حسب رغبتك
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {exportPeriod === 'custom' && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                                                من تاريخ:
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={customStartDate}
+                                                onChange={(e) => setCustomStartDate(e.target.value)}
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-900/30"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                                                إلى تاريخ:
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={customEndDate}
+                                                onChange={(e) => setCustomEndDate(e.target.value)}
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-900/30"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Option 3: All Records */}
+                            <div
+                                onClick={() => setExportPeriod('all')}
+                                className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                                    exportPeriod === 'all'
+                                        ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20 ring-2 ring-emerald-500/20'
+                                        : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="exportPeriodPayments"
+                                    checked={exportPeriod === 'all'}
+                                    onChange={() => setExportPeriod('all')}
+                                    className="mt-1 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                                />
+                                <div className="flex-1">
+                                    <span className="font-semibold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                        <CreditCard size={15} className="text-blue-500" />
+                                        كافة العمليات (بدون حد زمني)
+                                    </span>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        تصدير جميع عمليات الدفع المسجلة بالكامل (مع مراعاة الفلاتر الحالية مثل حالة الدفع وبوابة الدفع)
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Info notice */}
+                            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2 border border-slate-100 dark:border-slate-800">
+                                <FileSpreadsheet size={16} className="text-emerald-500 shrink-0" />
+                                <span>
+                                    يتم استخراج ملف إكسيل بتنسيق CSV مع ترميز UTF-8 معتمد لقراءة النصوص العربية والأرقام مباشرة بدون أي تشويه.
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setIsExportModalOpen(false)}
+                                disabled={exporting}
+                                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium cursor-pointer"
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleExportExcel}
+                                disabled={exporting}
+                                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-colors text-sm font-semibold shadow-lg shadow-emerald-600/20 flex items-center gap-2 cursor-pointer"
+                            >
+                                {exporting ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        <span>جاري التصدير...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download size={16} />
+                                        <span>تصدير وتحميل الإكسيل</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>
