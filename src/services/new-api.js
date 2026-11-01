@@ -726,8 +726,41 @@ export const uploadService = {
 
 // Certificate service
 export const certificateService = {
-    generateCertificate: async (courseId) => {
-        const response = await api.get(`/certificate/${courseId}`);
+    // Student
+    getMyCertificates: async () => {
+        const response = await api.get('/certificate/my-certificates');
+        return response.data;
+    },
+
+    getCourseCertificate: async (courseId) => {
+        const response = await api.get(`/certificate/course/${courseId}`);
+        return response.data;
+    },
+
+    // Public Verification
+    verifyCertificate: async (certNumber) => {
+        const response = await api.get(`/certificate/verify/${certNumber}`);
+        return response.data;
+    },
+
+    // Admin
+    adminGetAllCertificates: async (params = {}) => {
+        const response = await api.get('/certificate/admin/all', { params });
+        return response.data;
+    },
+
+    adminGenerateCertificate: async (data) => {
+        const response = await api.post('/certificate/admin/generate', data);
+        return response.data;
+    },
+
+    adminToggleCertificateStatus: async (id) => {
+        const response = await api.patch(`/certificate/admin/${id}/status`);
+        return response.data;
+    },
+
+    adminDeleteCertificate: async (id) => {
+        const response = await api.delete(`/certificate/admin/${id}`);
         return response.data;
     }
 };
@@ -837,6 +870,11 @@ export const adminService = {
         return response.data;
     },
 
+    getCourseStudents: async (courseId, params = {}) => {
+        const response = await api.get(`/admin/courses/${courseId}/students`, { params });
+        return response.data;
+    },
+
     updateCourseDetails: async (courseId, courseData) => {
         const response = await api.put(`/admin/courses/${courseId}/details`, courseData);
         return response.data;
@@ -852,8 +890,8 @@ export const adminService = {
         return response.data;
     },
 
-    manualEnrollUserToCourse: async ({ userId, courseId, reason } = {}) => {
-        const response = await api.post('/admin/enrollments/manual', { userId, courseId, reason });
+    manualEnrollUserToCourse: async ({ userId, courseId, reason, paymentAmount } = {}) => {
+        const response = await api.post('/admin/enrollments/manual', { userId, courseId, reason, paymentAmount });
         return response.data;
     },
 
@@ -1077,10 +1115,13 @@ export const userService = {
 
 // Payment services
 export const paymentService = {
-    createCheckoutSession: async (courseIds, couponCode = null, paymentMethod = 'paymob', lang ) => {
+    createCheckoutSession: async (courseIds, couponCode = null, paymentMethod = 'paymob', lang, pointsToRedeem = 0) => {
         const payload = { courseIds, paymentMethod, lang };
         if (couponCode) {   
             payload.couponCode = couponCode;
+        }
+        if (pointsToRedeem > 0) {
+            payload.pointsToRedeem = pointsToRedeem;
         }
         
         let endpoint = '/payment/create-checkout-session';

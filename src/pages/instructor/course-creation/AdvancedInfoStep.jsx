@@ -4,6 +4,7 @@ import { useLanguage } from '../../../hooks/useLanguage';
 import { toast } from 'react-toastify';
 import { useFileUpload } from '../../../hooks/useFileUpload';
 import FileUpload from '../../../components/shared/FileUpload';
+import { ACCREDITATION_BODIES } from '../../../data/accreditationBodies';
 import {
     Sparkles,
     Image as ImageIcon,
@@ -19,7 +20,8 @@ import {
     Info,
     HelpCircle,
     CornerDownLeft,
-    X
+    X,
+    Award
 } from 'lucide-react';
 
 const AdvancedInfoStep = ({ courseData, handleChange, onNext }) => {
@@ -458,6 +460,128 @@ const AdvancedInfoStep = ({ courseData, handleChange, onNext }) => {
                         <Plus className="w-4 h-4" />
                         <span>{t('instructor.courseCreation.addMainOutcome', 'إضافة مخرج تعليمي رئيسي جديد')}</span>
                     </button>
+                )}
+            </div>
+
+            {/* Course Accreditation & Certificates Section (جهات الاعتماد والشهادات المعتمدة) */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-slate-800/90 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
+                            <Award className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                {isRTL ? 'جهات الاعتماد والشهادات المعتمدة للمساق' : 'Course Accreditations & Certificates'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {isRTL ? 'حدد جهات الاعتماد التي ستظهر شعاراتها على الشهادة الرسمية الصادرة للمتدربين' : 'Select accreditation bodies whose logos will appear on student certificates'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Has Accreditation Toggle */}
+                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const newHas = !courseData.hasAccreditation;
+                                handleChange('hasAccreditation', newHas);
+                                if (!newHas) {
+                                    handleChange('accreditations', []);
+                                } else if (!courseData.accreditations || courseData.accreditations.length === 0) {
+                                    handleChange('accreditations', ['tvtc', 'american_board', 'british_board']);
+                                }
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                                courseData.hasAccreditation !== false
+                                    ? 'bg-[#004C97] text-white shadow-xs'
+                                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+                            }`}
+                        >
+                            {isRTL ? 'دورة معتمدة' : 'Accredited'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                handleChange('hasAccreditation', false);
+                                handleChange('accreditations', []);
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                                courseData.hasAccreditation === false
+                                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
+                                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+                            }`}
+                        >
+                            {isRTL ? 'بدون جهة اعتماد' : 'No Accreditation'}
+                        </button>
+                    </div>
+                </div>
+
+                {courseData.hasAccreditation !== false ? (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>{isRTL ? 'اختر جهات الاعتماد المعتمدة لهذه الدورة:' : 'Select applicable accreditation bodies:'}</span>
+                            <span className="text-[11px] text-blue-600 dark:text-blue-400">
+                                {isRTL 
+                                    ? `تم تحديد (${(courseData.accreditations || []).length} من ${ACCREDITATION_BODIES.length})`
+                                    : `Selected (${(courseData.accreditations || []).length} of ${ACCREDITATION_BODIES.length})`}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {ACCREDITATION_BODIES.map((accred) => {
+                                const currentList = Array.isArray(courseData.accreditations) ? courseData.accreditations : [];
+                                const isSelected = currentList.includes(accred.id);
+
+                                return (
+                                    <div
+                                        key={accred.id}
+                                        onClick={() => {
+                                            const updated = isSelected
+                                                ? currentList.filter(id => id !== accred.id)
+                                                : [...currentList, accred.id];
+                                            handleChange('accreditations', updated);
+                                            handleChange('hasAccreditation', updated.length > 0);
+                                        }}
+                                        className={`p-3.5 rounded-2xl border transition flex items-center justify-between gap-3 cursor-pointer ${
+                                            isSelected
+                                                ? 'bg-blue-50/70 dark:bg-blue-950/30 border-blue-400 dark:border-blue-700 shadow-xs'
+                                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center justify-center shrink-0">
+                                                <img src={accred.logo} alt="" className="w-full h-full object-contain" />
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                                                    {accred.nameAr}
+                                                </div>
+                                                <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                                    {accred.code}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center border shrink-0 ${
+                                            isSelected 
+                                                ? 'bg-[#004C97] border-[#004C97] text-white' 
+                                                : 'border-slate-300 dark:border-slate-600'
+                                        }`}>
+                                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 text-center">
+                        {isRTL 
+                            ? 'هذه الدورة محددة كـ (بدون جهة اعتماد). ستصدر الشهادة باسم الأكاديمية AEC فقط بدون شعارات اعتمادات خارجية.'
+                            : 'This course is set to have no external accreditation. Certificates will be issued under AEC without external body logos.'}
+                    </div>
                 )}
             </div>
 

@@ -3,8 +3,10 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { Printer } from 'lucide-react';
 import { paymentService } from '../services/new-api';
 import { useAuth } from '../context/AuthContext';
+import InvoiceModal from '../components/shared/Invoice/InvoiceModal';
 
 const PaymentSuccess = () => {
   const { t } = useTranslation();
@@ -13,6 +15,7 @@ const PaymentSuccess = () => {
   const { user } = useAuth();
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [isVerifying, setIsVerifying] = useState(true);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   useEffect(() => {
     const verifyPaymentStatus = async () => {
@@ -93,23 +96,57 @@ const PaymentSuccess = () => {
 
         <div className="space-y-3">
           <button
+            onClick={() => setShowInvoiceModal(true)}
+            className="w-full bg-[#004C97] hover:bg-[#071942] text-white py-2.5 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+          >
+            <Printer size={18} />
+            <span>طباعة إيصال الفاتورة (A4)</span>
+          </button>
+
+          <button
             onClick={() => {
               const myCoursesPath = user?.role === 'instructor' ? '/instructor/my-courses' : '/student/my-courses';
               navigate(myCoursesPath);
             }}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-xl hover:bg-blue-700 font-bold transition-colors"
           >
             {t('payment.success.viewCourses')}
           </button>
           
           <button
             onClick={() => navigate('/explore')}
-            className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+            className="w-full bg-gray-100 text-gray-700 py-2.5 px-4 rounded-xl hover:bg-gray-200 font-medium transition-colors"
           >
             {t('payment.success.browseMore')}
           </button>
         </div>
       </div>
+
+      {/* Invoice Modal */}
+      {paymentDetails && (
+        <InvoiceModal
+          isOpen={showInvoiceModal}
+          onClose={() => setShowInvoiceModal(false)}
+          invoiceData={{
+            invoiceNumber: `INV-${new Date().getFullYear()}-${paymentDetails.orderId?.slice(-5).toUpperCase() || '00001'}`,
+            orderNumber: paymentDetails.orderId,
+            issueDate: new Date(),
+            paymentStatus: 'completed',
+            student: {
+              name: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email,
+              email: user?.email || '',
+              phone: user?.phone || '',
+              phoneCode: user?.phoneCode || ''
+            },
+            courses: paymentDetails.courses || [],
+            paymentMethod: 'mada',
+            transactionRef: paymentDetails.transactionId ? `TXN-${paymentDetails.transactionId}` : 'TXN-PAID',
+            subtotal: paymentDetails.amount || 0,
+            grandTotal: paymentDetails.amount || 0,
+            verificationUrl: `${window.location.origin}/verify-enrollment/${paymentDetails.orderId}`
+          }}
+        />
+      )}
     </div>
   );
 };

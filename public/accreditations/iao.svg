@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- IAO Eagle Crest -->
+  <g transform="translate(80,68)">
+    <!-- Eagle Wings -->
+    <path d="M0 -30 C-20 -38 -45 -22 -48 4 C-40 2 -32 0 -22 6 L-24 16 C-12 10 -6 18 0 28 C6 18 12 10 24 16 L22 6 C32 0 40 2 48 4 C45 -22 20 -38 0 -30 Z" fill="#0f172a"/>
+    <!-- Central Shield -->
+    <path d="M-14 -12 L14 -12 L14 8 C14 18 0 24 0 24 C0 24 -14 18 -14 8 Z" fill="#1e40af" stroke="#ffffff" stroke-width="1.5"/>
+    <!-- Stripes in shield -->
+    <rect x="-10" y="-8" width="4" height="16" fill="#dc2626"/>
+    <rect x="-2" y="-8" width="4" height="18" fill="#ffffff"/>
+    <rect x="6" y="-8" width="4" height="16" fill="#dc2626"/>
+    <text x="0" y="-14" font-family="Arial" font-size="10" font-weight="900" text-anchor="middle" fill="#d97706">IAO</text>
+  </g>
+  <text x="80" y="132" font-family="'Cairo', Arial" font-size="9" font-weight="bold" text-anchor="middle" fill="#0f172a">المنظمة الدولية للاعتماد</text>
+  <text x="80" y="146" font-family="Arial" font-size="7" font-weight="600" text-anchor="middle" fill="#475569">INTERNATIONAL ACCREDITATION</text>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- American Board Eagle Crest with Laurel Wreath -->
+  <g transform="translate(80,68)">
+    <!-- Laurel wreath -->
+    <path d="M-45 0 C-45 28 -15 42 0 44 C-20 40 -35 25 -35 0 C-35 -20 -20 -35 -5 -40 C-25 -35 -45 -18 -45 0 Z" fill="#1e3a8a"/>
+    <path d="M45 0 C45 28 15 42 0 44 C20 40 35 25 35 0 C35 -20 20 -35 5 -40 C25 -35 45 -18 45 0 Z" fill="#1e3a8a"/>
+    <!-- Shield -->
+    <path d="M-22 -26 L22 -26 L22 8 C22 22 0 32 0 32 C0 32 -22 22 -22 8 Z" fill="#1e3a8a" stroke="#d97706" stroke-width="2"/>
+    <!-- Stripes -->
+    <rect x="-18" y="-10" width="7" height="24" fill="#dc2626"/>
+    <rect x="-7" y="-10" width="6" height="26" fill="#ffffff"/>
+    <rect x="3" y="-10" width="6" height="26" fill="#dc2626"/>
+    <rect x="13" y="-10" width="6" height="22" fill="#ffffff"/>
+    <!-- Blue Chief with stars -->
+    <rect x="-20" y="-24" width="40" height="14" fill="#1e3a8a"/>
+    <circle cx="-10" cy="-17" r="2.5" fill="#ffffff"/>
+    <circle cx="0" cy="-17" r="2.5" fill="#ffffff"/>
+    <circle cx="10" cy="-17" r="2.5" fill="#ffffff"/>
+  </g>
+  <!-- Red banner ribbon -->
+  <path d="M25 116 L135 116 L125 128 L135 140 L25 140 L35 128 Z" fill="#b91c1c"/>
+  <text x="80" y="132" font-family="'Cairo', Arial" font-size="9" font-weight="900" text-anchor="middle" fill="#ffffff">البورد الأمريكي للتدريب</text>
+  <text x="80" y="152" font-family="Arial" font-size="7.5" font-weight="700" text-anchor="middle" fill="#1e3a8a">AMERICAN BOARD OF TRAINING</text>
+</svg>

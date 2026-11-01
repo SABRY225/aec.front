@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <circle cx="80" cy="72" r="54" fill="#ffffff" stroke="#c92a2a" stroke-width="4"/>
+  <circle cx="80" cy="72" r="48" fill="none" stroke="#1864ab" stroke-width="2"/>
+  <!-- BB Crest -->
+  <g transform="translate(80,72)">
+    <!-- Shield -->
+    <path d="M-22 -24 L22 -24 L22 6 C22 22 0 32 0 32 C0 32 -22 22 -22 6 Z" fill="#1864ab"/>
+    <path d="M-18 -20 L18 -20 L18 4 C18 18 0 28 0 28 C0 28 -18 18 -18 4 Z" fill="#c92a2a"/>
+    <!-- BB Monogram -->
+    <text x="0" y="8" font-family="'Cinzel', Georgia, serif" font-size="22" font-weight="900" text-anchor="middle" fill="#ffffff" letter-spacing="1">BB</text>
+  </g>
+  <!-- Ribbons / Stars -->
+  <g fill="#f59f00">
+    <polygon points="50,22 53,29 60,30 55,35 56,42 50,38 44,42 45,35 40,30 47,29" />
+    <polygon points="110,22 113,29 120,30 115,35 116,42 110,38 104,42 105,35 100,30 107,29" />
+  </g>
+  <text x="80" y="138" font-family="'Cairo', 'Segoe UI', Tahoma, Arial" font-size="11" font-weight="bold" text-anchor="middle" fill="#c92a2a">البورد البريطاني</text>
+  <text x="80" y="151" font-family="'Cinzel', Georgia, serif" font-size="8.5" font-weight="bold" text-anchor="middle" fill="#1864ab" letter-spacing="0.5">British Board</text>
+</svg>

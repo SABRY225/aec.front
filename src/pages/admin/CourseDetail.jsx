@@ -37,7 +37,16 @@ import {
     CheckCheck,
     AlertTriangle,
     Loader2,
-    ExternalLink
+    ExternalLink,
+    Users,
+    Search,
+    Mail,
+    Phone,
+    Download,
+    RefreshCw,
+    MessageCircle,
+    UserCheck,
+    Award
 } from 'lucide-react';
 import { adminService } from '../../services/new-api';
 import RichTextDisplay from '../../components/RichTextDisplay/RichTextDisplay';
@@ -60,9 +69,30 @@ const CourseDetail = () => {
     const [copiedId, setCopiedId] = useState(false);
     const [expandedSections, setExpandedSections] = useState({ 0: true });
 
+    // Enrolled students state
+    const [students, setStudents] = useState([]);
+    const [studentsLoading, setStudentsLoading] = useState(false);
+    const [studentsStats, setStudentsStats] = useState({ total: 0, enrolled: 0, inProgress: 0, completed: 0 });
+    const [studentSearch, setStudentSearch] = useState('');
+    const [studentStatusFilter, setStudentStatusFilter] = useState('all');
+    const [studentPage, setStudentPage] = useState(1);
+    const [studentPagination, setStudentPagination] = useState({ total: 0, page: 1, limit: 50, totalPages: 1 });
+    const [enrollmentToDelete, setEnrollmentToDelete] = useState(null);
+    const [isDeletingEnrollment, setIsDeletingEnrollment] = useState(false);
+
     useEffect(() => {
         fetchCourseDetails();
+        fetchStudents(1);
     }, [id]);
+
+    useEffect(() => {
+        if (activeTab === 'students') {
+            const timer = setTimeout(() => {
+                fetchStudents(1, studentSearch, studentStatusFilter);
+            }, 350);
+            return () => clearTimeout(timer);
+        }
+    }, [studentSearch, studentStatusFilter, activeTab]);
 
     const fetchCourseDetails = async () => {
         try {
@@ -77,6 +107,87 @@ const CourseDetail = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchStudents = async (page = 1, search = studentSearch, status = studentStatusFilter) => {
+        if (!id) return;
+        try {
+            setStudentsLoading(true);
+            const res = await adminService.getCourseStudents(id, {
+                page,
+                limit: 50,
+                search: (search || '').trim(),
+                status: status === 'all' ? '' : status
+            });
+            if (res?.success) {
+                setStudents(res.students || []);
+                if (res.stats) setStudentsStats(res.stats);
+                if (res.pagination) setStudentPagination(res.pagination);
+                setStudentPage(page);
+            }
+        } catch (err) {
+            console.error('Error fetching course students:', err);
+        } finally {
+            setStudentsLoading(false);
+        }
+    };
+
+    const handleDeleteEnrollment = async () => {
+        if (!enrollmentToDelete) return;
+        try {
+            setIsDeletingEnrollment(true);
+            await adminService.deleteEnrollment(enrollmentToDelete._id);
+            toast.success(isRTL ? 'تم إلغاء تسجيل الطالب بنجاح' : 'Student enrollment deleted successfully');
+            setEnrollmentToDelete(null);
+            fetchStudents(studentPage);
+            fetchCourseDetails();
+        } catch (err) {
+            console.error('Error deleting enrollment:', err);
+            toast.error(isRTL ? 'فشل في إلغاء تسجيل الطالب' : 'Failed to delete enrollment');
+        } finally {
+            setIsDeletingEnrollment(false);
+        }
+    };
+
+    const handleExportCSV = () => {
+        if (!students.length) {
+            toast.info(isRTL ? 'لا يوجد طلاب لتصديرهم' : 'No students to export');
+            return;
+        }
+        const headers = [
+            isRTL ? 'اسم الطالب' : 'Student Name',
+            isRTL ? 'البريد الإلكتروني' : 'Email',
+            isRTL ? 'رقم الهاتف' : 'Phone',
+            isRTL ? 'تاريخ التسجيل' : 'Enrolled At',
+            isRTL ? 'طريقة التسجيل' : 'Enrollment Type',
+            isRTL ? 'الحالة' : 'Status',
+            isRTL ? 'نسبة الإنجاز %' : 'Progress %',
+            isRTL ? 'الرقم التسلسلي' : 'Serial Number',
+            isRTL ? 'كود الدخول' : 'Access Code'
+        ];
+
+        const rows = students.map(s => [
+            `"${s.student?.name || ''}"`,
+            `"${s.student?.email || ''}"`,
+            `"${s.student?.phone || ''}"`,
+            `"${s.enrolledAt ? new Date(s.enrolledAt).toLocaleDateString() : ''}"`,
+            `"${s.isManual ? (isRTL ? 'تسجيل يدوي' : 'Manual') : (isRTL ? 'دفع إلكتروني' : 'Online Paid')}"`,
+            `"${s.status || ''}"`,
+            `"${s.progress?.overallProgress || 0}%"`,
+            `"${s.serialNumber || ''}"`,
+            `"${s.accessCode || ''}"`
+        ]);
+
+        const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `course_${course?.title || id}_students.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success(isRTL ? 'تم تصدير قائمة الطلاب بنجاح' : 'Students exported to CSV successfully');
     };
 
     const handleStatusChange = async (newStatus) => {
@@ -364,6 +475,27 @@ const CourseDetail = () => {
 
                         {/* Right: Quick Action Controls */}
                         <div className="flex items-center gap-2 flex-wrap justify-end">
+                            {/* Switch to Students Tab Button */}
+                            <button
+                                onClick={() => setActiveTab('students')}
+                                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition border ${
+                                    activeTab === 'students'
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
+                                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60'
+                                }`}
+                                title={isRTL ? 'عرض الطلاب المشاركين' : 'View enrolled students'}
+                            >
+                                <Users className="w-4 h-4 text-blue-500" />
+                                <span>{isRTL ? 'الطلاب المشاركون' : 'Students'}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                                    activeTab === 'students'
+                                        ? 'bg-white/20 text-white'
+                                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                                }`}>
+                                    {course.enrolledStudentsCount ?? studentsStats.total ?? course.enrolledStudents?.length ?? 0}
+                                </span>
+                            </button>
+
                             {/* Manual Enrollment Button */}
                             <button
                                 onClick={() => setIsEnrollModalOpen(true)}
@@ -569,13 +701,23 @@ const CourseDetail = () => {
                             {/* Stat Metrics Strip */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
                                 {/* Metric 1: Students */}
-                                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80">
-                                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
-                                        <User className="w-3.5 h-3.5 text-blue-500" />
-                                        <span>{isRTL ? 'الطلاب المسجلون' : 'Students'}</span>
+                                <div 
+                                    onClick={() => setActiveTab('students')}
+                                    className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition group"
+                                    title={isRTL ? 'انقر لعرض قائمة الطلاب' : 'Click to view students list'}
+                                >
+                                    <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs mb-1">
+                                        <div className="flex items-center gap-2">
+                                            <Users className="w-3.5 h-3.5 text-blue-500 group-hover:scale-110 transition" />
+                                            <span>{isRTL ? 'الطلاب المسجلون' : 'Students'}</span>
+                                        </div>
+                                        <span className="text-[10px] text-primary-600 dark:text-primary-400 font-semibold opacity-0 group-hover:opacity-100 transition">
+                                            {isRTL ? 'عرض القائمة ←' : 'View list →'}
+                                        </span>
                                     </div>
-                                    <p className="text-lg font-black text-slate-900 dark:text-white">
-                                        {course.enrolledStudents?.length || 0}
+                                    <p className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                        <span>{course.enrolledStudentsCount ?? studentsStats.total ?? course.enrolledStudents?.length ?? 0}</span>
+                                        <span className="text-xs font-normal text-slate-400">{isRTL ? 'طالب' : 'enrolled'}</span>
                                     </p>
                                 </div>
 
@@ -648,6 +790,25 @@ const CourseDetail = () => {
                                 <span>{isRTL ? 'المنهج الدراسي' : 'Curriculum'}</span>
                                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${activeTab === 'curriculum' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
                                     {totalLecturesCount}
+                                </span>
+                            </button>
+
+                            <button
+                                onClick={() => setActiveTab('students')}
+                                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 whitespace-nowrap ${
+                                    activeTab === 'students'
+                                        ? 'bg-primary-600 text-white shadow-sm'
+                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                }`}
+                            >
+                                <Users className="w-4 h-4" />
+                                <span>{isRTL ? 'الطلاب المشاركون' : 'Enrolled Students'}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                    activeTab === 'students' 
+                                        ? 'bg-white/20 text-white' 
+                                        : 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300'
+                                }`}>
+                                    {course.enrolledStudentsCount ?? studentsStats.total ?? course.enrolledStudents?.length ?? 0}
                                 </span>
                             </button>
 
@@ -1133,6 +1294,386 @@ const CourseDetail = () => {
                                 </div>
                             </motion.div>
                         )}
+
+                        {/* TAB 5: ENROLLED STUDENTS */}
+                        {activeTab === 'students' && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 8 }} 
+                                animate={{ opacity: 1, y: 0 }} 
+                                transition={{ duration: 0.2 }}
+                                className="space-y-6"
+                            >
+                                {/* KPI Quick Stats */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                                        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-semibold mb-1">
+                                            <Users className="w-4 h-4" />
+                                            <span>{isRTL ? 'إجمالي الطلاب' : 'Total Students'}</span>
+                                        </div>
+                                        <p className="text-2xl font-black text-slate-900 dark:text-white">
+                                            {studentsStats.total}
+                                        </p>
+                                    </div>
+
+                                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-semibold mb-1">
+                                            <Clock className="w-4 h-4" />
+                                            <span>{isRTL ? 'قيد التعلم والتقدم' : 'In Progress'}</span>
+                                        </div>
+                                        <p className="text-2xl font-black text-slate-900 dark:text-white">
+                                            {studentsStats.inProgress}
+                                        </p>
+                                    </div>
+
+                                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-1">
+                                            <Award className="w-4 h-4" />
+                                            <span>{isRTL ? 'أتموا الدورة بنجاح' : 'Completed'}</span>
+                                        </div>
+                                        <p className="text-2xl font-black text-slate-900 dark:text-white">
+                                            {studentsStats.completed}
+                                        </p>
+                                    </div>
+
+                                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold mb-1">
+                                            <UserCheck className="w-4 h-4" />
+                                            <span>{isRTL ? 'مسجلون حديثاً' : 'Newly Enrolled'}</span>
+                                        </div>
+                                        <p className="text-2xl font-black text-slate-900 dark:text-white">
+                                            {studentsStats.enrolled}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Controls: Search, Filter & Actions */}
+                                <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                                    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                                        {/* Search Input */}
+                                        <div className="relative flex-1">
+                                            <Search className="w-4 h-4 absolute top-1/2 -translate-y-1/2 start-3 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                value={studentSearch}
+                                                onChange={(e) => setStudentSearch(e.target.value)}
+                                                placeholder={isRTL ? 'ابحث بالاسم، البريد الإلكتروني، الهاتف، أو الرقم التسلسلي...' : 'Search by name, email, phone, or serial...'}
+                                                className="w-full ps-9 pe-8 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition"
+                                            />
+                                            {studentSearch && (
+                                                <button
+                                                    onClick={() => setStudentSearch('')}
+                                                    className="absolute top-1/2 -translate-y-1/2 end-3 text-slate-400 hover:text-slate-600 text-xs"
+                                                >
+                                                    ✕
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <button
+                                                onClick={() => setIsEnrollModalOpen(true)}
+                                                className="px-3.5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 transition shadow-sm shadow-primary-500/20"
+                                            >
+                                                <UserPlus className="w-4 h-4" />
+                                                <span>{isRTL ? 'تسجيل طالب جديد' : 'Enroll Student'}</span>
+                                            </button>
+
+                                            <button
+                                                onClick={handleExportCSV}
+                                                disabled={students.length === 0}
+                                                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+                                                title={isRTL ? 'تصدير كملف CSV' : 'Export CSV'}
+                                            >
+                                                <Download className="w-4 h-4 text-slate-500" />
+                                                <span className="hidden sm:inline">{isRTL ? 'تصدير' : 'Export'}</span>
+                                            </button>
+
+                                            <button
+                                                onClick={() => fetchStudents(studentPage)}
+                                                disabled={studentsLoading}
+                                                className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition"
+                                                title={isRTL ? 'تحديث البيانات' : 'Refresh list'}
+                                            >
+                                                <RefreshCw className={`w-4 h-4 ${studentsLoading ? 'animate-spin text-primary-500' : ''}`} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Status Filter Chips */}
+                                    <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                                        <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+                                            {isRTL ? 'الحالة:' : 'Filter:'}
+                                        </span>
+                                        {[
+                                            { id: 'all', label: isRTL ? 'الكل' : 'All', count: studentsStats.total },
+                                            { id: 'enrolled', label: isRTL ? 'مسجل حديثاً' : 'Enrolled', count: studentsStats.enrolled },
+                                            { id: 'in-progress', label: isRTL ? 'قيد التعلم' : 'In Progress', count: studentsStats.inProgress },
+                                            { id: 'finished', label: isRTL ? 'أتموا الدورة' : 'Completed', count: studentsStats.completed }
+                                        ].map(f => (
+                                            <button
+                                                key={f.id}
+                                                onClick={() => setStudentStatusFilter(f.id)}
+                                                className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
+                                                    studentStatusFilter === f.id
+                                                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/60'
+                                                }`}
+                                            >
+                                                <span>{f.label}</span>
+                                                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                                                    studentStatusFilter === f.id
+                                                        ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900'
+                                                        : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                                                }`}>
+                                                    {f.count}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Students List / Cards */}
+                                {studentsLoading && students.length === 0 ? (
+                                    <div className="space-y-3">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-pulse flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-slate-800"></div>
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
+                                                    <div className="h-3 bg-slate-100 dark:bg-slate-800/60 rounded w-1/2"></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : students.length === 0 ? (
+                                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
+                                            <Users className="w-8 h-8" />
+                                        </div>
+                                        <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                                            {studentSearch 
+                                                ? (isRTL ? 'لا توجد نتائج مطابقة لبحثك' : 'No students matching your search')
+                                                : (isRTL ? 'لا يوجد طلاب مسجلون في هذه الدورة حتى الآن' : 'No students enrolled in this course yet')}
+                                        </h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+                                            {studentSearch
+                                                ? (isRTL ? 'جرب البحث باسم آخر أو إزالة تصفيات البحث.' : 'Try adjusting your search criteria.')
+                                                : (isRTL ? 'يمكنك إضافة طلاب وتسجيلهم يدوياً عبر زر "تسجيل طالب جديد".' : 'You can manually enroll students using the button above.')}
+                                        </p>
+                                        <div className="mt-4 flex items-center justify-center gap-2">
+                                            {studentSearch ? (
+                                                <button
+                                                    onClick={() => setStudentSearch('')}
+                                                    className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 transition"
+                                                >
+                                                    {isRTL ? 'مسح البحث' : 'Clear search'}
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => setIsEnrollModalOpen(true)}
+                                                    className="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                                                >
+                                                    <UserPlus className="w-4 h-4" />
+                                                    <span>{isRTL ? 'تسجيل أول طالب الآن' : 'Enroll First Student'}</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {students.map((item) => {
+                                            const studentName = item.student?.name || (isRTL ? 'طالب' : 'Student');
+                                            const studentInitials = studentName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'ST';
+                                            const cleanPhone = (item.student?.phone || '').replace(/[^0-9+]/g, '');
+                                            const whatsappNumber = cleanPhone.startsWith('+') ? cleanPhone.slice(1) : (cleanPhone.startsWith('0') ? '966' + cleanPhone.slice(1) : cleanPhone);
+                                            const progressPercent = Math.min(100, Math.max(0, item.progress?.overallProgress || 0));
+
+                                            return (
+                                                <div 
+                                                    key={item._id}
+                                                    className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition"
+                                                >
+                                                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                                        
+                                                        {/* Student Identity */}
+                                                        <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                                                            {item.student?.avatar ? (
+                                                                <img 
+                                                                    src={item.student.avatar} 
+                                                                    alt={studentName} 
+                                                                    className="w-12 h-12 rounded-2xl object-cover shrink-0 border border-slate-100 dark:border-slate-800"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20">
+                                                                    {studentInitials}
+                                                                </div>
+                                                            )}
+
+                                                            <div className="min-w-0 flex-1">
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    {item.student?._id ? (
+                                                                        <Link 
+                                                                            to={`/admin/students/${item.student._id}`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="font-bold text-sm sm:text-base text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition truncate flex items-center gap-1.5"
+                                                                        >
+                                                                            <span>{studentName}</span>
+                                                                            <ExternalLink className="w-3.5 h-3.5 text-slate-400 inline" />
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">
+                                                                            {studentName}
+                                                                        </h4>
+                                                                    )}
+
+                                                                    {/* Enrollment Type Badge */}
+                                                                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${
+                                                                        item.isManual
+                                                                            ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800'
+                                                                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800'
+                                                                    }`}>
+                                                                        {item.isManual ? (isRTL ? 'تسجيل يدوي (أدمن)' : 'Manual Admin') : (isRTL ? 'دفع إلكتروني' : 'Paid Online')}
+                                                                    </span>
+
+                                                                    {/* Status Badge */}
+                                                                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${
+                                                                        item.status === 'finished' || item.status === 'passed'
+                                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800'
+                                                                            : item.status === 'in-progress'
+                                                                            ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800'
+                                                                            : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800'
+                                                                    }`}>
+                                                                        {item.status === 'finished' || item.status === 'passed'
+                                                                            ? (isRTL ? 'أتم الدورة' : 'Completed')
+                                                                            : item.status === 'in-progress'
+                                                                            ? (isRTL ? 'قيد التعلم' : 'In Progress')
+                                                                            : (isRTL ? 'مسجل' : 'Enrolled')}
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* Contact Info Row */}
+                                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                                    {item.student?.email && (
+                                                                        <a 
+                                                                            href={`mailto:${item.student.email}`}
+                                                                            className="flex items-center gap-1 hover:text-primary-600 transition truncate max-w-xs"
+                                                                        >
+                                                                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                                            <span className="truncate">{item.student.email}</span>
+                                                                        </a>
+                                                                    )}
+
+                                                                    {item.student?.phone && (
+                                                                        <a 
+                                                                            href={`tel:${item.student.phone}`}
+                                                                            className="flex items-center gap-1 hover:text-primary-600 transition"
+                                                                            dir="ltr"
+                                                                        >
+                                                                            <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                                            <span>{item.student.phone}</span>
+                                                                        </a>
+                                                                    )}
+
+                                                                    <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                                                                        <Calendar className="w-3.5 h-3.5 shrink-0" />
+                                                                        <span>{isRTL ? 'سجل في:' : 'Enrolled:'} {formatDate(item.enrolledAt)}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Onsite / Offline specific info */}
+                                                                {(item.serialNumber || item.accessCode || item.attendanceStatus) && (
+                                                                    <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px]">
+                                                                        {item.serialNumber && (
+                                                                            <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">
+                                                                                {isRTL ? 'الرقم:' : 'Serial:'} {item.serialNumber}
+                                                                            </span>
+                                                                        )}
+                                                                        {item.accessCode && (
+                                                                            <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">
+                                                                                {isRTL ? 'كود الدخول:' : 'Code:'} {item.accessCode}
+                                                                            </span>
+                                                                        )}
+                                                                        {item.checkedIn ? (
+                                                                            <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 font-semibold">
+                                                                                {isRTL ? '✓ تم الحضور' : '✓ Checked in'}
+                                                                            </span>
+                                                                        ) : null}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Progress & Actions */}
+                                                        <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                                                            {/* Progress Bar Widget */}
+                                                            <div className="w-28 sm:w-32">
+                                                                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                                                    <span>{isRTL ? 'الإنجاز' : 'Progress'}</span>
+                                                                    <span>{progressPercent}%</span>
+                                                                </div>
+                                                                <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                                                    <div 
+                                                                        className={`h-full rounded-full transition-all duration-300 ${
+                                                                            progressPercent >= 100 
+                                                                                ? 'bg-emerald-500' 
+                                                                                : progressPercent > 0 
+                                                                                ? 'bg-blue-600' 
+                                                                                : 'bg-slate-300 dark:bg-slate-700'
+                                                                        }`}
+                                                                        style={{ width: `${progressPercent}%` }}
+                                                                    />
+                                                                </div>
+                                                                <span className="text-[10px] text-slate-400 mt-0.5 block truncate">
+                                                                    {item.progress?.completedLecturesCount || 0} {isRTL ? 'درس مكتمل' : 'lectures done'}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Action Icons */}
+                                                            <div className="flex items-center gap-1.5 shrink-0">
+                                                                {whatsappNumber && (
+                                                                    <a 
+                                                                        href={`https://wa.me/${whatsappNumber}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="p-2 rounded-xl text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition"
+                                                                        title={isRTL ? 'مراسلة عبر واتساب' : 'WhatsApp'}
+                                                                    >
+                                                                        <MessageCircle className="w-4 h-4" />
+                                                                    </a>
+                                                                )}
+
+                                                                {item.student?._id && (
+                                                                    <Link
+                                                                        to={`/admin/students/${item.student._id}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                                                                        title={isRTL ? 'عرض ملف الطالب' : 'View profile'}
+                                                                    >
+                                                                        <Eye className="w-4 h-4" />
+                                                                    </Link>
+                                                                )}
+
+                                                                <button
+                                                                    onClick={() => setEnrollmentToDelete(item)}
+                                                                    className="p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+                                                                    title={isRTL ? 'إلغاء تسجيل الطالب' : 'Remove enrollment'}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
                     </div>
 
                     {/* RIGHT / SIDEBAR (4 Cols) */}
@@ -1268,8 +1809,57 @@ const CourseDetail = () => {
                             : `Student ${user?.name || user?.firstName || ''} enrolled successfully!`
                     );
                     fetchCourseDetails();
+                    fetchStudents(1);
                 }} 
             />
+
+            {/* ======================================================== */}
+            {/* DELETE ENROLLMENT MODAL */}
+            {/* ======================================================== */}
+            <AnimatePresence>
+                {enrollmentToDelete && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl"
+                        >
+                            <div className="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="w-7 h-7" />
+                            </div>
+
+                            <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+                                {isRTL ? 'تأكيد إلغاء تسجيل الطالب' : 'Confirm Unenrollment'}
+                            </h3>
+
+                            <p className="text-sm text-center text-slate-500 dark:text-slate-400 mb-6">
+                                {isRTL 
+                                    ? `هل أنت متأكد من رغبتك في إلغاء تسجيل الطالب "${enrollmentToDelete.student?.name || (isRTL ? 'هذا الطالب' : 'this student')}" من دورة "${course.title}"؟`
+                                    : `Are you sure you want to remove student "${enrollmentToDelete.student?.name || 'this student'}" from "${course.title}"?`}
+                            </p>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setEnrollmentToDelete(null)}
+                                    disabled={isDeletingEnrollment}
+                                    className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-sm transition"
+                                >
+                                    {isRTL ? 'إلغاء' : 'Cancel'}
+                                </button>
+                                <button
+                                    onClick={handleDeleteEnrollment}
+                                    disabled={isDeletingEnrollment}
+                                    className="flex-1 py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {isDeletingEnrollment && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    <span>{isRTL ? 'تأكيد الإلغاء' : 'Unenroll'}</span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* ======================================================== */}
             {/* DELETE CONFIRMATION MODAL */}

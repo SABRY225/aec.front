@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../hooks/useLanguage';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Activity,
@@ -29,61 +30,62 @@ import {
 import { adminService } from '../../services/new-api';
 import { toast } from 'react-toastify';
 
-const getCategoryBadge = (category) => {
+const getCategoryBadge = (category, isRTL) => {
     switch (category) {
         case 'home':
             return {
-                label: 'الرئيسية',
+                label: isRTL ? 'الرئيسية' : 'Home',
                 icon: <Home size={14} />,
                 bg: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
             };
         case 'courses':
             return {
-                label: 'دليل الدورات',
+                label: isRTL ? 'دليل الدورات' : 'Courses Catalog',
                 icon: <Compass size={14} />,
                 bg: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
             };
         case 'course_detail':
             return {
-                label: 'صفحة دورة',
+                label: isRTL ? 'صفحة دورة' : 'Course Details',
                 icon: <BookOpen size={14} />,
                 bg: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
             };
         case 'cart_checkout':
             return {
-                label: 'السلة والدفع',
+                label: isRTL ? 'السلة والدفع' : 'Cart & Checkout',
                 icon: <ShoppingCart size={14} />,
                 bg: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
             };
         case 'student_portal':
             return {
-                label: 'بوابة الطالب',
+                label: isRTL ? 'بوابة الطالب' : 'Student Portal',
                 icon: <GraduationCap size={14} />,
                 bg: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
             };
         default:
             return {
-                label: 'صفحة عامة',
+                label: isRTL ? 'صفحة عامة' : 'General Page',
                 icon: <Globe size={14} />,
                 bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
             };
     }
 };
 
-const formatTimeAgo = (dateStr) => {
-    if (!dateStr) return 'غير محدد';
+const formatTimeAgo = (dateStr, isRTL) => {
+    if (!dateStr) return isRTL ? 'غير محدد' : 'Unknown';
     const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
-    if (seconds < 60) return 'الآن';
+    if (seconds < 60) return isRTL ? 'الآن' : 'Just now';
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `منذ ${minutes} دقيقة`;
+    if (minutes < 60) return isRTL ? `منذ ${minutes} دقيقة` : `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `منذ ${hours} ساعة`;
+    if (hours < 24) return isRTL ? `منذ ${hours} ساعة` : `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    return `منذ ${days} يوم`;
+    return isRTL ? `منذ ${days} يوم` : `${days}d ago`;
 };
 
 const PageAnalytics = () => {
     const { t } = useTranslation();
+    const { isRTL, language } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [timeRange, setTimeRange] = useState('week'); // 'today' | 'week' | 'month' | 'all'
@@ -128,7 +130,7 @@ const PageAnalytics = () => {
             }
         } catch (err) {
             console.error('Error loading page analytics:', err);
-            toast.error('تعذر تحميل بيانات تتبع الصفحات');
+            toast.error(isRTL ? 'تعذر تحميل بيانات تتبع الصفحات' : 'Failed to load page analytics');
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -165,7 +167,7 @@ const PageAnalytics = () => {
     }, [data.devices]);
 
     return (
-        <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-8 font-arabic">
+        <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-8 font-arabic" dir={isRTL ? 'rtl' : 'ltr'}>
             {/* ---------------- Header ---------------- */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
                 <div className="flex items-start gap-4 sm:gap-5">
@@ -175,15 +177,17 @@ const PageAnalytics = () => {
                     <div>
                         <div className="flex items-center gap-3">
                             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                                تتبع صفحات المستخدمين
+                                {isRTL ? 'تتبع صفحات المستخدمين' : 'User Page Analytics'}
                             </h1>
                             <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-200 dark:border-emerald-800">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                رصد مباشر
+                                {isRTL ? 'رصد مباشر' : 'Live Tracking'}
                             </span>
                         </div>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mt-1.5 font-medium">
-                            تحليل شامل لأكثر الصفحات زيارة ونشاط الطلاب والزوار عبر النظام بالكامل.
+                            {isRTL
+                                ? 'تحليل شامل لأكثر الصفحات زيارة ونشاط الطلاب والزوار عبر النظام بالكامل.'
+                                : 'Comprehensive analysis of top visited pages and user traffic across the platform.'}
                         </p>
                     </div>
                 </div>
@@ -194,13 +198,13 @@ const PageAnalytics = () => {
                         onClick={() => fetchAnalytics(true)}
                         disabled={refreshing}
                         className="px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-white bg-slate-100 hover:bg-blue-600 dark:bg-slate-800 dark:hover:bg-blue-600 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all duration-300 flex items-center gap-2 group active:scale-95 disabled:opacity-50"
-                        title="تحديث البيانات"
+                        title={isRTL ? 'تحديث البيانات' : 'Refresh'}
                     >
                         <RefreshCw
                             size={18}
                             className={`${refreshing ? 'animate-spin text-blue-500' : 'group-hover:rotate-180 transition-transform duration-700'}`}
                         />
-                        <span>{refreshing ? 'جاري التحديث...' : 'تحديث'}</span>
+                        <span>{refreshing ? (isRTL ? 'جاري التحديث...' : 'Refreshing...') : (isRTL ? 'تحديث' : 'Refresh')}</span>
                     </button>
                 </div>
             </div>
@@ -208,17 +212,17 @@ const PageAnalytics = () => {
             {/* ---------------- Filter & Time Range Bar ---------------- */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
                 {/* Time Range Selector */}
-                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl">
+                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl overflow-x-auto">
                     {[
-                        { id: 'today', label: 'اليوم' },
-                        { id: 'week', label: 'آخر 7 أيام' },
-                        { id: 'month', label: 'آخر 30 يوماً' },
-                        { id: 'all', label: 'كل الأوقات' }
+                        { id: 'today', label: isRTL ? 'اليوم' : 'Today' },
+                        { id: 'week', label: isRTL ? 'آخر 7 أيام' : 'Last 7 Days' },
+                        { id: 'month', label: isRTL ? 'آخر 30 يوماً' : 'Last 30 Days' },
+                        { id: 'all', label: isRTL ? 'كل الأوقات' : 'All Time' }
                     ].map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setTimeRange(tab.id)}
-                            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${
+                            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${
                                 timeRange === tab.id
                                     ? 'bg-blue-600 text-white shadow-sm'
                                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -234,9 +238,9 @@ const PageAnalytics = () => {
                     {/* User Role Filter */}
                     <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl shrink-0">
                         {[
-                            { id: 'all', label: 'الجميع' },
-                            { id: 'student', label: 'الطلاب' },
-                            { id: 'guest', label: 'الزوار الضيوف' }
+                            { id: 'all', label: isRTL ? 'الجميع' : 'All Visitors' },
+                            { id: 'student', label: isRTL ? 'الطلاب' : 'Students' },
+                            { id: 'guest', label: isRTL ? 'الزوار الضيوف' : 'Guests' }
                         ].map((role) => (
                             <button
                                 key={role.id}
@@ -256,14 +260,14 @@ const PageAnalytics = () => {
                     <div className="relative flex-1 sm:w-64">
                         <Search
                             size={16}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                            className={`absolute ${isRTL ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none`}
                         />
                         <input
                             type="text"
-                            placeholder="ابحث عن مسار أو عنوان صفحة..."
+                            placeholder={isRTL ? 'ابحث عن مسار أو عنوان صفحة...' : 'Search page path or title...'}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-3 pr-10 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            className={`w-full ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                         />
                     </div>
                 </div>
@@ -278,13 +282,13 @@ const PageAnalytics = () => {
                     transition={{ duration: 0.3 }}
                     className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-all"
                 >
-                    <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+                    <div className={`absolute top-0 ${isRTL ? 'right-0 -mr-8' : 'left-0 -ml-8'} w-28 h-28 bg-blue-500/10 rounded-full blur-2xl -mt-8 pointer-events-none`} />
                     <div className="flex items-center justify-between mb-4">
                         <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <Eye size={24} />
                         </div>
                         <span className="text-xs font-bold px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
-                            إجمالي المشاهدات
+                            {isRTL ? 'إجمالي المشاهدات' : 'Total Pageviews'}
                         </span>
                     </div>
                     <h3 className="text-3xl font-black text-slate-900 dark:text-white">
@@ -292,7 +296,7 @@ const PageAnalytics = () => {
                     </h3>
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
                         <Activity size={14} className="text-blue-500" />
-                        <span>مشاهدة تم رصدها خلال الفترة</span>
+                        <span>{isRTL ? 'مشاهدة تم رصدها خلال الفترة' : 'Pageviews tracked in period'}</span>
                     </p>
                 </motion.div>
 
@@ -303,13 +307,13 @@ const PageAnalytics = () => {
                     transition={{ duration: 0.3, delay: 0.05 }}
                     className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-all"
                 >
-                    <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+                    <div className={`absolute top-0 ${isRTL ? 'right-0 -mr-8' : 'left-0 -ml-8'} w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl -mt-8 pointer-events-none`} />
                     <div className="flex items-center justify-between mb-4">
                         <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <Users size={24} />
                         </div>
                         <span className="text-xs font-bold px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
-                            زوار فريدين
+                            {isRTL ? 'زوار فريدين' : 'Unique Visitors'}
                         </span>
                     </div>
                     <h3 className="text-3xl font-black text-slate-900 dark:text-white">
@@ -317,7 +321,7 @@ const PageAnalytics = () => {
                     </h3>
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
                         <Globe size={14} className="text-emerald-500" />
-                        <span>جلسات تصفح مختلفة</span>
+                        <span>{isRTL ? 'جلسات تصفح مختلفة' : 'Unique browsing sessions'}</span>
                     </p>
                 </motion.div>
 
@@ -328,22 +332,22 @@ const PageAnalytics = () => {
                     transition={{ duration: 0.3, delay: 0.1 }}
                     className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-all"
                 >
-                    <div className="absolute top-0 right-0 w-28 h-28 bg-purple-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+                    <div className={`absolute top-0 ${isRTL ? 'right-0 -mr-8' : 'left-0 -ml-8'} w-28 h-28 bg-purple-500/10 rounded-full blur-2xl -mt-8 pointer-events-none`} />
                     <div className="flex items-center justify-between mb-4">
                         <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <Award size={24} />
                         </div>
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg">
-                            الأكثر زيارة
+                            {isRTL ? 'الأكثر زيارة' : 'Top Visited'}
                         </span>
                     </div>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white truncate" title={data.summary.topPage?.pageTitle || data.summary.topPage?.path || 'لا توجد بيانات'}>
-                        {data.summary.topPage?.pageTitle || data.summary.topPage?.path || 'لا توجد بيانات'}
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white truncate" title={data.summary.topPage?.pageTitle || data.summary.topPage?.path || (isRTL ? 'لا توجد بيانات' : 'No data')}>
+                        {data.summary.topPage?.pageTitle || data.summary.topPage?.path || (isRTL ? 'لا توجد بيانات' : 'No data')}
                     </h3>
                     <p className="text-xs font-bold text-purple-600 dark:text-purple-400 mt-2 truncate flex items-center gap-1" dir="ltr">
                         {data.summary.topPage?.path || '/'}
                         <span className="text-slate-400 font-medium ml-2">
-                            ({data.summary.topPage?.totalViews || 0} زيارة)
+                            ({data.summary.topPage?.totalViews || 0} {isRTL ? 'زيارة' : 'views'})
                         </span>
                     </p>
                 </motion.div>
@@ -355,22 +359,22 @@ const PageAnalytics = () => {
                     transition={{ duration: 0.3, delay: 0.15 }}
                     className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-all"
                 >
-                    <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+                    <div className={`absolute top-0 ${isRTL ? 'right-0 -mr-8' : 'left-0 -ml-8'} w-28 h-28 bg-amber-500/10 rounded-full blur-2xl -mt-8 pointer-events-none`} />
                     <div className="flex items-center justify-between mb-4">
                         <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                             <UserCheck size={24} />
                         </div>
                         <span className="text-xs font-bold px-2.5 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">
-                            نسبة الطلاب
+                            {isRTL ? 'نسبة الطلاب' : 'Registered Ratio'}
                         </span>
                     </div>
                     <h3 className="text-3xl font-black text-slate-900 dark:text-white">
                         {data.summary.registeredPercentage || 0}%
                     </h3>
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center justify-between">
-                        <span>{data.summary.studentViews || 0} طالب</span>
+                        <span>{data.summary.studentViews || 0} {isRTL ? 'طالب' : 'Students'}</span>
                         <span className="text-slate-300 dark:text-slate-700">|</span>
-                        <span>{data.summary.guestViews || 0} زائر ضيف</span>
+                        <span>{data.summary.guestViews || 0} {isRTL ? 'زائر ضيف' : 'Guests'}</span>
                     </p>
                 </motion.div>
             </div>
@@ -386,10 +390,10 @@ const PageAnalytics = () => {
                             </div>
                             <div>
                                 <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                                    مسار الزيارات عبر الوقت
+                                    {isRTL ? 'مسار الزيارات عبر الوقت' : 'Traffic Activity Over Time'}
                                 </h3>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    توزيع المشاهدات حسب الفترات الزمنية
+                                    {isRTL ? 'توزيع المشاهدات حسب الفترات الزمنية' : 'Pageviews distribution over selected timeframe'}
                                 </p>
                             </div>
                         </div>
@@ -410,8 +414,8 @@ const PageAnalytics = () => {
                                     >
                                         {/* Tooltip on hover */}
                                         <div className="absolute -top-12 opacity-0 group-hover/bar:opacity-100 transition-all duration-200 text-xs font-bold text-white bg-slate-900 dark:bg-slate-800 px-3 py-1.5 rounded-xl shadow-xl z-30 pointer-events-none whitespace-nowrap flex flex-col items-center">
-                                            <span>{point.views} مشاهدة</span>
-                                            <span className="text-[10px] text-blue-400">{point.unique} زائر فريد</span>
+                                            <span>{point.views} {isRTL ? 'مشاهدة' : 'views'}</span>
+                                            <span className="text-[10px] text-blue-400">{point.unique} {isRTL ? 'زائر فريد' : 'unique'}</span>
                                             <div className="w-2 h-2 bg-slate-900 dark:bg-slate-800 rotate-45 -mb-1 mt-0.5"></div>
                                         </div>
 
@@ -435,7 +439,9 @@ const PageAnalytics = () => {
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2">
                                 <Activity size={36} className="opacity-30" />
-                                <span className="text-sm font-medium">لا توجد بيانات كافية خلال هذه الفترة</span>
+                                <span className="text-sm font-medium">
+                                    {isRTL ? 'لا توجد بيانات كافية خلال هذه الفترة' : 'No sufficient traffic data in this period'}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -450,9 +456,9 @@ const PageAnalytics = () => {
                             </div>
                             <div>
                                 <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                                    توزيع الأجهزة
+                                    {isRTL ? 'توزيع الأجهزة' : 'Device Distribution'}
                                 </h3>
-                                <p className="text-xs text-slate-400 mt-0.5">نوع أجهزة الزوار</p>
+                                <p className="text-xs text-slate-400 mt-0.5">{isRTL ? 'نوع أجهزة الزوار' : 'Visitor devices'}</p>
                             </div>
                         </div>
 
@@ -461,21 +467,21 @@ const PageAnalytics = () => {
                             {[
                                 {
                                     id: 'desktop',
-                                    name: 'أجهزة الكمبيوتر (Desktop)',
+                                    name: isRTL ? 'أجهزة الكمبيوتر (Desktop)' : 'Desktop Computers',
                                     icon: <Monitor size={18} className="text-blue-500" />,
                                     count: data.devices?.desktop || 0,
                                     color: 'from-blue-500 to-indigo-600'
                                 },
                                 {
                                     id: 'mobile',
-                                    name: 'الهواتف الذكية (Mobile)',
+                                    name: isRTL ? 'الهواتف الذكية (Mobile)' : 'Smartphones (Mobile)',
                                     icon: <Smartphone size={18} className="text-emerald-500" />,
                                     count: data.devices?.mobile || 0,
                                     color: 'from-emerald-500 to-teal-500'
                                 },
                                 {
                                     id: 'tablet',
-                                    name: 'الأجهزة اللوحية (Tablet)',
+                                    name: isRTL ? 'الأجهزة اللوحية (Tablet)' : 'Tablets',
                                     icon: <Tablet size={18} className="text-purple-500" />,
                                     count: data.devices?.tablet || 0,
                                     color: 'from-purple-500 to-pink-500'
@@ -489,7 +495,7 @@ const PageAnalytics = () => {
                                                 {dev.icon}
                                                 {dev.name}
                                             </span>
-                                            <span className="text-slate-900 dark:text-white">
+                                            <span className="text-slate-900 dark:text-white font-mono">
                                                 {percent}% ({dev.count})
                                             </span>
                                         </div>
@@ -509,21 +515,21 @@ const PageAnalytics = () => {
 
                     {/* Audience Breakdown */}
                     <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <h4 className="text-xs font-bold text-slate-400 mb-3">توزيع الجمهور:</h4>
+                        <h4 className="text-xs font-bold text-slate-400 mb-3">{isRTL ? 'توزيع الجمهور:' : 'Audience Split:'}</h4>
                         <div className="grid grid-cols-2 gap-2 text-center">
                             <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-2xl border border-blue-100 dark:border-blue-900/30">
                                 <span className="text-xs text-blue-600 dark:text-blue-400 font-bold block mb-1">
-                                    طلاب مسجلين
+                                    {isRTL ? 'طلاب مسجلين' : 'Enrolled Students'}
                                 </span>
-                                <span className="text-xl font-black text-slate-900 dark:text-white">
+                                <span className="text-xl font-black text-slate-900 dark:text-white font-mono">
                                     {data.summary.studentViews || 0}
                                 </span>
                             </div>
                             <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50">
                                 <span className="text-xs text-slate-500 dark:text-slate-400 font-bold block mb-1">
-                                    زوار غير مسجلين
+                                    {isRTL ? 'زوار غير مسجلين' : 'Guest Visitors'}
                                 </span>
-                                <span className="text-xl font-black text-slate-900 dark:text-white">
+                                <span className="text-xl font-black text-slate-900 dark:text-white font-mono">
                                     {data.summary.guestViews || 0}
                                 </span>
                             </div>
@@ -541,22 +547,22 @@ const PageAnalytics = () => {
                             <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
                                 <BookOpen size={20} />
                             </div>
-                            الصفحات الأكثر زيارة عبر النظام
+                            {isRTL ? 'الصفحات الأكثر زيارة عبر النظام' : 'Most Visited Platform Pages'}
                         </h2>
                         <p className="text-xs text-slate-400 mt-1">
-                            مرتبة تنازلياً حسب إجمالي عدد المشاهدات والزوار
+                            {isRTL ? 'مرتبة تنازلياً حسب إجمالي عدد المشاهدات والزوار' : 'Ranked in descending order by views and visitors'}
                         </p>
                     </div>
 
                     {/* Category Filter Pills */}
                     <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
                         {[
-                            { id: 'all', label: 'جميع الأقسام' },
-                            { id: 'home', label: 'الرئيسية' },
-                            { id: 'courses', label: 'الدورات' },
-                            { id: 'course_detail', label: 'صفحات الدورات' },
-                            { id: 'cart_checkout', label: 'السلة والدفع' },
-                            { id: 'student_portal', label: 'بوابة الطالب' }
+                            { id: 'all', label: isRTL ? 'جميع الأقسام' : 'All Categories' },
+                            { id: 'home', label: isRTL ? 'الرئيسية' : 'Home' },
+                            { id: 'courses', label: isRTL ? 'الدورات' : 'Courses' },
+                            { id: 'course_detail', label: isRTL ? 'صفحات الدورات' : 'Course Details' },
+                            { id: 'cart_checkout', label: isRTL ? 'السلة والدفع' : 'Cart & Checkout' },
+                            { id: 'student_portal', label: isRTL ? 'بوابة الطالب' : 'Student Portal' }
                         ].map((cat) => (
                             <button
                                 key={cat.id}
@@ -575,17 +581,17 @@ const PageAnalytics = () => {
 
                 {/* Table Content */}
                 <div className="overflow-x-auto">
-                    <table className="w-full text-right text-sm">
+                    <table className="w-full text-start text-sm">
                         <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800 text-xs">
                             <tr>
-                                <th className="px-6 py-4 w-16 text-center">الترتيب</th>
-                                <th className="px-6 py-4">عنوان ومسار الصفحة</th>
-                                <th className="px-6 py-4">التصنيف</th>
-                                <th className="px-6 py-4 text-center">المشاهدات</th>
-                                <th className="px-6 py-4 text-center">زوار فريدين</th>
-                                <th className="px-6 py-4">توزيع الزوار</th>
-                                <th className="px-6 py-4 text-center">آخر زيارة</th>
-                                <th className="px-6 py-4 text-center w-24">معاينة</th>
+                                <th className="px-6 py-4 w-16 text-center">{isRTL ? 'الترتيب' : 'Rank'}</th>
+                                <th className="px-6 py-4 text-start">{isRTL ? 'عنوان ومسار الصفحة' : 'Page Title & Path'}</th>
+                                <th className="px-6 py-4 text-start">{isRTL ? 'التصنيف' : 'Category'}</th>
+                                <th className="px-6 py-4 text-center">{isRTL ? 'المشاهدات' : 'Views'}</th>
+                                <th className="px-6 py-4 text-center">{isRTL ? 'زوار فريدين' : 'Unique Visitors'}</th>
+                                <th className="px-6 py-4 text-start">{isRTL ? 'توزيع الزوار' : 'Audience Split'}</th>
+                                <th className="px-6 py-4 text-center">{isRTL ? 'آخر زيارة' : 'Last Visited'}</th>
+                                <th className="px-6 py-4 text-center w-24">{isRTL ? 'معاينة' : 'Preview'}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
@@ -595,15 +601,14 @@ const PageAnalytics = () => {
                                         <div className="flex flex-col items-center justify-center gap-3">
                                             <RefreshCw size={30} className="animate-spin text-blue-600" />
                                             <span className="text-sm font-bold text-slate-500">
-                                                جاري تحميل بيانات التتبع...
+                                                {isRTL ? 'جاري تحميل بيانات التتبع...' : 'Loading analytics data...'}
                                             </span>
                                         </div>
                                     </td>
                                 </tr>
                             ) : filteredPages.length > 0 ? (
                                 filteredPages.map((page, idx) => {
-                                    const badge = getCategoryBadge(page.category);
-                                    const isTop3 = idx < 3;
+                                    const badge = getCategoryBadge(page.category, isRTL);
                                     return (
                                         <tr
                                             key={page.path || idx}
@@ -612,19 +617,19 @@ const PageAnalytics = () => {
                                             {/* Rank */}
                                             <td className="px-6 py-4 text-center font-black">
                                                 {idx === 0 ? (
-                                                    <span className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center text-sm shadow-sm">
+                                                    <span className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 inline-flex items-center justify-center text-sm shadow-sm font-mono">
                                                         🥇 1
                                                     </span>
                                                 ) : idx === 1 ? (
-                                                    <span className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 inline-flex items-center justify-center text-sm shadow-sm">
+                                                    <span className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 inline-flex items-center justify-center text-sm shadow-sm font-mono">
                                                         🥈 2
                                                     </span>
                                                 ) : idx === 2 ? (
-                                                    <span className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-600 inline-flex items-center justify-center text-sm shadow-sm">
+                                                    <span className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-600 inline-flex items-center justify-center text-sm shadow-sm font-mono">
                                                         🥉 3
                                                     </span>
                                                 ) : (
-                                                    <span className="text-xs text-slate-400 font-bold">
+                                                    <span className="text-xs text-slate-400 font-bold font-mono">
                                                         #{idx + 1}
                                                     </span>
                                                 )}
@@ -634,7 +639,7 @@ const PageAnalytics = () => {
                                             <td className="px-6 py-4">
                                                 <div>
                                                     <span className="font-bold text-slate-900 dark:text-white block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                        {page.pageTitle || 'صفحة بدون عنوان'}
+                                                        {page.pageTitle || (isRTL ? 'صفحة بدون عنوان' : 'Untitled Page')}
                                                     </span>
                                                     <span
                                                         className="text-xs font-mono text-slate-400 block mt-0.5"
@@ -658,7 +663,7 @@ const PageAnalytics = () => {
                                             {/* Views with Progress Bar */}
                                             <td className="px-6 py-4 text-center">
                                                 <div className="flex flex-col items-center">
-                                                    <span className="font-black text-slate-900 dark:text-white text-base">
+                                                    <span className="font-black text-slate-900 dark:text-white text-base font-mono">
                                                         {page.totalViews?.toLocaleString()}
                                                     </span>
                                                     <div className="w-24 bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
@@ -670,13 +675,13 @@ const PageAnalytics = () => {
                                                         />
                                                     </div>
                                                     <span className="text-[10px] font-bold text-slate-400 mt-1">
-                                                        {page.percentage}% من الزيارات
+                                                        {page.percentage}% {isRTL ? 'من الزيارات' : 'of views'}
                                                     </span>
                                                 </div>
                                             </td>
 
                                             {/* Unique Visitors */}
-                                            <td className="px-6 py-4 text-center font-bold text-emerald-600 dark:text-emerald-400">
+                                            <td className="px-6 py-4 text-center font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                                                 {page.uniqueVisitors?.toLocaleString()}
                                             </td>
 
@@ -685,25 +690,25 @@ const PageAnalytics = () => {
                                                 <div className="flex items-center gap-3 text-xs">
                                                     <span
                                                         className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold"
-                                                        title="مشاهدات الطلاب"
+                                                        title={isRTL ? 'مشاهدات الطلاب' : 'Student Views'}
                                                     >
                                                         <UserCheck size={14} />
-                                                        {page.studentViews || 0}
+                                                        <span className="font-mono">{page.studentViews || 0}</span>
                                                     </span>
                                                     <span className="text-slate-300 dark:text-slate-700">/</span>
                                                     <span
                                                         className="flex items-center gap-1 text-slate-500 font-medium"
-                                                        title="مشاهدات الزوار الضيوف"
+                                                        title={isRTL ? 'مشاهدات الزوار الضيوف' : 'Guest Views'}
                                                     >
                                                         <UserX size={14} />
-                                                        {page.guestViews || 0}
+                                                        <span className="font-mono">{page.guestViews || 0}</span>
                                                     </span>
                                                 </div>
                                             </td>
 
                                             {/* Last Visited */}
                                             <td className="px-6 py-4 text-center text-xs font-medium text-slate-400">
-                                                {formatTimeAgo(page.lastVisited)}
+                                                {formatTimeAgo(page.lastVisited, isRTL)}
                                             </td>
 
                                             {/* Preview in new tab */}
@@ -713,7 +718,7 @@ const PageAnalytics = () => {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/40 inline-flex items-center justify-center transition-colors"
-                                                    title="فتح الصفحة في تابة جديدة"
+                                                    title={isRTL ? 'فتح الصفحة في نافذة جديدة' : 'Open in new tab'}
                                                 >
                                                     <ExternalLink size={16} />
                                                 </a>
@@ -727,10 +732,10 @@ const PageAnalytics = () => {
                                         <div className="flex flex-col items-center justify-center gap-3">
                                             <Compass size={40} className="opacity-30" />
                                             <p className="font-bold text-base text-slate-600 dark:text-slate-300">
-                                                لا توجد صفحات مطابقة للبحث
+                                                {isRTL ? 'لا توجد صفحات مطابقة للبحث' : 'No matching pages found'}
                                             </p>
                                             <p className="text-xs text-slate-400">
-                                                جرّب تغيير فلاتر البحث أو النطاق الزمني
+                                                {isRTL ? 'جرّب تغيير فلاتر البحث أو النطاق الزمني' : 'Try modifying your search or timeframe filter'}
                                             </p>
                                         </div>
                                     </td>
@@ -750,10 +755,10 @@ const PageAnalytics = () => {
                         </div>
                         <div>
                             <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                                سجل الزيارات المباشرة (لحظة بلحظة)
+                                {isRTL ? 'سجل الزيارات المباشرة (لحظة بلحظة)' : 'Live Traffic Stream (Real-Time)'}
                             </h3>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                أحدث الصفحات التي تم فتحها الآن من قبل المستخدمين
+                                {isRTL ? 'أحدث الصفحات التي تم فتحها الآن من قبل المستخدمين' : 'Real-time feed of pages opened across the platform'}
                             </p>
                         </div>
                     </div>
@@ -782,7 +787,7 @@ const PageAnalytics = () => {
                                     </div>
                                     <div className="truncate">
                                         <span className="text-xs font-bold text-slate-900 dark:text-white block truncate">
-                                            {visit.userName || 'زائر ضيف'}
+                                            {visit.userName || (isRTL ? 'زائر ضيف' : 'Guest Visitor')}
                                         </span>
                                         <span
                                             className="text-[11px] font-mono text-slate-400 block truncate"
@@ -793,13 +798,13 @@ const PageAnalytics = () => {
                                     </div>
                                 </div>
                                 <span className="text-[10px] font-bold text-slate-400 shrink-0 whitespace-nowrap">
-                                    {formatTimeAgo(visit.createdAt)}
+                                    {formatTimeAgo(visit.createdAt, isRTL)}
                                 </span>
                             </div>
                         ))
                     ) : (
                         <div className="col-span-full py-8 text-center text-slate-400 text-sm font-medium">
-                            لا توجد زيارات مسجلة مؤخراً
+                            {isRTL ? 'لا توجد زيارات مسجلة مؤخراً' : 'No recent visits recorded'}
                         </div>
                     )}
                 </div>

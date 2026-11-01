@@ -27,8 +27,11 @@ import {
     Lock,
     HelpCircle,
     ChevronRight,
-    FileText
+    FileText,
+    Printer
 } from 'lucide-react';
+import InvoiceModal from '../../components/shared/Invoice/InvoiceModal';
+import { adaptEnrollmentToInvoice } from '../../utils/invoiceAdapter';
 
 const PaymentSettings = () => {
     const { t } = useTranslation();
@@ -42,6 +45,7 @@ const PaymentSettings = () => {
     const [pdfLoading, setPdfLoading] = useState({});
     const [copiedSerial, setCopiedSerial] = useState(null);
     const [activeTab, setActiveTab] = useState('history'); // 'history' | 'methods' | 'policies'
+    const [invoiceModalData, setInvoiceModalData] = useState(null);
 
     // Load enrollment payment transactions
     useEffect(() => {
@@ -415,24 +419,36 @@ const PaymentSettings = () => {
 
                                                 {/* Actions */}
                                                 <td className="px-5 py-4 text-end whitespace-nowrap">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDownloadPDF(tx.courseId, tx.title)}
-                                                        disabled={pdfLoading[tx.courseId]}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
-                                                    >
-                                                        {pdfLoading[tx.courseId] ? (
-                                                            <>
-                                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                                <span>جاري التجهيز...</span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                                                                <span>تحميل الإيصال</span>
-                                                            </>
-                                                        )}
-                                                    </button>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setInvoiceModalData(adaptEnrollmentToInvoice(tx, user))}
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#004C97] hover:bg-[#071942] text-white font-bold text-xs shadow-sm transition-colors cursor-pointer"
+                                                            title="طباعة الفاتورة الضريبية"
+                                                        >
+                                                            <Printer className="w-3.5 h-3.5" />
+                                                            <span>طباعة الفاتورة</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDownloadPDF(tx.courseId, tx.title)}
+                                                            disabled={pdfLoading[tx.courseId]}
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                                                            title="تحميل إيصال PDF"
+                                                        >
+                                                            {pdfLoading[tx.courseId] ? (
+                                                                <>
+                                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                                    <span className="hidden sm:inline">جاري التجهيز...</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                                                                    <span className="hidden sm:inline">تحميل الإيصال</span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 </td>
 
                                             </tr>
@@ -445,7 +461,12 @@ const PaymentSettings = () => {
                 </div>
             )}
 
-
+            {/* Printable Invoice Modal */}
+            <InvoiceModal
+                isOpen={!!invoiceModalData}
+                onClose={() => setInvoiceModalData(null)}
+                invoiceData={invoiceModalData}
+            />
         </div>
     );
 };

@@ -18,11 +18,13 @@ import {
     Sparkles, 
     Loader2,
     ShoppingBag,
-    Receipt
+    Receipt,
+    Gift
 } from 'lucide-react';
 import TamaraWidget from '../components/TamaraWidget';
 import TabbyPromo from '../components/TabbyPromo';
 import TabbyCard from '../components/TabbyCard';
+import { userRewardsService } from '../services/rewards.service';
 
 const Checkout = () => {
     const { t } = useTranslation();
@@ -33,21 +35,59 @@ const Checkout = () => {
     const { isAuthenticated, loading } = useAuth();
     
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-    const [couponCode, setCouponCode] = useState('');
+    const [couponCode, setCouponCode] = useState(() => {
+        try {
+            return localStorage.getItem('referralCode') || '';
+        } catch {
+            return '';
+        }
+    });
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+    const [rewardsInfo, setRewardsInfo] = useState(null);
+    const [usePoints, setUsePoints] = useState(false);
     
     // Payment method selection: 'paymob' | 'tabby' | 'tamara'
     const [paymentMethod, setPaymentMethod] = useState('paymob');
 
-    // Tax calculation (15%) — tax is applied after discount
+    // Load user reward points on authentication
+    useEffect(() => {
+        if (isAuthenticated) {
+            userRewardsService.getMyRewards().then(res => {
+                if (res?.data) setRewardsInfo(res.data);
+            }).catch(() => {});
+        }
+    }, [isAuthenticated]);
+
+    // Tax calculation (15%) — tax is applied after coupon and points discount
     const TAX_RATE = 0.15;
     const cartSubtotal = getTotalPrice();
     const subtotal = appliedCoupon?.subtotal ?? cartSubtotal;
     const discountAmount = appliedCoupon?.discountAmount || 0;
     const discountedSubtotal = Math.max(0, subtotal - discountAmount);
-    const taxAmount = appliedCoupon?.taxAmount ?? discountedSubtotal * TAX_RATE;
-    const totalWithTax = appliedCoupon?.total ?? discountedSubtotal + taxAmount;
+
+    // Points discount calculation
+    const availablePoints = rewardsInfo?.rewardPoints || 0;
+    const minPointsRequired = rewardsInfo?.minPointsToRedeem || 50;
+    const sarPerPoint = rewardsInfo?.sarPerPoint || 0.1;
+    const maxDiscountPercentage = rewardsInfo?.maxDiscountPercentage || 50;
+    const canRedeemPoints = availablePoints >= minPointsRequired;
+
+    let pointsDiscountAmount = 0;
+    let pointsToRedeem = 0;
+
+    if (usePoints && canRedeemPoints && discountedSubtotal > 0) {
+        const rawPointsVal = availablePoints * sarPerPoint;
+        const maxAllowed = (discountedSubtotal * maxDiscountPercentage) / 100;
+        pointsDiscountAmount = Math.min(rawPointsVal, maxAllowed);
+        pointsToRedeem = sarPerPoint > 0 ? Math.ceil(pointsDiscountAmount / sarPerPoint) : 0;
+        pointsToRedeem = Math.min(pointsToRedeem, availablePoints);
+        pointsDiscountAmount = Math.round(pointsDiscountAmount * 100) / 100;
+    }
+
+    const finalSubtotalAfterPoints = Math.max(0, discountedSubtotal - pointsDiscountAmount);
+    const taxAmount = Math.round(finalSubtotalAfterPoints * TAX_RATE * 100) / 100;
+    const totalWithTax = Math.max(0, Math.round((finalSubtotalAfterPoints + taxAmount) * 100) / 100);
 
     // Installment calculation for Tabby / Tamara (4 equal payments)
     const installmentAmount = (totalWithTax / 4).toFixed(2);
@@ -92,7 +132,8 @@ const Checkout = () => {
                 courseIds,
                 appliedCoupon?.code || null,
                 paymentMethod,
-                lang
+                lang,
+                usePoints ? pointsToRedeem : 0
             );
             
             // Redirect to payment page (Paymob uses iframURL, Tabby uses paymentUrl)
@@ -554,6 +595,21 @@ const Checkout = () => {
                                         </span>
                                     </div>
                                 )}
+
+                                {usePoints && pointsDiscountAmount > 0 && (
+                                    <div className="flex justify-between text-amber-600 dark:text-amber-400 font-semibold">
+                                        <span className="flex items-center gap-1">
+                                            <Gift className="w-3.5 h-3.5" />
+                                            <span>
+                                                {isRTL ? 'خصم نقاط المكافأة' : 'Points Discount'}
+                                                {` (${pointsToRedeem} ${isRTL ? 'نقطة' : 'pts'})`}
+                                            </span>
+                                        </span>
+                                        <span>
+                                            -{pointsDiscountAmount.toFixed(2)} {isRTL ? 'ر.س' : 'SAR'}
+                                        </span>
+                                    </div>
+                                )}
                                 
                                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                                     <span>{t('checkout.tax', 'الضريبة (15%)')}</span>
@@ -589,6 +645,43 @@ const Checkout = () => {
                                 </div>
                             </div>
                             
+                            {/* Points Redemption Box */}
+                            {canRedeemPoints && (
+                                <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                                <Gift className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                                {isRTL ? 'نقاط المكافأة المتاحة' : 'Available Reward Points'}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400">
+                                            {availablePoints} {isRTL ? 'نقطة' : 'pts'} ({(availablePoints * sarPerPoint).toFixed(2)} {isRTL ? 'ر.س' : 'SAR'})
+                                        </span>
+                                    </div>
+
+                                    <label className="flex items-center gap-2.5 cursor-pointer pt-0.5">
+                                        <input
+                                            type="checkbox"
+                                            checked={usePoints}
+                                            onChange={(e) => setUsePoints(e.target.checked)}
+                                            className="w-4 h-4 text-amber-600 rounded border-slate-300 dark:border-slate-700 focus:ring-amber-500/20"
+                                        />
+                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                            {isRTL ? 'استبدال نقاطي للحصول على خصم مباشر' : 'Redeem points for instant discount'}
+                                        </span>
+                                    </label>
+
+                                    {usePoints && pointsDiscountAmount > 0 && (
+                                        <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold pt-1 border-t border-amber-200/60 dark:border-amber-800/40">
+                                            ✓ {isRTL ? `خصم ${pointsDiscountAmount.toFixed(2)} ر.س مقابل ${pointsToRedeem} نقطة` : `Save ${pointsDiscountAmount.toFixed(2)} SAR using ${pointsToRedeem} points`}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* ======================================================== */}
                             {/* Coupon Code Section */}
                             {/* ======================================================== */}

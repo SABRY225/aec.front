@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
     CreditCard, Search, Filter, Eye, Trash2, CheckCircle, 
-    XCircle, Clock, MoreVertical, Edit2, ChevronLeft, ChevronRight, Phone, Download, Loader2, BookOpen 
+    XCircle, Clock, MoreVertical, Edit2, ChevronLeft, ChevronRight, Phone, Download, Loader2, BookOpen, Printer 
 } from 'lucide-react';
 import { adminService } from '../../services/new-api';
 import { toast } from 'react-toastify';
 import LoadingNew from '../../components/shared/LoadingNew/LoadingNew';
+import InvoiceModal from '../../components/shared/Invoice/InvoiceModal';
+import { adaptPaymentToInvoice } from '../../utils/invoiceAdapter';
 
 // Format phone with country code properly
 const formatFullPhone = (phone, phoneCode) => {
@@ -47,6 +49,7 @@ const Payments = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editStatus, setEditStatus] = useState('');
+    const [invoiceModalData, setInvoiceModalData] = useState(null);
 
     const handleExportExcel = async () => {
         try {
@@ -481,6 +484,13 @@ const Payments = () => {
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
+                                            <button 
+                                                onClick={() => setInvoiceModalData(adaptPaymentToInvoice(payment))} 
+                                                className="p-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-lg transition-colors cursor-pointer" 
+                                                title="طباعة إيصال الفاتورة"
+                                            >
+                                                <Printer size={16} />
+                                            </button>
                                             <button onClick={() => openViewModal(payment._id)} className="p-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors" title="عرض التفاصيل">
                                                 <Eye size={16} />
                                             </button>
@@ -546,9 +556,19 @@ const Payments = () => {
                     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
                         <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                             <h3 className="text-xl font-bold text-slate-800 dark:text-white">تفاصيل الدفع - {selectedPayment.orderId}</h3>
-                            <button onClick={() => setIsViewModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                                <XCircle size={24} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setInvoiceModalData(adaptPaymentToInvoice(selectedPayment))}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#004C97] hover:bg-[#071942] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                                >
+                                    <Printer size={14} />
+                                    <span>طباعة الفاتورة</span>
+                                </button>
+                                <button onClick={() => setIsViewModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                                    <XCircle size={24} />
+                                </button>
+                            </div>
                         </div>
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
@@ -644,6 +664,12 @@ const Payments = () => {
                     </div>
                 </div>
             )}
+            {/* Printable Invoice Modal */}
+            <InvoiceModal
+                isOpen={!!invoiceModalData}
+                onClose={() => setInvoiceModalData(null)}
+                invoiceData={invoiceModalData}
+            />
         </div>
     );
 };

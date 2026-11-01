@@ -54,6 +54,18 @@ import StaffManagement from './pages/admin/StaffManagement';
 import Payments from './pages/admin/Payments'; import Orders from './pages/admin/Orders';
 import AbandonedCarts from './pages/admin/AbandonedCarts';
 import Backups from './pages/admin/Backups';
+import AffiliateManagement from './pages/admin/AffiliateManagement';
+import AffiliateForm from './pages/admin/AffiliateForm';
+import RewardsManagement from './pages/admin/RewardsManagement';
+import StudentRewards from './pages/student/StudentRewards';
+import InstructorRewards from './pages/instructor/InstructorRewards';
+
+// Affiliate portal imports
+import AffiliateLogin from './pages/affiliate/AffiliateLogin';
+import AffiliateLayout from './pages/affiliate/AffiliateLayout';
+import AffiliateDashboard from './pages/affiliate/AffiliateDashboard';
+import AffiliateConversions from './pages/affiliate/AffiliateConversions';
+import AffiliatePayouts from './pages/affiliate/AffiliatePayouts';
 // Instructor imports
 import InstructorLayout from './pages/instructor/InstructorLayout';
 import InstructorDashboard from './pages/instructor/Dashboard';
@@ -78,6 +90,9 @@ import InstructorAccountSettings from './pages/instructor/InstructorAccountSetti
 import InstructorProfileSettings from './pages/instructor/ProfileSettings';
 import CoursePreview from './pages/CoursePreview';
 import VerifyEnrollment from './pages/VerifyEnrollment';
+import VerifyCertificate from './pages/VerifyCertificate';
+import StudentCertificates from './pages/student/StudentCertificates';
+import CertificatesManagement from './pages/admin/CertificatesManagement';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import FAQ from './pages/FAQ';
@@ -104,6 +119,15 @@ const RouteTracker = () => {
   const location = useLocation();
   useEffect(() => {
     ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search });
+    try {
+      const params = new URLSearchParams(location.search);
+      const ref = params.get('ref') || params.get('affiliate') || params.get('coupon');
+      if (ref) {
+        localStorage.setItem('referralCode', ref.trim().toUpperCase());
+      }
+    } catch {
+      // Ignore if localStorage blocked
+    }
   }, [location]);
   return null;
 };
@@ -129,6 +153,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/affiliate/login" element={<AffiliateLogin />} />
                 {/* Main Routes - with header and footer */}
                 <Route
                   path="/*"
@@ -158,6 +183,8 @@ const App = () => {
                           <Route path="/category/:slug" element={<Category />} />
                           <Route path="/subcategory/:slug" element={<Subcategory />} />
                           <Route path="/verify-enrollment/:serial" element={<VerifyEnrollment />} />
+                          <Route path="/verify-certificate/:certNumber" element={<VerifyCertificate />} />
+                          <Route path="/verify-certificate" element={<VerifyCertificate />} />
                           <Route path="/about" element={<AboutUs />} />
                           <Route path="/contact" element={<ContactUs />} />
                           <Route path="/faq" element={<FAQ />} />
@@ -183,7 +210,8 @@ const App = () => {
                         <Route path="my-courses" element={<MyCourses />} />
                         <Route path="notifications" element={<NotificationsPage />} />
                         <Route path="assignments" element={<TranslatedComingSoon titleKey="student.comingSoon.assignments.title" messageKey="student.comingSoon.assignments.message" />} />
-                        <Route path="certificate" element={<TranslatedComingSoon titleKey="student.comingSoon.certificates.title" messageKey="student.comingSoon.certificates.message" />} />
+                        <Route path="certificate" element={<StudentCertificates />} />
+                        <Route path="rewards" element={<StudentRewards />} />
                         <Route path="reviews" element={<TranslatedComingSoon titleKey="student.comingSoon.reviews.title" messageKey="student.comingSoon.reviews.message" />} />
                         <Route path="account-settings" element={<AccountSettings />} />
                         <Route path="profile-settings" element={<ProfileSettings />} />
@@ -195,48 +223,49 @@ const App = () => {
                   }
                 />
 
-                {/* Admin Routes - with header but without footer */}
+                {/* Admin Routes */}
                 <Route
                   path="/admin/*"
                   element={
-                    <>
-                      <main>
-                        <Routes>
-                          <Route path="" element={<AdminLayout />}>
-                            <Route index element={<AdminDashboard />} />
-                            <Route path="dashboard" element={<AdminDashboard />} />
-                            <Route path="user-tracking" element={<PageAnalytics />} />
-                            <Route path="analytics" element={<Analytics />} />
-                            <Route path="active-sessions" element={<ActiveSessions />} />
-                            <Route path="notifications" element={<AdminNotifications />} />
-                            <Route path="notifications-setting" element={<AdminNotificationsSettings />} />
-                            <Route path="instructors" element={<InstructorManagement />} />
-                            <Route path="courses" element={<CourseManagement />} />
-                            <Route path="courses/:id" element={<CourseDetail />} />
-                            <Route path="courses/:id/edit" element={<CourseEdit />} />
-                            <Route path="categories" element={<CategoriesManagement />} />
-                            <Route path="subcategories" element={<SubcategoriesManagement />} />
-                            <Route path="reviews" element={<AdminReviews />} />
-                            <Route path="staff" element={<StaffManagement />} />
-                            <Route path="students" element={<StudentManagement />} />
-                            <Route path="advertisements" element={<AdvertisementManagement />} />
-                            <Route path="coupons" element={<CouponManagement />} />
-                            <Route path="contact-messages" element={<ContactMessages />} />
-                            <Route path="manual-enrollment" element={<ManualEnrollment />} />
-                            <Route path="enrollment-logs" element={<EnrollmentLogs />} />
-                            <Route path="system-logs" element={<SystemLogs />} />
-                            <Route path="payments" element={<Payments />} /> <Route path="orders" element={<Orders />} />
-                            <Route path="abandoned-carts" element={<AbandonedCarts />} />
-                            <Route path="backups" element={<Backups />} />
-                            <Route path="online-enrollments" element={<ManagedEnrollments />} />
-                            <Route path="offline-enrollments" element={<ManagedEnrollments />} />
-                            <Route path="account-settings" element={<AdminAccountSettings />} />
-                            <Route path="profile-settings" element={<AdminProfileSettings />} />
-                            <Route path="settings" element={<TranslatedComingSoon titleKey="admin.comingSoon.settings.title" messageKey="admin.comingSoon.settings.message" />} />
-                          </Route>
-                        </Routes>
-                      </main>
-                    </>
+                    <Routes>
+                      <Route path="" element={<AdminLayout />}>
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="user-tracking" element={<PageAnalytics />} />
+                        <Route path="analytics" element={<Analytics />} />
+                        <Route path="active-sessions" element={<ActiveSessions />} />
+                        <Route path="notifications" element={<AdminNotifications />} />
+                        <Route path="notifications-setting" element={<AdminNotificationsSettings />} />
+                        <Route path="instructors" element={<InstructorManagement />} />
+                        <Route path="courses" element={<CourseManagement />} />
+                        <Route path="courses/:id" element={<CourseDetail />} />
+                        <Route path="courses/:id/edit" element={<CourseEdit />} />
+                        <Route path="certificates" element={<CertificatesManagement />} />
+                        <Route path="categories" element={<CategoriesManagement />} />
+                        <Route path="subcategories" element={<SubcategoriesManagement />} />
+                        <Route path="reviews" element={<AdminReviews />} />
+                        <Route path="staff" element={<StaffManagement />} />
+                        <Route path="students" element={<StudentManagement />} />
+                        <Route path="advertisements" element={<AdvertisementManagement />} />
+                        <Route path="coupons" element={<CouponManagement />} />
+                        <Route path="affiliates" element={<AffiliateManagement />} />
+                        <Route path="affiliates/create" element={<AffiliateForm />} />
+                        <Route path="affiliates/:id/edit" element={<AffiliateForm />} />
+                        <Route path="rewards" element={<RewardsManagement />} />
+                        <Route path="contact-messages" element={<ContactMessages />} />
+                        <Route path="manual-enrollment" element={<ManualEnrollment />} />
+                        <Route path="enrollment-logs" element={<EnrollmentLogs />} />
+                        <Route path="system-logs" element={<SystemLogs />} />
+                        <Route path="payments" element={<Payments />} /> <Route path="orders" element={<Orders />} />
+                        <Route path="abandoned-carts" element={<AbandonedCarts />} />
+                        <Route path="backups" element={<Backups />} />
+                        <Route path="online-enrollments" element={<ManagedEnrollments />} />
+                        <Route path="offline-enrollments" element={<ManagedEnrollments />} />
+                        <Route path="account-settings" element={<AdminAccountSettings />} />
+                        <Route path="profile-settings" element={<AdminProfileSettings />} />
+                        <Route path="settings" element={<TranslatedComingSoon titleKey="admin.comingSoon.settings.title" messageKey="admin.comingSoon.settings.message" />} />
+                      </Route>
+                    </Routes>
                   }
                 />
 
@@ -257,8 +286,25 @@ const App = () => {
                         {/* <Route path="courses/:id/analytics" element={<TranslatedComingSoon titleKey="instructor.comingSoon.analytics.title" messageKey="instructor.comingSoon.analytics.message" />} /> */}
                         <Route path="account-settings" element={<InstructorAccountSettings />} />
                         <Route path="profile-settings" element={<InstructorProfileSettings />} />
+                        <Route path="rewards" element={<InstructorRewards />} />
                         <Route path="notifications" element={<NotificationsPage />} />
                         <Route path="settings" element={<InstructorAccountSettings />} />
+                      </Route>
+                    </Routes>
+                  }
+                />
+
+                {/* Affiliate Portal Routes */}
+                <Route
+                  path="/affiliate/*"
+                  element={
+                    <Routes>
+                      <Route path="login" element={<AffiliateLogin />} />
+                      <Route path="" element={<AffiliateLayout />}>
+                        <Route index element={<AffiliateDashboard />} />
+                        <Route path="dashboard" element={<AffiliateDashboard />} />
+                        <Route path="conversions" element={<AffiliateConversions />} />
+                        <Route path="payouts" element={<AffiliatePayouts />} />
                       </Route>
                     </Routes>
                   }

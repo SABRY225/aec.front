@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../hooks/useLanguage';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
-import { courseService, courseContentService } from '../services/new-api';
+import { courseService, courseContentService, certificateService } from '../services/new-api';
 import { useAuth } from '../context/AuthContext';
 import LoadingNew from '../components/shared/LoadingNew/LoadingNew';
 import { formatDate } from '../utils/formatDate';
 import OfflineCourseStudy from './OfflineCourseStudy';
+import CertificateTemplate from '../components/shared/Certificate/CertificateTemplate';
 import {
     Play,
     Pause,
@@ -280,6 +280,30 @@ const CourseStudy = () => {
     const [loadedVideoDurationSec, setLoadedVideoDurationSec] = useState(null);
     const [courseMaterialsOpen, setCourseMaterialsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'resources', 'info'
+
+    // Certificate states
+    const [showCertificateModal, setShowCertificateModal] = useState(false);
+    const [courseCertificate, setCourseCertificate] = useState(null);
+    const [loadingCert, setLoadingCert] = useState(false);
+
+    const handleOpenCertificate = async () => {
+        try {
+            setLoadingCert(true);
+            const res = await certificateService.getCourseCertificate(id);
+            if (res?.success && res?.certificate) {
+                setCourseCertificate(res.certificate);
+                setShowCertificateModal(true);
+                if (res.isNew) {
+                    toast.success(isRTL ? 'تهانينا! تم إصدار شهادتك المعتمدة بنجاح 🎉' : 'Congratulations! Certificate issued 🎉');
+                }
+            }
+        } catch (err) {
+            console.error('Error opening certificate:', err);
+            toast.error(err.response?.data?.message || (isRTL ? 'يجب إكمال جميع المحاضرات بنسبة 100% لإصدار الشهادة' : 'Complete 100% of the course to get certificate'));
+        } finally {
+            setLoadingCert(false);
+        }
+    };
 
     useEffect(() => {
         fetchStudyData();
@@ -556,6 +580,20 @@ const CourseStudy = () => {
                                     {progressPercent}% {t('course.study.completedShort', 'مكتمل')}
                                 </span>
                             </div>
+                        )}
+
+                        {/* Certificate Button on 100% completion */}
+                        {progressPercent >= 100 && (
+                            <button
+                                type="button"
+                                onClick={handleOpenCertificate}
+                                disabled={loadingCert}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-md shadow-amber-400/30 hover:scale-105 active:scale-95 transition cursor-pointer"
+                                title={isRTL ? 'استعراض وتحميل شهادتك المعتمدة' : 'View accredited certificate'}
+                            >
+                                <Award className="w-4 h-4 text-slate-950" />
+                                <span>{loadingCert ? (isRTL ? 'جارٍ الفتح...' : 'Loading...') : (isRTL ? 'الشهادة المعتمدة 🎓' : 'Certificate 🎓')}</span>
+                            </button>
                         )}
 
                         {/* Rate Course Button */}
@@ -1240,6 +1278,44 @@ const CourseStudy = () => {
                                     {t('course.study.submitRating', 'إرسال التقييم')}
                                 </button>
                             </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* FULLSCREEN ACCREDITED CERTIFICATE MODAL */}
+            <AnimatePresence>
+                {showCertificateModal && courseCertificate && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+                        onClick={() => setShowCertificateModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-slate-900 rounded-3xl p-4 sm:p-6 max-w-5xl w-full border border-white/10 shadow-2xl relative my-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                                <div className="flex items-center gap-2 text-white">
+                                    <Award className="w-5 h-5 text-amber-400" />
+                                    <span className="font-black text-sm sm:text-base">
+                                        {isRTL ? 'شهادة إتمام الدورة المعتمدة' : 'Official Course Completion Certificate'}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setShowCertificateModal(false)}
+                                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <CertificateTemplate certificate={courseCertificate} showControls={true} />
                         </motion.div>
                     </motion.div>
                 )}

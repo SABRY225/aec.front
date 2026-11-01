@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <defs>
+    <linearGradient id="tvtcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#008080" />
+      <stop offset="100%" stop-color="#005555" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle/shield -->
+  <circle cx="80" cy="80" r="75" fill="none" stroke="#008080" stroke-width="3" stroke-dasharray="4 2"/>
+  <!-- Central Emblem / Palm / Geometry -->
+  <g transform="translate(80,72)">
+    <!-- 8-pointed star / stylized flower -->
+    <path d="M0 -42 L11 -18 L36 -28 L24 -4 L48 10 L22 17 L25 44 L4 28 L-4 44 L-22 17 L-48 10 L-24 -4 L-36 -28 L-11 -18 Z" fill="url(#tvtcGrad)"/>
+    <circle cx="0" cy="0" r="14" fill="#ffffff"/>
+    <circle cx="0" cy="0" r="8" fill="#008080"/>
+  </g>
+  <!-- Arabic Text below -->
+  <text x="80" y="132" font-family="'Cairo', 'Segoe UI', Tahoma, Arial" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#005555">المؤسسة العامة للتدريب التقني والمهني</text>
+  <text x="80" y="145" font-family="'Segoe UI', Arial" font-size="7" font-weight="600" text-anchor="middle" fill="#557777">Technical and Vocational Training Corporation</text>
+</svg>

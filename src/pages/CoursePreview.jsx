@@ -14,6 +14,7 @@ import { normalizeCourseType } from '../constants/courseTypes';
 import LoadingNew from '../components/shared/LoadingNew/LoadingNew';
 import RichTextDisplay from '../components/RichTextDisplay/RichTextDisplay';
 import CourseCard from '../components/CourseCard';
+import StudentReviewsModal from '../components/shared/StudentReviewsModal/StudentReviewsModal';
 import {
     Star,
     Users,
@@ -72,6 +73,18 @@ const CoursePreview = () => {
     const [expandedSections, setExpandedSections] = useState({});
     const [enrollmentStatus, setEnrollmentStatus] = useState(null);
     const [checkingEnrollment, setCheckingEnrollment] = useState(false);
+    const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
+
+    // Helper to auto-map course category to review category
+    const mapCategoryToReviewCategory = (cat) => {
+        if (!cat) return 'all';
+        const str = String(cat).toLowerCase();
+        if (str.includes('برمج') || str.includes('ذكاء') || str.includes('تقني') || str.includes('comput') || str.includes('dev') || str.includes('ai') || str.includes('it')) return 'programming';
+        if (str.includes('إدار') || str.includes('ادار') || str.includes('مال') || str.includes('اعمال') || str.includes('أعمال') || str.includes('تسويق') || str.includes('busin') || str.includes('market') || str.includes('finance')) return 'business';
+        if (str.includes('هندس') || str.includes('معمار') || str.includes('engine')) return 'engineering';
+        if (str.includes('لغ') || str.includes('انجليز') || str.includes('english') || str.includes('lang')) return 'languages';
+        return 'all';
+    };
 
     useEffect(() => {
         fetchCourseData();
@@ -440,6 +453,15 @@ const CoursePreview = () => {
                                     <span className="text-blue-200 text-xs">
                                         ({course.ratings?.length || 0} {t('course.preview.reviewPlural', 'تقييم')})
                                     </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsReviewsModalOpen(true)}
+                                        className="ms-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-400/20 hover:from-amber-400/30 hover:to-orange-400/30 border border-amber-400/40 text-amber-300 text-xs font-bold transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                                        title={t('course.preview.whatStudentsSayDesc', 'شاهد صور ومحادثات تقييمات الطلاب الحقيقية')}
+                                    >
+                                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                                        <span>{t('course.preview.whatStudentsSay', 'ماذا يقول طلابنا عنّا؟')}</span>
+                                    </button>
                                 </div>
 
                                 <div className="hidden sm:block w-px h-4 bg-white/20" />
@@ -1194,6 +1216,32 @@ const CoursePreview = () => {
                             </div>
                         )}
 
+                        {/* SECTION: Student Testimonials & Proof Banner */}
+                        <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-blue-500/10 rounded-3xl p-6 sm:p-8 border border-amber-300/40 shadow-sm hover:shadow-md transition relative overflow-hidden">
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                                <div className="space-y-2">
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-800 text-xs font-bold">
+                                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                        <span>{t('course.preview.realExperiencesBadge', 'تجارب ومحادثات حقيقية موثقة')}</span>
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                                        {t('course.preview.whatStudentsSay', 'ماذا يقول طلابنا عنّا؟')}
+                                    </h3>
+                                    <p className="text-slate-600 text-xs sm:text-sm max-w-xl leading-relaxed">
+                                        {t('course.preview.whatStudentsSayDetail', 'اطّلع على صور رسائل ومحادثات الواتساب وتقييمات خريجينا قبل وبعد استلام الشهادات في كافة المجالات.')}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsReviewsModalOpen(true)}
+                                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#004C97] hover:bg-[#071942] text-white font-extrabold text-sm shadow-lg shadow-blue-900/20 hover:scale-102 active:scale-98 transition shrink-0 cursor-pointer"
+                                >
+                                    <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
+                                    <span>{t('course.preview.openReviewsGallery', 'شاهد معرض التقييمات والمحادثات')}</span>
+                                </button>
+                            </div>
+                        </div>
+
                         {/* SECTION 9: Copyright Notice (إشعار الملكية الفكرية) */}
                         <div className="rounded-3xl p-6 bg-blue-50/80 border border-blue-200/80 text-blue-900 text-xs sm:text-sm">
                             <div className="flex items-start gap-3">
@@ -1366,6 +1414,21 @@ const CoursePreview = () => {
                                                             <span>{t('course.preview.addToCart', 'أضف إلى السلة')}</span>
                                                         </>
                                                     )}
+                                                </button>
+
+                                                {/* Social Proof CTA: What our students say */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsReviewsModalOpen(true)}
+                                                    className="w-full py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-amber-50 via-orange-50/50 to-amber-50 hover:from-amber-100 hover:to-orange-100 text-amber-950 border border-amber-200 shadow-sm hover:shadow group cursor-pointer"
+                                                >
+                                                    <div className="w-6 h-6 rounded-full bg-amber-400/25 flex items-center justify-center text-amber-700 text-xs font-black">
+                                                        ★
+                                                    </div>
+                                                    <span className="font-extrabold">{t('course.preview.whatStudentsSay', 'ماذا يقول طلابنا عنّا؟')}</span>
+                                                    <span className="text-[11px] text-amber-800 font-semibold px-2 py-0.5 rounded-full bg-amber-200/50">
+                                                        {t('course.preview.verifiedReviewsCountBadge', '+1,500 تقييم')}
+                                                    </span>
                                                 </button>
                                             </>
                                         ) : (
@@ -1617,6 +1680,15 @@ const CoursePreview = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Student Reviews & WhatsApp Chat Screenshots Modal */}
+            <StudentReviewsModal
+                isOpen={isReviewsModalOpen}
+                onClose={() => setIsReviewsModalOpen(false)}
+                initialCategory={mapCategoryToReviewCategory(course?.category)}
+                courseTitle={course?.title}
+                onEnrollClick={handleEnrollNow}
+            />
         </div>
     );
 };

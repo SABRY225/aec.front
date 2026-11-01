@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- CB / CPD Certified Board Stamp -->
+  <g transform="translate(80,72)">
+    <!-- Outer dashed circle -->
+    <circle cx="0" cy="0" r="50" fill="none" stroke="#b91c1c" stroke-width="2.5" stroke-dasharray="3 3"/>
+    <circle cx="0" cy="0" r="44" fill="#ffffff" stroke="#b91c1c" stroke-width="2"/>
+    <circle cx="0" cy="0" r="30" fill="none" stroke="#b91c1c" stroke-width="1.5"/>
+    <!-- Monogram CB -->
+    <text x="0" y="11" font-family="'Cinzel', Georgia, serif" font-size="28" font-weight="900" text-anchor="middle" fill="#b91c1c" letter-spacing="1">CB</text>
+    <!-- Stars -->
+    <polygon points="-36,0 -38,4 -43,4 -39,7 -41,12 -36,9 -31,12 -33,7 -29,4 -34,4" fill="#b91c1c" transform="scale(0.5) translate(-40, -10)"/>
+    <polygon points="36,0 34,4 29,4 33,7 31,12 36,9 41,12 39,7 43,4 38,4" fill="#b91c1c" transform="scale(0.5) translate(40, -10)"/>
+  </g>
+  <text x="80" y="136" font-family="'Cairo', Arial" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#b91c1c">البورد المعتمد للتدريب</text>
+  <text x="80" y="149" font-family="Arial" font-size="7.5" font-weight="600" text-anchor="middle" fill="#7f1d1d">CERTIFIED BOARD • CPD</text>
+</svg>

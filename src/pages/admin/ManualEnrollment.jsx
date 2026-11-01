@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../hooks/useLanguage';
 import { toast } from 'react-toastify';
 import { adminService } from '../../services/new-api';
-import { UserPlus, Search, User, BookOpen, Clock, FileText, CheckCircle, PlusCircle, RefreshCw, XCircle, FileClock } from 'lucide-react';
+import { UserPlus, Search, User, BookOpen, Clock, FileText, CheckCircle, PlusCircle, RefreshCw, XCircle, FileClock, Coins } from 'lucide-react';
 
 function useDebouncedValue(value, delayMs) {
   const [debounced, setDebounced] = useState(value);
@@ -22,6 +22,7 @@ const ManualEnrollment = () => {
   const [userQuery, setUserQuery] = useState('');
   const [courseQuery, setCourseQuery] = useState('');
   const [reason, setReason] = useState('');
+  const [paidAmount, setPaidAmount] = useState('');
 
   const debouncedUserQuery = useDebouncedValue(userQuery, 250);
   const debouncedCourseQuery = useDebouncedValue(courseQuery, 250);
@@ -125,7 +126,8 @@ const ManualEnrollment = () => {
       const res = await adminService.manualEnrollUserToCourse({
         userId: selectedUser._id,
         courseId: selectedCourse._id,
-        reason: reason.trim() || undefined
+        reason: reason.trim() || undefined,
+        paymentAmount: paidAmount !== '' ? Number(paidAmount) : (selectedCourse?.price || 0)
       });
 
       if (res?.alreadyEnrolled) {
@@ -136,6 +138,7 @@ const ManualEnrollment = () => {
         setUserQuery('');
         setCourseQuery('');
         setReason('');
+        setPaidAmount('');
         setSelectedUser(null);
         setSelectedCourse(null);
         setUserResults([]);
@@ -257,7 +260,7 @@ const ManualEnrollment = () => {
               {selectedCourse && (
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <CheckCircle size={18} className="text-emerald-500" />
-                  <button onClick={() => { setSelectedCourse(null); setCourseQuery(''); }} className="text-slate-400 hover:text-red-500">
+                  <button onClick={() => { setSelectedCourse(null); setCourseQuery(''); setPaidAmount(''); }} className="text-slate-400 hover:text-red-500">
                     <XCircle size={18} />
                   </button>
                 </div>
@@ -280,6 +283,9 @@ const ManualEnrollment = () => {
                       setSelectedCourse(c);
                       setCourseQuery(c.title || '');
                       setCourseResults([]);
+                      if (paidAmount === '' || paidAmount === '0' || Number(paidAmount) === 0) {
+                        setPaidAmount(c.price !== undefined ? c.price : 0);
+                      }
                     }}
                     className="w-full text-start px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex flex-col gap-1"
                   >
@@ -295,17 +301,56 @@ const ManualEnrollment = () => {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
-          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-            <FileText size={16} className="text-amber-500" />
-            {t('admin.manualEnrollment.reasonLabel', 'ملاحظات / سبب الإضافة')}
-          </label>
-          <input
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder={t('admin.manualEnrollment.reasonPlaceholder', 'مثال: تعويض عن دورة سابقة، دعوة مجانية...')}
-            className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-slate-800 dark:text-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20 transition-shadow"
-          />
+        {/* Financial & Notes Grid */}
+        <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Paid Amount */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <Coins size={16} className="text-emerald-500" />
+                {t('admin.manualEnrollment.paidAmountLabel', 'المبلغ المدفوع')}
+              </label>
+              {selectedCourse && (
+                <span className="text-xs text-slate-500 font-normal">
+                  سعر الدورة الأساسي: <strong className="text-slate-800 dark:text-slate-200 font-mono">{selectedCourse.price || 0} ر.س</strong>
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="any"
+                value={paidAmount}
+                onChange={(e) => setPaidAmount(e.target.value)}
+                placeholder={selectedCourse ? String(selectedCourse.price || 0) : '0.00'}
+                className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 pl-14 rtl:pl-4 rtl:pr-4 text-slate-800 dark:text-white font-mono font-bold outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 dark:focus:ring-emerald-900/20 transition-shadow"
+              />
+              <span className="absolute left-4 rtl:left-auto rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                ر.س
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              {t('admin.manualEnrollment.paidAmountHint', 'أدخل المبلغ المحصل من الطالب (أو 0 في حال المنحة أو التسجيل المجاني).')}
+            </p>
+          </div>
+
+          {/* Reason / Notes */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <FileText size={16} className="text-amber-500" />
+              {t('admin.manualEnrollment.reasonLabel', 'ملاحظات / سبب الإضافة')}
+            </label>
+            <input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={t('admin.manualEnrollment.reasonPlaceholder', 'مثال: سداد نقدي، تحويل بنكي، تعويض عن دورة سابقة...')}
+              className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-slate-800 dark:text-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 dark:focus:ring-amber-900/20 transition-shadow"
+            />
+            <p className="text-xs text-slate-400">
+              {t('admin.manualEnrollment.reasonHint', 'ملاحظة إدارية مرجعية توثق تفاصيل السداد أو سبب الإضافة.')}
+            </p>
+          </div>
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-end gap-3">
@@ -315,6 +360,7 @@ const ManualEnrollment = () => {
               setUserQuery('');
               setCourseQuery('');
               setReason('');
+              setPaidAmount('');
               setSelectedUser(null);
               setSelectedCourse(null);
             }}
@@ -370,6 +416,7 @@ const ManualEnrollment = () => {
                   <tr>
                     <th className="p-4 text-slate-600 dark:text-slate-300 font-semibold">{t('admin.manualEnrollment.tableStudent', 'الطالب')}</th>
                     <th className="p-4 text-slate-600 dark:text-slate-300 font-semibold">{t('admin.manualEnrollment.tableCourse', 'الدورة')}</th>
+                    <th className="p-4 text-slate-600 dark:text-slate-300 font-semibold">{t('admin.manualEnrollment.tablePaidAmount', 'المبلغ المدفوع')}</th>
                     <th className="p-4 text-slate-600 dark:text-slate-300 font-semibold">{t('admin.manualEnrollment.tableAdmin', 'بواسطة')}</th>
                     <th className="p-4 text-slate-600 dark:text-slate-300 font-semibold">{t('admin.manualEnrollment.tableDate', 'تاريخ الإضافة')}</th>
                     <th className="p-4 text-slate-600 dark:text-slate-300 font-semibold">{t('admin.manualEnrollment.tableReason', 'السبب')}</th>
@@ -389,6 +436,12 @@ const ManualEnrollment = () => {
                             {log.course.courseType}
                           </span>
                         )}
+                      </td>
+                      <td className="p-4 align-top whitespace-nowrap">
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                          {log.paymentAmount !== undefined && log.paymentAmount !== null ? Number(log.paymentAmount).toFixed(2) : '0.00'}
+                        </span>
+                        <span className="text-xs text-slate-400 font-sans mr-1">ر.س</span>
                       </td>
                       <td className="p-4 align-top">
                         <div className="font-medium text-slate-900 dark:text-white">{log.enrolledBy?.name || '-'}</div>

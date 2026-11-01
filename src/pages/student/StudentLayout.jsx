@@ -23,7 +23,8 @@ import {
     Sun,
     Languages,
     Compass,
-    ExternalLink
+    ExternalLink,
+    Gift
 } from 'lucide-react';
 
 const StudentLayout = () => {
@@ -95,6 +96,11 @@ const StudentLayout = () => {
                     path: '/student/certificate',
                     label: t('nav.studentSidebar.items.certificate', 'الشهادات والإنجازات'),
                     icon: <GraduationCap className="h-4.5 w-4.5" />
+                },
+                {
+                    path: '/student/rewards',
+                    label: i18n.language === 'ar' ? 'المكافآت ونقاط الولاء' : 'Rewards & Points',
+                    icon: <Gift className="h-4.5 w-4.5 text-amber-500" />
                 },
                 {
                     path: '/student/reviews',

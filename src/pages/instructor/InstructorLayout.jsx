@@ -22,7 +22,8 @@ import {
     Layers,
     Plus,
     Compass,
-    Bell
+    Bell,
+    Gift
 } from 'lucide-react';
 
 const InstructorLayout = () => {
@@ -114,6 +115,11 @@ const InstructorLayout = () => {
                     path: '/instructor/my-courses',
                     label: t('nav.instructorNav.enrolledCourses', 'الدورات المسجل بها'),
                     icon: <GraduationCap className="h-4.5 w-4.5" />
+                },
+                {
+                    path: '/instructor/rewards',
+                    label: i18n.language === 'ar' ? 'المكافآت ونقاط الولاء' : 'Rewards & Points',
+                    icon: <Gift className="h-4.5 w-4.5 text-amber-500" />
                 }
             ]
         },
